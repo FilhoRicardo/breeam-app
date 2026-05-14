@@ -25,6 +25,7 @@ const STATUS_COLORS = {
 
 // ── Storage ──────────────────────────────────────────────────────────────────
 const LS_KEY = "biu_projects_v1";
+const LS_MEETINGS = "biu_meetings_v1";
 
 function loadProjects() {
   try {
@@ -39,11 +40,18 @@ function saveProjects(projects) {
   localStorage.setItem(LS_KEY, JSON.stringify(projects));
 }
 
-// ── Scoring helpers ──────────────────────────────────────────────────────────
-function scoreForRating(rating) {
-  const map = { "Outstanding": 85, "Excellent": 70, "Very Good": 55, "Good": 45, "Pass": 30 };
-  return map[rating] ?? 0;
+function loadMeetings() {
+  try {
+    const raw = localStorage.getItem(LS_MEETINGS);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
 }
+
+function saveMeetings(meetings) {
+  localStorage.setItem(LS_MEETINGS, JSON.stringify(meetings));
+}
+
+// ── Scoring helpers ──────────────────────────────────────────────────────────
 function ratingLabel(score) {
   if (score >= 85) return "Outstanding";
   if (score >= 70) return "Excellent";
@@ -56,11 +64,12 @@ function ratingLabel(score) {
 function calcPartScores(credits) {
   const part1 = credits.filter(c => c.part === 1 && c.pursuing);
   const part2 = credits.filter(c => c.part === 2 && c.pursuing);
-  const part1Score = part1.reduce((s, c) => s + (c.score || 0), 0);
-  const part1Avail = part1.reduce((s, c) => s + c.available, 0);
-  const part2Score = part2.reduce((s, c) => s + (c.score || 0), 0);
-  const part2Avail = part2.reduce((s, c) => s + c.available, 0);
-  return { part1Score, part1Avail, part2Score, part2Avail };
+  return {
+    part1Score: part1.reduce((s, c) => s + (c.score || 0), 0),
+    part1Avail: part1.reduce((s, c) => s + c.available, 0),
+    part2Score: part2.reduce((s, c) => s + (c.score || 0), 0),
+    part2Avail: part2.reduce((s, c) => s + c.available, 0),
+  };
 }
 
 // ── Nav pills ────────────────────────────────────────────────────────────────
@@ -86,14 +95,14 @@ function NavPill({ label, icon, active, onClick }) {
 }
 
 // ── Score Bar ────────────────────────────────────────────────────────────────
-function ScoreBar({ score, available, target, label }) {
+function ScoreBar({ score, available, target }) {
   const pct = available ? (score / available) * 100 : 0;
   const targetPct = available ? (target / available) * 100 : 0;
   const color = pct >= targetPct ? "#10b981" : pct >= targetPct * 0.7 ? "#fbbf24" : "#f87171";
   return (
     <div style={{ marginBottom: 14 }}>
       <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#64748b", marginBottom: 5 }}>
-        <span style={{ fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em" }}>{label}</span>
+        <span style={{ fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em" }}></span>
         <span>{score} / {available} <span style={{ color: "#475569" }}>(target: {target})</span></span>
       </div>
       <div style={{ height: 6, borderRadius: 99, background: "rgba(255,255,255,0.07)", overflow: "hidden", position: "relative" }}>
@@ -190,10 +199,7 @@ function EvidenceModal({ credit, onClose, onSave }) {
   const [files, setFiles] = useState([]);
   const [links, setLinks] = useState((credit.evidence || []).join("\n"));
 
-  const addFiles = (incoming) => {
-    setFiles(prev => [...prev, ...incoming]);
-  };
-
+  const addFiles = (incoming) => setFiles(prev => [...prev, ...incoming]);
   const removeFile = (i) => setFiles(prev => prev.filter((_, idx) => idx !== i));
 
   const handleSave = () => {
@@ -297,24 +303,51 @@ Assessment date: ${project.assessment_date} | Area: ${project.area_sqm} m² | Bu
     html += `<h2>${label}</h2>`;
     const partCredits = project.credits.filter(c => c.part === part && c.pursuing);
     for (const credit of partCredits) {
-      const figNum = credit.evidence?.length || 0;
       html += `<div class="credit">
   <div class="credit-header">${credit.code} — ${credit.title}</div>
   <div class="meta">Category: ${credit.category} | Available: ${credit.available} | Score: ${credit.score}</div>
   <div class="narrative">${credit.narrative || "—"}</div>
-  ${credit.evidence?.length ? `<div class="evidence">Evidence (${figNum} file(s)):<br/>` +
-    credit.evidence.map((e, i) => `<div class="figure">Figure ${i + 1}: ${typeof e === "string" ? e : e.name}</div>`).join("") +
-    `</div>` : ""}
+  ${credit.evidence?.length ? `<div class="evidence">Evidence (${credit.evidence.length} file(s)):<br/>` +
+    credit.evidence.map((e, i) => `<div class="figure">Figure ${i + 1}: ${typeof e === "string" ? e : e.name}</div>`).join("") + `</div>` : ""}
 </div>`;
     }
   }
 
   html += `</body></html>`;
-
   const win = window.open("", "_blank");
   win.document.write(html);
   win.document.close();
   win.print();
+}
+
+// ── Export meeting as .md ───────────────────────────────────────────────────
+function exportMeetingMd(meeting) {
+  const header = [
+    "---",
+    `title: "${meeting.title}"`,
+    `date: "${meeting.date}"`,
+    `attendees: "${(meeting.attendees || []).join(", ")}"`,
+    `project: "${meeting.projectName || ""}"`,
+    `tags: ["meeting", "breeam"]`,
+    "---",
+    "",
+    `# ${meeting.title}`,
+    "",
+    `**Date:** ${meeting.date}`,
+    meeting.attendees?.length ? `\n**Attendees:** ${meeting.attendees.join(", ")}` : "",
+    "",
+    "## Notes",
+    "",
+    meeting.notes || "_No notes recorded._",
+  ].filter(Boolean).join("\n");
+
+  const blob = new Blob([header], { type: "text/markdown;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${meeting.date}_${slugify(meeting.title)}.md`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 // ── PAGE: Home ──────────────────────────────────────────────────────────────
@@ -328,8 +361,6 @@ function HomePage({ project, onNavigate }) {
   const complete = pursuing.filter(c => c.status === "complete");
   const inProgress = pursuing.filter(c => c.status === "in_progress");
 
-  const cats = [...new Set(CREDITS.map(c => c.category))];
-
   return (
     <div style={{ padding: "28px 32px", maxWidth: 1100 }}>
       <div style={{ marginBottom: 28 }}>
@@ -338,7 +369,6 @@ function HomePage({ project, onNavigate }) {
         <div style={{ fontSize: 13, color: "#64748b", marginTop: 4 }}>{project.category} · {project.location} · {project.area_sqm} m² · {project.assessor}</div>
       </div>
 
-      {/* Score overview */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 28 }}>
         <div style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 14, padding: "20px 22px" }}>
           <div style={{ fontSize: 11, color: "#7c3aed", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Overall Score</div>
@@ -348,16 +378,15 @@ function HomePage({ project, onNavigate }) {
         <div style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)", borderRadius: 14, padding: "20px 22px" }}>
           <div style={{ fontSize: 11, color: "#f59e0b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Part 1 — Asset</div>
           <div style={{ fontSize: 36, fontWeight: 800, color: "#f1f5f9" }}>{part1Score}<span style={{ fontSize: 18, color: "#475569" }}>/{part1Avail}</span></div>
-          <ScoreBar score={part1Score} available={part1Avail} target={part1Target} label="" />
+          <ScoreBar score={part1Score} available={part1Avail} target={part1Target} />
         </div>
         <div style={{ background: "rgba(59,130,246,0.08)", border: "1px solid rgba(59,130,246,0.2)", borderRadius: 14, padding: "20px 22px" }}>
           <div style={{ fontSize: 11, color: "#60a5fa", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Part 2 — BM</div>
           <div style={{ fontSize: 36, fontWeight: 800, color: "#f1f5f9" }}>{part2Score}<span style={{ fontSize: 18, color: "#475569" }}>/{part2Avail}</span></div>
-          <ScoreBar score={part2Score} available={part2Avail} target={part2Target} label="" />
+          <ScoreBar score={part2Score} available={part2Avail} target={part2Target} />
         </div>
       </div>
 
-      {/* Progress */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 28 }}>
         <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, padding: "20px 22px" }}>
           <div style={{ fontSize: 12, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 14 }}>Credit Progress</div>
@@ -388,11 +417,11 @@ function HomePage({ project, onNavigate }) {
             <button onClick={() => onNavigate("assessment")} style={{ padding: "9px 16px", borderRadius: 9, border: "none", background: "rgba(124,58,237,0.15)", color: "#a78bfa", cursor: "pointer", fontWeight: 700, fontSize: 12, fontFamily: "inherit" }}>Continue Assessment →</button>
             <button onClick={() => onNavigate("preassessment")} style={{ padding: "9px 16px", borderRadius: 9, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)", color: "#94a3b8", cursor: "pointer", fontWeight: 700, fontSize: 12, fontFamily: "inherit" }}>Pre-Assessment</button>
             <button onClick={() => generatePDF(project)} style={{ padding: "9px 16px", borderRadius: 9, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)", color: "#94a3b8", cursor: "pointer", fontWeight: 700, fontSize: 12, fontFamily: "inherit" }}>📄 Generate PDF</button>
+            <button onClick={() => onNavigate("meetings")} style={{ padding: "9px 16px", borderRadius: 9, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)", color: "#94a3b8", cursor: "pointer", fontWeight: 700, fontSize: 12, fontFamily: "inherit" }}>📅 Meetings</button>
           </div>
         </div>
       </div>
 
-      {/* Category breakdown */}
       <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, padding: "20px 22px" }}>
         <div style={{ fontSize: 12, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 16 }}>By Category — Part 1 Asset Performance</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
@@ -421,11 +450,8 @@ function HomePage({ project, onNavigate }) {
 function PreAssessmentPage({ project, onUpdate }) {
   const [part, setPart] = useState(1);
   const credits = project.credits.filter(c => c.part === part);
-
   const pursuing = credits.filter(c => c.pursuing);
   const notPursuing = credits.filter(c => !c.pursuing);
-  const totalAvail = credits.reduce((s, c) => s + c.available, 0);
-  const targetScore = Math.round(totalAvail * 0.55); // ~55% of available
 
   return (
     <div style={{ padding: "28px 32px", maxWidth: 1100 }}>
@@ -435,7 +461,6 @@ function PreAssessmentPage({ project, onUpdate }) {
         <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>Mark each credit as Pursuing (will assess) or Skip (not applicable / not worth pursuing)</div>
       </div>
 
-      {/* Part tabs */}
       <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
         {[1, 2].map(p => (
           <button key={p} onClick={() => setPart(p)}
@@ -454,16 +479,12 @@ function PreAssessmentPage({ project, onUpdate }) {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
         <div>
           <div style={{ fontSize: 11, color: "#10b981", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>🔍 Pursuing ({pursuing.length})</div>
-          {pursuing.map(c => (
-            <CreditCard key={c.code} credit={c} onUpdate={onUpdate} readOnly={false} />
-          ))}
+          {pursuing.map(c => <CreditCard key={c.code} credit={c} onUpdate={onUpdate} readOnly={false} />)}
           {pursuing.length === 0 && <div style={{ color: "#334155", fontSize: 13, padding: 20, textAlign: "center" }}>No credits selected</div>}
         </div>
         <div>
           <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>⏭️ Skipping ({notPursuing.length})</div>
-          {notPursuing.map(c => (
-            <CreditCard key={c.code} credit={c} onUpdate={onUpdate} readOnly={false} />
-          ))}
+          {notPursuing.map(c => <CreditCard key={c.code} credit={c} onUpdate={onUpdate} readOnly={false} />)}
           {notPursuing.length === 0 && <div style={{ color: "#334155", fontSize: 13, padding: 20, textAlign: "center" }}>All credits pursuing</div>}
         </div>
       </div>
@@ -484,7 +505,6 @@ function AssessmentPage({ project, onUpdate }) {
         <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#f1f5f9" }}>Assessment — Narratives & Evidence</h1>
       </div>
 
-      {/* Part tabs */}
       <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
         {[1, 2].map(p => {
           const count = project.credits.filter(c => c.part === p && c.pursuing).length;
@@ -499,7 +519,6 @@ function AssessmentPage({ project, onUpdate }) {
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-        {/* Credit list */}
         <div>
           {credits.map(c => (
             <div key={c.code}
@@ -524,7 +543,6 @@ function AssessmentPage({ project, onUpdate }) {
           ))}
         </div>
 
-        {/* Detail panel */}
         <div>
           {!activeCredit ? (
             <div style={{ color: "#334155", fontSize: 13, padding: "60px 20px", textAlign: "center", border: "1px dashed rgba(255,255,255,0.07)", borderRadius: 12 }}>
@@ -593,7 +611,6 @@ function AssessmentPage({ project, onUpdate }) {
         </div>
       </div>
 
-      {/* Evidence modal */}
       {activeCredit?._showEvidence && (
         <EvidenceModal
           credit={activeCredit}
@@ -666,17 +683,16 @@ function EvidencePackagePage({ project }) {
   const [selected, setSelected] = useState(() => new Set(project.credits.filter(c => c.pursuing).map(c => c.code)));
   const [onlyComplete, setOnlyComplete] = useState(false);
 
-  const credits = project.credits.filter(c => c.pursuing && (selected.has(c.code)) && (!onlyComplete || c.status === "complete"));
+  const credits = project.credits.filter(c => c.pursuing && selected.has(c.code) && (!onlyComplete || c.status === "complete"));
+  const part1 = credits.filter(c => c.part === 1);
+  const part2 = credits.filter(c => c.part === 2);
+  const totalScore = credits.reduce((s, c) => s + (c.score || 0), 0);
 
   const toggle = (code) => setSelected(prev => {
     const next = new Set(prev);
     if (next.has(code)) next.delete(code); else next.add(code);
     return next;
   });
-
-  const part1 = credits.filter(c => c.part === 1);
-  const part2 = credits.filter(c => c.part === 2);
-  const totalScore = credits.reduce((s, c) => s + (c.score || 0), 0);
 
   return (
     <div style={{ padding: "28px 32px", maxWidth: 1100 }}>
@@ -734,7 +750,6 @@ function EvidencePackagePage({ project }) {
           </div>
         </div>
 
-        {/* Preview sidebar */}
         <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: "20px", position: "sticky", top: 20, alignSelf: "start" }}>
           <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 14 }}>Package Summary</div>
           <div style={{ fontSize: 13, color: "#e2e8f0", marginBottom: 8 }}><strong>{credits.length}</strong> credits selected</div>
@@ -760,15 +775,221 @@ function EvidencePackagePage({ project }) {
   );
 }
 
+// ── PAGE: Meetings ───────────────────────────────────────────────────────────
+function MeetingsPage({ project, meetings, onMeetingsChange }) {
+  const [selected, setSelected] = useState(null);
+  const [form, setForm] = useState({ title: "", date: tod(), attendees: "", notes: "" });
+
+  const projectMeetings = meetings
+    .filter(m => m.projectId === project.id)
+    .sort((a, b) => (a.date > b.date ? -1 : 1));
+
+  // When switching between meetings, sync form state
+  const selectMeeting = (m) => {
+    setSelected(m);
+    setForm({
+      title: m.title || "",
+      date: m.date || tod(),
+      attendees: (m.attendees || []).join(", "),
+      notes: m.notes || "",
+    });
+  };
+
+  const newMeeting = () => {
+    const m = {
+      id: Date.now(),
+      projectId: project.id,
+      projectName: project.name,
+      title: "",
+      date: tod(),
+      attendees: [],
+      notes: "",
+    };
+    const updated = [m, ...meetings];
+    onMeetingsChange(updated);
+    selectMeeting(m);
+  };
+
+  const deleteMeeting = (id) => {
+    if (!confirm("Delete this meeting?")) return;
+    const updated = meetings.filter(m => m.id !== id);
+    onMeetingsChange(updated);
+    if (selected?.id === id) setSelected(null);
+  };
+
+  const saveCurrent = () => {
+    if (!selected) return;
+    const updated = meetings.map(m => {
+      if (m.id !== selected.id) return m;
+      return {
+        ...m,
+        title: form.title,
+        date: form.date,
+        attendees: form.attendees.split(",").map(s => s.trim()).filter(Boolean),
+        notes: form.notes,
+      };
+    });
+    onMeetingsChange(updated);
+    setSelected(updated.find(m => m.id === selected.id) || selected);
+  };
+
+  // Auto-save when form changes (on blur / navigate away)
+  const handleFieldChange = (field, value) => {
+    setForm(prev => ({ ...prev, [field]: value }));
+    // Save immediately on change
+    if (!selected) return;
+    const updated = meetings.map(m => {
+      if (m.id !== selected.id) return m;
+      const updatedMeeting = { ...m, [field]: value };
+      if (field === "attendees") updatedMeeting.attendees = value.split(",").map(s => s.trim()).filter(Boolean);
+      return updatedMeeting;
+    });
+    onMeetingsChange(updated);
+  };
+
+  return (
+    <div style={{ padding: "28px 32px", maxWidth: 1100, display: "flex", flexDirection: "column", height: "100%" }}>
+      <div style={{ marginBottom: 24 }}>
+        <div style={{ fontSize: 11, color: "#7c3aed", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>Meetings</div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#f1f5f9" }}>Meeting Notes</h1>
+          <button onClick={newMeeting}
+            style={{ padding: "9px 18px", borderRadius: 9, border: "none", background: "linear-gradient(135deg,#7c3aed,#3b82f6)", color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit", boxShadow: "0 4px 16px rgba(124,58,237,0.3)" }}>
+            + New Meeting
+          </button>
+        </div>
+        <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>
+          {projectMeetings.length} meeting{projectMeetings.length !== 1 ? "s" : ""} · Stored as .md files in <code style={{ color: "#a78bfa" }}>meetings/</code>
+        </div>
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 20, flex: 1, minHeight: 0 }}>
+        {/* Meeting list */}
+        <div style={{ borderRight: "1px solid rgba(255,255,255,0.06)", paddingRight: 16 }}>
+          {projectMeetings.length === 0 && (
+            <div style={{ color: "#334155", fontSize: 13, textAlign: "center", padding: "40px 10px" }}>
+              No meetings yet.<br />Click "+ New Meeting" to start.
+            </div>
+          )}
+          {projectMeetings.map(m => (
+            <div key={m.id}
+              onClick={() => selectMeeting(m)}
+              style={{
+                padding: "12px 14px", borderRadius: 10, marginBottom: 6, cursor: "pointer",
+                background: selected?.id === m.id ? "rgba(124,58,237,0.15)" : "rgba(255,255,255,0.03)",
+                border: `1px solid ${selected?.id === m.id ? "rgba(124,58,237,0.35)" : "rgba(255,255,255,0.07)"}`,
+              }}>
+              <div style={{ fontSize: 10, color: "#64748b", fontWeight: 700, marginBottom: 3 }}>{m.date}</div>
+              <div style={{ fontSize: 13, fontWeight: 600, color: "#e2e8f0", marginBottom: 3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {m.title || <em style={{ color: "#475569" }}>Untitled meeting</em>}
+              </div>
+              {m.attendees?.length > 0 && (
+                <div style={{ fontSize: 11, color: "#64748b", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {(m.attendees || []).join(", ")}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+
+        {/* Meeting editor */}
+        {!selected ? (
+          <div style={{ color: "#334155", fontSize: 13, padding: "60px 20px", textAlign: "center", border: "1px dashed rgba(255,255,255,0.07)", borderRadius: 12 }}>
+            Select a meeting or click "+ New Meeting"
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+            {/* Header fields */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 180px 200px", gap: 12, marginBottom: 16 }}>
+              <div>
+                <div style={{ fontSize: 10, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 5 }}>Meeting Title</div>
+                <input
+                  value={form.title}
+                  onChange={e => handleFieldChange("title", e.target.value)}
+                  placeholder="e.g. BREEAM Kick-off Meeting"
+                  style={{ width: "100%", padding: "8px 11px", boxSizing: "border-box", borderRadius: 8, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#e2e8f0", fontSize: 14, fontFamily: "inherit" }}
+                />
+              </div>
+              <div>
+                <div style={{ fontSize: 10, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 5 }}>Date</div>
+                <input
+                  type="date"
+                  value={form.date}
+                  onChange={e => handleFieldChange("date", e.target.value)}
+                  style={{ width: "100%", padding: "8px 11px", boxSizing: "border-box", borderRadius: 8, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#e2e8f0", fontSize: 13, fontFamily: "inherit" }}
+                />
+              </div>
+              <div>
+                <div style={{ fontSize: 10, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 5 }}>Attendees</div>
+                <input
+                  value={form.attendees}
+                  onChange={e => handleFieldChange("attendees", e.target.value)}
+                  placeholder="Jane, John, Lucy"
+                  style={{ width: "100%", padding: "8px 11px", boxSizing: "border-box", borderRadius: 8, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#e2e8f0", fontSize: 13, fontFamily: "inherit" }}
+                />
+              </div>
+            </div>
+
+            {/* Agenda section */}
+            <div style={{ marginBottom: 14 }}>
+              <div style={{ fontSize: 10, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 6 }}>Agenda / Notes</div>
+              <textarea
+                value={form.notes}
+                onChange={e => handleFieldChange("notes", e.target.value)}
+                placeholder={"## Agenda\n- Topic 1\n- Topic 2\n\n## Notes\n- Note here...\n\n## Actions\n- [ ] Action item"}
+                style={{
+                  width: "100%", minHeight: 340, boxSizing: "border-box",
+                  padding: "14px 16px", borderRadius: 10,
+                  background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)",
+                  color: "#e2e8f0", fontSize: 13, lineHeight: 1.65, resize: "vertical",
+                  fontFamily: "ui-monospace, SFMono-Regular, Consolas, monospace",
+                }}
+              />
+            </div>
+
+            {/* Actions */}
+            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+              <button
+                onClick={() => saveCurrent()}
+                style={{ padding: "9px 18px", borderRadius: 9, border: "none", background: "rgba(124,58,237,0.15)", color: "#a78bfa", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>
+                💾 Save
+              </button>
+              <button
+                onClick={() => {
+                  const m = meetings.find(m => m.id === selected.id);
+                  if (m) exportMeetingMd(m);
+                }}
+                style={{ padding: "9px 18px", borderRadius: 9, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)", color: "#94a3b8", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>
+                📥 Export .md
+              </button>
+              <button
+                onClick={() => deleteMeeting(selected.id)}
+                style={{ padding: "9px 18px", borderRadius: 9, border: "1px solid rgba(239,68,68,0.2)", background: "rgba(239,68,68,0.06)", color: "#f87171", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>
+                🗑 Delete
+              </button>
+
+              <div style={{ marginLeft: "auto", fontSize: 11, color: "#475569" }}>
+                {selected.date}_{slugify(selected.title || "untitled")}.md
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ── Main App ─────────────────────────────────────────────────────────────────
 export default function App() {
   const [projects, setProjects] = useState(loadProjects);
   const [activeProjectId, setActiveProjectId] = useState(DEMO_PROJECT.id);
   const [page, setPage] = useState("home");
+  const [meetings, setMeetings] = useState(loadMeetings);
 
   const activeProject = projects.find(p => p.id === activeProjectId) || projects[0];
 
   useEffect(() => { saveProjects(projects); }, [projects]);
+  useEffect(() => { saveMeetings(meetings); }, [meetings]);
 
   const updateCredit = (updated) => {
     setProjects(prev => prev.map(p => {
@@ -777,29 +998,30 @@ export default function App() {
     }));
   };
 
-  const project = { ...activeProject }; // local copy
+  const project = { ...activeProject };
   const pages = {
     home: <HomePage project={project} onNavigate={setPage} />,
     preassessment: <PreAssessmentPage project={project} onUpdate={updateCredit} />,
     assessment: <AssessmentPage project={project} onUpdate={updateCredit} />,
     vault: <EvidenceVaultPage project={project} />,
     package: <EvidencePackagePage project={project} />,
+    meetings: <MeetingsPage project={project} meetings={meetings} onMeetingsChange={setMeetings} />,
   };
 
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: "#0f0a1e", color: "#e2e8f0" }}>
-      {/* Sidebar */}
       <nav style={{ width: 220, minHeight: "100vh", borderRight: "1px solid rgba(255,255,255,0.06)", padding: "24px 16px", display: "flex", flexDirection: "column", gap: 4, flexShrink: 0 }}>
         <div style={{ padding: "0 12px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)", marginBottom: 12 }}>
           <div style={{ fontSize: 10, color: "#7c3aed", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 4 }}>BREEAM In Use</div>
           <div style={{ fontSize: 15, fontWeight: 800, color: "#f1f5f9" }}>BIU Tracker</div>
         </div>
 
-        <NavPill label="Home"            icon="🏠"  active={page === "home"}        onClick={() => setPage("home")} />
-        <NavPill label="Pre-Assessment"  icon="🔍"  active={page === "preassessment"} onClick={() => setPage("preassessment")} />
-        <NavPill label="Assessment"      icon="📋"  active={page === "assessment"} onClick={() => setPage("assessment")} />
-        <NavPill label="Evidence Vault"   icon="📦"  active={page === "vault"}      onClick={() => setPage("vault")} />
-        <NavPill label="Evidence Package" icon="📄"  active={page === "package"}    onClick={() => setPage("package")} />
+        <NavPill label="Home"             icon="🏠"  active={page === "home"}          onClick={() => setPage("home")} />
+        <NavPill label="Pre-Assessment"   icon="🔍"  active={page === "preassessment"} onClick={() => setPage("preassessment")} />
+        <NavPill label="Assessment"       icon="📋"  active={page === "assessment"}    onClick={() => setPage("assessment")} />
+        <NavPill label="Evidence Vault"   icon="📦"  active={page === "vault"}         onClick={() => setPage("vault")} />
+        <NavPill label="Evidence Package" icon="📄"  active={page === "package"}       onClick={() => setPage("package")} />
+        <NavPill label="Meetings"         icon="📅"  active={page === "meetings"}      onClick={() => setPage("meetings")} />
 
         <div style={{ marginTop: "auto", padding: "16px 12px 0", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
           <div style={{ fontSize: 10, color: "#475569", marginBottom: 6 }}>Active project</div>
@@ -813,7 +1035,6 @@ export default function App() {
         </div>
       </nav>
 
-      {/* Main content */}
       <main style={{ flex: 1, overflowY: "auto" }}>
         {pages[page] || pages.home}
       </main>
