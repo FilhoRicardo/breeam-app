@@ -45,6 +45,101 @@ const STATUS_COLORS = {
   not_pursuing: { bg: "rgba(100,116,139,0.10)",  color: "#64748b" },
 };
 
+// ── BREEAM Manual PDF map (96 credit PDFs bundled in public/breeam-pdfs/) ─────
+const CREDIT_PDF_MAP = {
+  "Tra 1": "/breeam-pdfs/TRANSPORT/TRA_01/TRA 01 - Manual criteria - Alternate transport.pdf",
+  "Tra 2": "/breeam-pdfs/TRANSPORT/TRA_02/TRA 02 - Manual Criteria - Proximity to public transport.pdf",
+  "Tra 3": "/breeam-pdfs/TRANSPORT/TRA_03/TRA 03 - Manual Criteria - Proximity to amenities.pdf",
+  "Tra 4": "/breeam-pdfs/TRANSPORT/TRA_04/TRA 04 - Manual Criteria - Pedestrian and cyclist safety.pdf",
+  "Ene 1": "/breeam-pdfs/ENERGY/ENE_01/ENE 01 - Manual criteria - Building services.pdf",
+  "Ene 2": "/breeam-pdfs/ENERGY/ENE_02/ENE 02 - Manual criteria - Mech ventilation.pdf",
+  "Ene 3": "/breeam-pdfs/ENERGY/ENE_03/ENE 03 - Manual criteria - Fabric performance.pdf",
+  "Ene 4": "/breeam-pdfs/ENERGY/ENE_04/ENE 04 - Manual criteria - Air permeability.pdf",
+  "Ene 5": "/breeam-pdfs/ENERGY/ENE_05/ENE 05 - Manual criteria - Cooling.pdf",
+  "Ene 6": "/breeam-pdfs/ENERGY/ENE_06/ENE 06 - Manual criteria - Heating.pdf",
+  "Ene 7": "/breeam-pdfs/ENERGY/ENE_07/ENE 07 - Manual criteria - Internal lighting.pdf",
+  "Ene 8": "/breeam-pdfs/ENERGY/ENE_08/ENE 08 - Manual criteria - Ventilation.pdf",
+  "Ene 9": "/breeam-pdfs/ENERGY/ENE_09/ENE 09 - Manual criteria - Water heating.pdf",
+  "Ene 10": "/breeam-pdfs/ENERGY/ENE_10/ENE 10 - Manual criteria - Demand side management.pdf",
+  "Ene 11": "/breeam-pdfs/ENERGY/ENE_11/ENE 11 - Manual criteria - Installed controls.pdf",
+  "Ene 12": "/breeam-pdfs/ENERGY/ENE_12/ENE 12 - Manual criteria - EPCs.pdf",
+  "Ene 13": "/breeam-pdfs/ENERGY/ENE_13/ENE 13 - Manual criteria - Solar PV panels.pdf",
+  "Ene 14": "/breeam-pdfs/ENERGY/ENE_14/ENE 14 - Manual criteria - Solar thermal panel.pdf",
+  "Ene 15": "/breeam-pdfs/ENERGY/ENE_15/ENE 15 - Manual criteria - Monitor energy uses.pdf",
+  "Ene 16": "/breeam-pdfs/ENERGY/ENE_16/ENE 16 - Manual criteria - Monitor tenant area.pdf",
+  "Ene 17": "/breeam-pdfs/ENERGY/ENE_17/ENE 17 - Manual criteria - External lighting.pdf",
+  "Ene 18": "/breeam-pdfs/ENERGY/ENE_18/ENE 18 - Manual Criteria - Lift & escalator efficiency.pdf",
+  "Ene 19": "/breeam-pdfs/ENERGY/ENE_19/ENE 19 - Manual criteria - Energy consumption.pdf",
+  "Ene 20": "/breeam-pdfs/ENERGY/ENE_20/ENE 20 - Manual criteria - Carbon intensity.pdf",
+  "Ene 21": "/breeam-pdfs/ENERGY/ENE_21/ENE 21 - Manual criteria - Electricity gen..pdf",
+  "Ene 22": "/breeam-pdfs/ENERGY/ENE_22/ENE 22 - Manual criteria - Energy audit.pdf",
+  "Ene 23": "/breeam-pdfs/ENERGY/ENE_23/ENE 23 - Manual criteria - Energy reporting.pdf",
+  "Ene 24": "/breeam-pdfs/ENERGY/ENE_24/ENE 24 - Manual criteria - Carbon emissions.pdf",
+  "Wat 1": "/breeam-pdfs/WATER/WAT_01/WAT 01 - Manual Criteria - Water monitoring.pdf",
+  "Wat 2": "/breeam-pdfs/WATER/WAT_02/WAT 02 - Manual Criteria - WCs.pdf",
+  "Wat 3": "/breeam-pdfs/WATER/WAT_03/WAT 03 - Manual criteria - Urinals.pdf",
+  "Wat 4": "/breeam-pdfs/WATER/WAT_04/WAT 04 - Manual Criteria - Taps.pdf",
+  "Wat 5": "/breeam-pdfs/WATER/WAT_05/WAT 05 - Manual criteria - Showers.pdf",
+  "Wat 6": "/breeam-pdfs/WATER/WAT_06/WAT 06 - Manual criteria - White goods.pdf",
+  "Wat 7": "/breeam-pdfs/WATER/WAT_07/WAT 07 - Manual criteria - Leak detection.pdf",
+  "Wat 8": "/breeam-pdfs/WATER/WAT_08/WAT 08 - Manual criteria - Leak prevention.pdf",
+  "Wat 9": "/breeam-pdfs/WATER/WAT_09/WAT 09 - Manual criteria - Isolation valves.pdf",
+  "Wat 10": "/breeam-pdfs/WATER/WAT_10/WAT 10 - Manual criteria - Non-utility water.pdf",
+  "Wat 11": "/breeam-pdfs/WATER/WAT_11/WAT 11 - Manual criteria - Water consumption.pdf",
+  "Wat 12": "/breeam-pdfs/WATER/WAT_12/WAT 12 - Manual criteria - Water recycling.pdf",
+  "Wat 13": "/breeam-pdfs/WATER/WAT_13/WAT 13 - Manual criteria - Water reporting.pdf",
+  "Wat 14": "/breeam-pdfs/WATER/WAT_14/WAT 14 - Manual criteria - Water strategy.pdf",
+  "Hea 1": "/breeam-pdfs/HEALTH-&-WELLBEING/HEA_01/HEA 01 - Manual criteria - Daylighting.pdf",
+  "Hea 2": "/breeam-pdfs/HEALTH-&-WELLBEING/HEA_02/HEA 02 - Manual Criteria - Glare control.pdf",
+  "Hea 3": "/breeam-pdfs/HEALTH-&-WELLBEING/HEA_03/HEA 03 - Manual criteria - Lux level lighting test.pdf",
+  "Hea 4": "/breeam-pdfs/HEALTH-&-WELLBEING/HEA_04/HEA 04 - Manual criteria - Lighting control.pdf",
+  "Hea 5": "/breeam-pdfs/HEALTH-&-WELLBEING/HEA_05/HEA 05 - Manual criteria - Minimising flicker.pdf",
+  "Hea 6": "/breeam-pdfs/HEALTH-&-WELLBEING/HEA_06/HEA 06 - Manual criteria - View out.pdf",
+  "Hea 7": "/breeam-pdfs/HEALTH-&-WELLBEING/HEA_07/HEA 07 - Manual criteria - Comfort control.pdf",
+  "Hea 8": "/breeam-pdfs/HEALTH-&-WELLBEING/HEA_08/HEA 08 - Manual criteria - Ventilation intakes.pdf",
+  "Hea 9": "/breeam-pdfs/HEALTH-&-WELLBEING/HEA_09/HEA 09 - Manual criteria - CO2 sensors.pdf",
+  "Hea 10": "/breeam-pdfs/HEALTH-&-WELLBEING/HEA_10/HEA 10 - Manual criteria - CO sensors.pdf",
+  "Hea 11": "/breeam-pdfs/HEALTH-&-WELLBEING/HEA_11/HEA 11 - Manual criteria - Rest areas.pdf",
+  "Hea 12": "/breeam-pdfs/HEALTH-&-WELLBEING/HEA_12/HEA 12 - Manual criteria - Inclusive design.pdf",
+  "Hea 13": "/breeam-pdfs/HEALTH-&-WELLBEING/HEA_13/HEA 13 - Manual criteria - Drinking water.pdf",
+  "Hea 14": "/breeam-pdfs/HEALTH-&-WELLBEING/HEA_14/HEA 14 - Manual Criteria - Thermal Comfort.pdf",
+  "Hea 15": "/breeam-pdfs/HEALTH-&-WELLBEING/HEA_15/HEA 15 - Manual criteria - Smoking policy.pdf",
+  "Hea 16": "/breeam-pdfs/HEALTH-&-WELLBEING/HEA_16/HEA 16 - Manual Criteria - Indoor air quality.pdf",
+  "Hea 17": "/breeam-pdfs/HEALTH-&-WELLBEING/HEA_17/HEA 17 - Manual criteria - Acoustic conditions.pdf",
+  "Hea 18": "/breeam-pdfs/HEALTH-&-WELLBEING/HEA_18/HEA 18 - Manual criteria - Legionella.pdf",
+  "Hea 19": "/breeam-pdfs/HEALTH-&-WELLBEING/HEA_19/HEA 19 - Drinking Water - Criteria.pdf",
+  "Man 1": "/breeam-pdfs/RESOURCES/MAN_01/MAN 01 - Manual Criteria - Building user guide.pdf",
+  "Man 2": "/breeam-pdfs/RESOURCES/MAN_02/MAN 02 - Manual criteria - Engage and feedback.pdf",
+  "Man 3": "/breeam-pdfs/RESOURCES/MAN_03/MAN 03 - Manual criteria - Maintenance policy.pdf",
+  "Man 4": "/breeam-pdfs/RESOURCES/MAN_04/MAN 04 - Manual criteria - Environment policy.pdf",
+  "Man 5": "/breeam-pdfs/RESOURCES/MAN_05/MAN 05 - Manual criteria - Green lease.pdf",
+  "Pol 1": "/breeam-pdfs/POLLUTION/POL_01/POL 01 - Manual criteria - Water pollution.pdf",
+  "Pol 2": "/breeam-pdfs/POLLUTION/POL_02/POL 02 - Manual criteria - Chemical storage.pdf",
+  "Pol 3": "/breeam-pdfs/POLLUTION/POL_03/POL 03 - Manual criteria - Local air quality.pdf",
+  "Pol 4": "/breeam-pdfs/POLLUTION/POL_04/POL 04 - Manual criteria - GWP of refrigerants.pdf",
+  "Pol 5": "/breeam-pdfs/POLLUTION/POL_05/POL 05 - Manual criteria - Refridgerant LD.pdf",
+  "Pol 6": "/breeam-pdfs/POLLUTION/POL_06/POL 06 - Manual criteria - Nighttime light.pdf",
+  "Pol 7": "/breeam-pdfs/POLLUTION/POL_07/POL 07 - Manual criteria - Water pollution.pdf",
+  "Pol 8": "/breeam-pdfs/POLLUTION/POL_08/POL 08 - Manual criteria - Refrigerant replace.pdf",
+  "Pol 9": "/breeam-pdfs/POLLUTION/POL_09/POL 09 - Manual criteria - Land contamination.pdf",
+  "Pol 10": "/breeam-pdfs/POLLUTION/POL_10/POL 10 - Manual criteria - Incident response.pdf",
+  "Lea 1": "/breeam-pdfs/LAND-USE-&-ECOLOGY/LUE_01/LUE 01 - Manual criteria - Planted area.pdf",
+  "Lea 2": "/breeam-pdfs/LAND-USE-&-ECOLOGY/LUE_02/LUE 02 - Manual criteria - Ecology features.pdf",
+  "Lea 3": "/breeam-pdfs/LAND-USE-&-ECOLOGY/LUE_03/LUE 03 - Manual criteria - Ecology report.pdf",
+  "Lea 4": "/breeam-pdfs/LAND-USE-&-ECOLOGY/LUE_04/LUE 04 - Manual criteria - Biodiversity plan.pdf",
+  // RSL = Resilience, mapped to Pollution category in credits
+  "Rsl 1": "/breeam-pdfs/RESILIENCE/RSL_01/RSL 01 - Manual Criteria - Flood risk.pdf",
+  "Rsl 2": "/breeam-pdfs/RESILIENCE/RSL_02/RSL 02 - Manual criteria - Surface water.pdf",
+  "Rsl 3": "/breeam-pdfs/RESILIENCE/RSL_03/RSL 03 - Manual criteria - Natural hazards.pdf",
+  "Rsl 4": "/breeam-pdfs/RESILIENCE/RSL_04/RSL 04 - Manual criteria - Resilient features.pdf",
+  "Rsl 5": "/breeam-pdfs/RESILIENCE/RSL_05/RSL 05 - Manual criteria - Alarm systems.pdf",
+  "Rsl 6": "/breeam-pdfs/RESILIENCE/RSL_06/RSL 06 - Manual criteria - Emergency plans.pdf",
+  "Rsl 7": "/breeam-pdfs/RESILIENCE/RSL_07/RSL 07 - Manual criteria - Climate risk.pdf",
+  "Rsl 8": "/breeam-pdfs/RESILIENCE/RSL_08/RSL 08 - Manual criteria - Social risks.pdf",
+  "Rsl 9": "/breeam-pdfs/RESILIENCE/RSL_09/RSL 09 - Manual criteria - Fire risk.pdf",
+  "Rsl 10": "/breeam-pdfs/RESILIENCE/RSL_10/RSL 10 - Manual criteria - Security Risk Assessment.pdf",
+};
+
 // ── Storage ──────────────────────────────────────────────────────────────────
 const LS_KEY = "biu_projects_v1";
 const LS_MEETINGS = "biu_meetings_v1";
@@ -760,7 +855,7 @@ function PreAssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
               </div>
 
               {/* Pursue / Skip toggle */}
-              <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
+              <div style={{ display: "flex", gap: 10, alignItems: "center", marginTop: 14 }}>
                 <button
                   onClick={() => {
                     const updated = { ...displayCredit, pursuing: true, status: "in_progress" };
@@ -778,6 +873,16 @@ function PreAssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
                   style={{ padding: "10px 24px", borderRadius: 10, border: !displayCredit.pursuing ? "2px solid #94a3b8" : "1px solid rgba(0,0,0,0.10)", background: !displayCredit.pursuing ? "rgba(100,116,139,0.08)" : "rgba(0,0,0,0.03)", color: !displayCredit.pursuing ? "#334155" : "#94a3b8", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>
                   ✗ Skip this credit
                 </button>
+                {CREDIT_PDF_MAP[displayCredit.code] && (
+                  <a
+                    href={CREDIT_PDF_MAP[displayCredit.code]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={e => e.stopPropagation()}
+                    style={{ marginLeft: "auto", padding: "8px 14px", borderRadius: 8, border: "1px solid rgba(124,58,237,0.25)", background: "rgba(124,58,237,0.08)", color: "#7c3aed", cursor: "pointer", fontWeight: 700, fontSize: 12, fontFamily: "inherit", textDecoration: "none", display: "flex", alignItems: "center", gap: 6 }}>
+                    📖 BREEAM Manual
+                  </a>
+                )}
               </div>
             </div>
 
