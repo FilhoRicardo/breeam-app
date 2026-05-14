@@ -236,7 +236,7 @@ function EvidenceModal({ credit, onClose, onSave }) {
             <label style={{ display: "block", padding: "20px", borderRadius: 10, border: "2px dashed rgba(124,58,237,0.3)", textAlign: "center", cursor: "pointer" }}>
               <input
                 type="file" multiple
-                accept=".pdf,.jpg,.jpeg,.png,.xlsx,.xls,.doc,.docx"
+                accept=".pdf,.jpg,.jpeg,.png,.xlsx,.xls,.doc,.docx,.zip,.7z,.rar,.tar,.gz"
                 style={{ display: "none" }}
                 onChange={e => {
                   const MAX_SIZE = 50 * 1024 * 1024; // 50 MB
@@ -248,7 +248,7 @@ function EvidenceModal({ credit, onClose, onSave }) {
                 }}
               />
               <div style={{ fontSize: 13, color: "#a78bfa", fontWeight: 700 }}>+ Drop files or click to browse</div>
-              <div style={{ fontSize: 11, color: "#475569", marginTop: 4 }}>PDF, images, spreadsheets, DOCX</div>
+              <div style={{ fontSize: 11, color: "#475569", marginTop: 4 }}>PDF, images, spreadsheets, DOCX, archives (ZIP, 7Z, RAR, TAR.GZ)</div>
             </label>
             {files.map((f, i) => (
               <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", borderRadius: 8, background: "rgba(255,255,255,0.04)", marginTop: 6 }}>
