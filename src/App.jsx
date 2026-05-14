@@ -241,8 +241,31 @@ function CreditCard({ credit, onUpdate, readOnly }) {
 // ── Evidence Modal ───────────────────────────────────────────────────────────
 function EvidenceModal({ credit, onClose, onSave, projectRoot }) {
   const [files, setFiles] = useState([]);
-  const [links, setLinks] = useState((credit.evidence || []).join("\n"));
+  const [links, setLinks] = useState((credit.evidence || []).filter(e => typeof e === "string").join("\n"));
   const [saving, setSaving] = useState(false);
+
+  // Fix 3: Read existing evidence files from disk on mount
+  useEffect(() => {
+    if (!projectRoot) return;
+    (async () => {
+      const creditDef = CREDITS.find(c => c.code === credit.code);
+      const part = creditDef?.part || credit.part || 1;
+      const creditDir = await getCreditFolder(projectRoot, credit.code, part);
+      if (!creditDir) return;
+      const existingFiles = await listEvidence(creditDir);
+      const diskFiles = existingFiles.filter(f => f.isFile);
+      if (diskFiles.length) {
+        // Merge disk files with any new uploads already in `files` state
+        setFiles(prev => {
+          const uploadNames = new Set(prev.map(f => f.name));
+          const newFromDisk = diskFiles
+            .filter(d => !uploadNames.has(d.name))
+            .map(d => ({ name: d.name, type: "disk", _diskName: d.name }));
+          return [...prev, ...newFromDisk];
+        });
+      }
+    })();
+  }, [projectRoot]);
 
   const addFiles = (incoming) => setFiles(prev => [...prev, ...incoming]);
   const removeFile = (i) => setFiles(prev => prev.filter((_, idx) => idx !== i));
@@ -585,7 +608,7 @@ function HomePage({ project, onNavigate }) {
 }
 
 // ── PAGE: Pre-Assessment ─────────────────────────────────────────────────────
-function PreAssessmentPage({ project, onUpdate }) {
+function PreAssessmentPage({ project, onUpdate, projectRoot }) {
   const [part, setPart] = useState(1);
   const [selectedCat, setSelectedCat] = useState("Management");
   const [selectedCredit, setSelectedCredit] = useState(null);
@@ -607,6 +630,39 @@ function PreAssessmentPage({ project, onUpdate }) {
   // Sync selected credit if it becomes un-pursued
   const liveCredit = selectedCredit ? project.credits.find(c => c.code === selectedCredit.code) : null;
   const displayCredit = liveCredit || selectedCredit;
+
+  // Fix 1: Write assessment.md to disk whenever answer or score changes
+  useEffect(() => {
+    if (!projectRoot || !displayCredit?.pursuing || !displayCredit?.selectedAnswer) return;
+    const creditDef = CREDITS.find(c => c.code === displayCredit.code);
+    const partNum = creditDef?.part || displayCredit.part || 1;
+    (async () => {
+      const creditDir = await getCreditFolder(projectRoot, displayCredit.code, partNum);
+      if (!creditDir) return;
+      const selectedAns = displayCredit.answers?.find(a => a.id === displayCredit.selectedAnswer);
+      const content = [
+        `---`,
+        `code: "${displayCredit.code}"`,
+        `title: "${displayCredit.title}"`,
+        `selectedAnswer: "${displayCredit.selectedAnswer}"`,
+        `score: ${displayCredit.score || 0}`,
+        `available: ${displayCredit.available}`,
+        `narrative: "${(displayCredit.narrative || "").replace(/"/g, '\\"')}"`,
+        `status: "${displayCredit.status || "in_progress"}"`,
+        `date: "${tod()}"`,
+        `---`,
+        ``,
+        `# ${displayCredit.code} — Assessment`,
+        ``,
+        `**Selected Answer:** ${displayCredit.selectedAnswer} — ${selectedAns?.label || "Unknown"}`,
+        `**Credits:** ${displayCredit.score || 0} / ${displayCredit.available}`,
+        ``,
+        selectedAns?.sub ? `## Answer Details\n${selectedAns.sub}\n` : ``,
+        displayCredit.narrative ? `## Assessor Narrative\n${displayCredit.narrative}\n` : ``,
+      ].join("\n");
+      await saveTextFile(creditDir, "assessment.md", content);
+    })();
+  }, [displayCredit?.selectedAnswer, displayCredit?.score, displayCredit?.narrative, displayCredit?.pursuing]);
 
   return (
     <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
@@ -1287,9 +1343,47 @@ function EvidencePackagePage({ project }) {
 }
 
 // ── PAGE: Meetings ───────────────────────────────────────────────────────────
-function MeetingsPage({ project, meetings, onMeetingsChange }) {
+function MeetingsPage({ project, meetings, onMeetingsChange, projectRoot }) {
   const [selected, setSelected] = useState(null);
   const [form, setForm] = useState({ title: "", date: tod(), attendees: "", notes: "" });
+
+  // Fix 2: Load existing .md files from disk on mount
+  useEffect(() => {
+    if (!projectRoot) return;
+    (async () => {
+      const meetingsDir = await getMeetingsFolder(projectRoot);
+      if (!meetingsDir) return;
+      const entries = await listDir(meetingsDir);
+      const mdFiles = entries.filter(e => e.isFile && e.name.endsWith('.md'));
+      const diskMeetings = await Promise.all(
+        mdFiles.map(async (f) => {
+          const text = await readTextFile(meetingsDir, f.name);
+          // Parse frontmatter date from filename: YYYY-MM-DD_title.md
+          const match = f.name.match(/^(\d{4}-\d{2}-\d{2})_(.+)\.md$/);
+          return { _diskFile: f.name, _diskContent: text, _diskDate: match?.[1] || "", _diskTitle: match?.[2] || f.name };
+        })
+      );
+      // Add disk meetings that don't already exist in localStorage
+      const existingIds = new Set(meetings.map(m => m.id));
+      const toAdd = diskMeetings.filter(dm => !existingIds.has(dm._diskFile));
+      if (toAdd.length) {
+        const newMeetings = toAdd.map(dm => ({
+          id: dm._diskFile,
+          projectId: project.id,
+          projectName: project.name,
+          title: dm._diskTitle.replace(/-/g, ' '),
+          date: dm._diskDate,
+          attendees: [],
+          notes: dm._diskContent || "",
+        }));
+        onMeetingsChange(prev => {
+          const merged = [...prev, ...newMeetings];
+          saveMeetings(merged);
+          return merged;
+        });
+      }
+    })();
+  }, [projectRoot]);
 
   const projectMeetings = meetings
     .filter(m => m.projectId === project.id)
@@ -1317,6 +1411,31 @@ function MeetingsPage({ project, meetings, onMeetingsChange }) {
       notes: "",
     };
     const updated = [m, ...meetings];
+    // Fix 2: Write initial .md to disk
+    if (projectRoot) {
+      getMeetingsFolder(projectRoot).then(meetingsDir => {
+        if (!meetingsDir) return;
+        const filename = `${m.date}_untitled.md`;
+        const content = [
+          "---",
+          `title: ""`,
+          `date: "${m.date}"`,
+          `attendees: ""`,
+          `project: "${project.name}"`,
+          `tags: ["meeting", "breeam"]`,
+          "---",
+          "",
+          `# Untitled Meeting`,
+          "",
+          `**Date:** ${m.date}`,
+          "",
+          "## Notes",
+          "",
+          "_No notes recorded._",
+        ].join("\n");
+        saveTextFile(meetingsDir, filename, content);
+      });
+    }
     onMeetingsChange(updated);
     selectMeeting(m);
   };
@@ -1340,6 +1459,35 @@ function MeetingsPage({ project, meetings, onMeetingsChange }) {
         notes: form.notes,
       };
     });
+    // Fix 2: Write meeting .md to disk
+    if (projectRoot) {
+      const saved = updated.find(m => m.id === selected.id);
+      if (saved) {
+        getMeetingsFolder(projectRoot).then(meetingsDir => {
+          if (!meetingsDir) return;
+          const filename = `${saved.date}_${slugify(saved.title || "untitled")}.md`;
+          const content = [
+            "---",
+            `title: "${saved.title}"`,
+            `date: "${saved.date}"`,
+            `attendees: "${(saved.attendees || []).join(", ")}"`,
+            `project: "${project.name}"`,
+            `tags: ["meeting", "breeam"]`,
+            "---",
+            "",
+            `# ${saved.title}`,
+            "",
+            `**Date:** ${saved.date}`,
+            saved.attendees?.length ? `\n**Attendees:** ${saved.attendees.join(", ")}` : "",
+            "",
+            "## Notes",
+            "",
+            saved.notes || "_No notes recorded._",
+          ].filter(Boolean).join("\n");
+          saveTextFile(meetingsDir, filename, content);
+        });
+      }
+    }
     onMeetingsChange(updated);
     setSelected(updated.find(m => m.id === selected.id) || selected);
   };
@@ -1355,6 +1503,35 @@ function MeetingsPage({ project, meetings, onMeetingsChange }) {
       if (field === "attendees") updatedMeeting.attendees = value.split(",").map(s => s.trim()).filter(Boolean);
       return updatedMeeting;
     });
+    // Fix 2: Write meeting .md to disk on every field change
+    if (projectRoot) {
+      const saved = updated.find(m => m.id === selected.id);
+      if (saved) {
+        getMeetingsFolder(projectRoot).then(meetingsDir => {
+          if (!meetingsDir) return;
+          const filename = `${saved.date}_${slugify(saved.title || "untitled")}.md`;
+          const content = [
+            "---",
+            `title: "${saved.title}"`,
+            `date: "${saved.date}"`,
+            `attendees: "${(saved.attendees || []).join(", ")}"`,
+            `project: "${project.name}"`,
+            `tags: ["meeting", "breeam"]`,
+            "---",
+            "",
+            `# ${saved.title}`,
+            "",
+            `**Date:** ${saved.date}`,
+            saved.attendees?.length ? `\n**Attendees:** ${saved.attendees.join(", ")}` : "",
+            "",
+            "## Notes",
+            "",
+            saved.notes || "_No notes recorded._",
+          ].filter(Boolean).join("\n");
+          saveTextFile(meetingsDir, filename, content);
+        });
+      }
+    }
     onMeetingsChange(updated);
   };
 
@@ -1701,11 +1878,11 @@ export default function App() {
   const project = { ...activeProject };
   const pages = {
     home: <HomePage project={project} onNavigate={setPage} />,
-    preassessment: <PreAssessmentPage project={project} onUpdate={updateCredit} />,
+    preassessment: <PreAssessmentPage project={project} onUpdate={updateCredit} projectRoot={projectRoot} />,
     assessment: <AssessmentPage project={project} onUpdate={updateCredit} projectRoot={projectRoot} />,
     vault: <EvidenceVaultPage project={project} />,
     package: <EvidencePackagePage project={project} />,
-    meetings: <MeetingsPage project={project} meetings={meetings} onMeetingsChange={setMeetings} />,
+    meetings: <MeetingsPage project={project} meetings={meetings} onMeetingsChange={setMeetings} projectRoot={projectRoot} />,
   };
 
   return (
