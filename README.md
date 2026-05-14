@@ -1,5 +1,7 @@
 # BIU — BREEAM In Use Certification Tracker
 
+[![Deployed on Vercel](https://img.shields.io/badge/Vercel-Deployed-black?style=flat-square)](https://vercel.com/new)
+
 **Vite + React** · deploys to **Vercel** · demo project pre-loaded
 
 A certification tracker for BREEAM In Use assessors and building managers. Track 46 BREEAM credits across Part 1 (Asset Performance) and Part 2 (Building Management), write assessment narratives, upload evidence, and generate PDF evidence packages for submission.
