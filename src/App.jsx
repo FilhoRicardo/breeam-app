@@ -234,7 +234,19 @@ function EvidenceModal({ credit, onClose, onSave }) {
           <div style={{ marginBottom: 18 }}>
             <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>Upload files</div>
             <label style={{ display: "block", padding: "20px", borderRadius: 10, border: "2px dashed rgba(124,58,237,0.3)", textAlign: "center", cursor: "pointer" }}>
-              <input type="file" multiple style={{ display: "none" }} onChange={e => addFiles(Array.from(e.target.files || []))} />
+              <input
+                type="file" multiple
+                accept=".pdf,.jpg,.jpeg,.png,.xlsx,.xls,.doc,.docx"
+                style={{ display: "none" }}
+                onChange={e => {
+                  const MAX_SIZE = 50 * 1024 * 1024; // 50 MB
+                  const valid = Array.from(e.target.files || []).filter(f => {
+                    if (f.size > MAX_SIZE) { alert(`${f.name} exceeds 50 MB limit`); return false; }
+                    return true;
+                  });
+                  addFiles(valid);
+                }}
+              />
               <div style={{ fontSize: 13, color: "#a78bfa", fontWeight: 700 }}>+ Drop files or click to browse</div>
               <div style={{ fontSize: 11, color: "#475569", marginTop: 4 }}>PDF, images, spreadsheets, DOCX</div>
             </label>
@@ -318,6 +330,71 @@ Assessment date: ${project.assessment_date} | Area: ${project.area_sqm} m² | Bu
   win.document.write(html);
   win.document.close();
   win.print();
+}
+
+// ── New Project Modal ────────────────────────────────────────────────────────
+function NewProjectModal({ onClose, onCreate }) {
+  const [form, setForm] = useState({
+    name: "", category: "Office", location: "",
+    area_sqm: "", assessor: "", assessment_date: tod(), target_date: "",
+  });
+  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
+  const handleCreate = () => {
+    if (!form.name.trim()) { alert("Project name is required"); return; }
+    onCreate({
+      name: form.name.trim(),
+      category: form.category,
+      location: form.location.trim(),
+      area_sqm: parseInt(form.area_sqm) || 0,
+      assessor: form.assessor.trim(),
+      assessment_date: form.assessment_date,
+      target_date: form.target_date,
+    });
+    onClose();
+  };
+
+  return (
+    <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
+      <div style={{ background: "#1e1b4b", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 16, width: "100%", maxWidth: 520, maxHeight: "90vh", overflow: "auto" }}>
+        <div style={{ padding: "20px 24px", borderBottom: "1px solid rgba(255,255,255,0.08)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div>
+            <div style={{ fontSize: 10, color: "#a78bfa", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>New Project</div>
+            <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: "#f1f5f9" }}>Create BREEAM Project</h2>
+          </div>
+          <button onClick={onClose} style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", fontSize: 22 }}>×</button>
+        </div>
+        <div style={{ padding: "20px 24px", display: "flex", flexDirection: "column", gap: 14 }}>
+          {[
+            { label: "Project Name *", key: "name", type: "text", placeholder: "e.g. Canary Wharf Tower A", col: "1" },
+            { label: "Location", key: "location", type: "text", placeholder: "e.g. London E14 5AB", col: "1" },
+            { label: "Category", key: "category", type: "select", options: ["Office","Retail","Industrial","Residential","Education","Healthcare","Mixed Use"], col: "1" },
+            { label: "Floor Area (m²)", key: "area_sqm", type: "number", placeholder: "e.g. 3200", col: "1" },
+            { label: "BREEAM Assessor", key: "assessor", type: "text", placeholder: "e.g. Jane Holloway", col: "1" },
+            { label: "Assessment Date", key: "assessment_date", type: "date", col: "1" },
+            { label: "Target Certification", key: "target_date", type: "date", col: "1" },
+          ].map(({ label, key, type, placeholder, options }) => (
+            <div key={key}>
+              <div style={{ fontSize: 10, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 5 }}>{label}</div>
+              {type === "select" ? (
+                <select value={form[key]} onChange={e => set(key, e.target.value)}
+                  style={{ width: "100%", padding: "8px 11px", boxSizing: "border-box", borderRadius: 8, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#e2e8f0", fontSize: 13, fontFamily: "inherit" }}>
+                  {options.map(o => <option key={o} value={o}>{o}</option>)}
+                </select>
+              ) : (
+                <input type={type} value={form[key]} onChange={e => set(key, e.target.value)} placeholder={placeholder}
+                  style={{ width: "100%", padding: "8px 11px", boxSizing: "border-box", borderRadius: 8, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#e2e8f0", fontSize: 13, fontFamily: "inherit" }} />
+              )}
+            </div>
+          ))}
+        </div>
+        <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(255,255,255,0.08)", display: "flex", justifyContent: "flex-end", gap: 10 }}>
+          <button onClick={onClose} style={{ padding: "9px 18px", borderRadius: 9, border: "1px solid rgba(255,255,255,0.1)", background: "transparent", color: "#94a3b8", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>Cancel</button>
+          <button onClick={handleCreate} style={{ padding: "9px 20px", borderRadius: 9, border: "none", background: "linear-gradient(135deg,#7c3aed,#3b82f6)", color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>Create Project</button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // ── Export meeting as .md ───────────────────────────────────────────────────
@@ -985,6 +1062,7 @@ export default function App() {
   const [activeProjectId, setActiveProjectId] = useState(DEMO_PROJECT.id);
   const [page, setPage] = useState("home");
   const [meetings, setMeetings] = useState(loadMeetings);
+  const [showNewProject, setShowNewProject] = useState(false);
 
   const activeProject = projects.find(p => p.id === activeProjectId) || projects[0];
 
@@ -996,6 +1074,24 @@ export default function App() {
       if (p.id !== activeProjectId) return p;
       return { ...p, credits: p.credits.map(c => c.code === updated.code ? updated : c) };
     }));
+  };
+
+  const createProject = (formData) => {
+    const newProject = {
+      id: Date.now(),
+      name: formData.name,
+      slug: slugify(formData.name),
+      category: formData.category,
+      location: formData.location,
+      area_sqm: formData.area_sqm,
+      assessor: formData.assessor,
+      assessment_date: formData.assessment_date,
+      target_date: formData.target_date,
+      credits: CREDITS.map(c => ({ ...c, pursuing: false, status: "not_pursuing", score: 0, completion: 0, narrative: "", evidence: [] })),
+    };
+    setProjects(prev => [...prev, newProject]);
+    setActiveProjectId(newProject.id);
+    setPage("home");
   };
 
   const project = { ...activeProject };
@@ -1024,6 +1120,12 @@ export default function App() {
         <NavPill label="Meetings"         icon="📅"  active={page === "meetings"}      onClick={() => setPage("meetings")} />
 
         <div style={{ marginTop: "auto", padding: "16px 12px 0", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+          <button
+            onClick={() => setShowNewProject(true)}
+            style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px dashed rgba(124,58,237,0.35)", background: "rgba(124,58,237,0.06)", color: "#a78bfa", cursor: "pointer", fontWeight: 700, fontSize: 12, fontFamily: "inherit", marginBottom: 10 }}
+          >
+            + New Project
+          </button>
           <div style={{ fontSize: 10, color: "#475569", marginBottom: 6 }}>Active project</div>
           <select
             value={activeProjectId}
@@ -1037,6 +1139,12 @@ export default function App() {
 
       <main style={{ flex: 1, overflowY: "auto" }}>
         {pages[page] || pages.home}
+        {showNewProject && (
+          <NewProjectModal
+            onClose={() => setShowNewProject(false)}
+            onCreate={createProject}
+          />
+        )}
       </main>
     </div>
   );
