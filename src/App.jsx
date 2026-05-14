@@ -526,44 +526,310 @@ function HomePage({ project, onNavigate }) {
 // ── PAGE: Pre-Assessment ─────────────────────────────────────────────────────
 function PreAssessmentPage({ project, onUpdate }) {
   const [part, setPart] = useState(1);
+  const [selectedCat, setSelectedCat] = useState("Management");
+  const [selectedCredit, setSelectedCredit] = useState(null);
+
+  const CATEGORIES = ["Management", "Energy", "Water", "Materials", "Waste", "Health", "Pollution", "Transport", "Ecology"];
+
   const credits = project.credits.filter(c => c.part === part);
+  const catCredits = credits.filter(c => c.category === selectedCat);
+
   const pursuing = credits.filter(c => c.pursuing);
   const notPursuing = credits.filter(c => !c.pursuing);
 
+  // Sync selected credit if it becomes un-pursued
+  const liveCredit = selectedCredit ? project.credits.find(c => c.code === selectedCredit.code) : null;
+  const displayCredit = liveCredit || selectedCredit;
+
   return (
-    <div style={{ padding: "28px 32px", maxWidth: 1100 }}>
-      <div style={{ marginBottom: 24 }}>
-        <div style={{ fontSize: 11, color: "#7c3aed", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>Pre-Assessment</div>
-        <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#f1f5f9" }}>Credit Decision — Pursue or Skip?</h1>
-        <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>Mark each credit as Pursuing (will assess) or Skip (not applicable / not worth pursuing)</div>
+    <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
+      {/* LEFT PANEL — Category tabs + credit list */}
+      <div style={{ width: 320, borderRight: "1px solid rgba(255,255,255,0.06)", display: "flex", flexDirection: "column", flexShrink: 0 }}>
+        <div style={{ padding: "20px 20px 0" }}>
+          <div style={{ fontSize: 11, color: "#7c3aed", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Pre-Assessment</div>
+          <h1 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 800, color: "#f1f5f9" }}>Credit Decision</h1>
+          <div style={{ fontSize: 11, color: "#64748b", marginBottom: 16 }}>Select Part → Category → Credit</div>
+
+          {/* Part selector */}
+          <div style={{ display: "flex", gap: 6, marginBottom: 14 }}>
+            {[1, 2].map(p => (
+              <button key={p} onClick={() => { setPart(p); setSelectedCredit(null); }}
+                style={{ flex: 1, padding: "7px 10px", borderRadius: 8, border: "none", cursor: "pointer", fontWeight: 700, fontSize: 11, fontFamily: "inherit",
+                  background: part === p ? "rgba(124,58,237,0.2)" : "rgba(255,255,255,0.04)", color: part === p ? "#c4b5fd" : "#64748b" }}>
+                Part {p}
+              </button>
+            ))}
+            <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+              <span style={{ fontSize: 10, color: "#10b981", fontWeight: 700 }}>{pursuing.length}✓</span>
+              <span style={{ fontSize: 10, color: "#475569" }}>|</span>
+              <span style={{ fontSize: 10, color: "#64748b" }}>{notPursuing.length}✗</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Category tabs */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 2, padding: "0 12px", marginBottom: 8 }}>
+          {CATEGORIES.map(cat => {
+            const catCredits_ = credits.filter(c => c.category === cat);
+            const pursuingCount = catCredits_.filter(c => c.pursuing).length;
+            const cc = CATEGORY_COLORS[cat] || CATEGORY_COLORS.Management;
+            return (
+              <button key={cat} onClick={() => { setSelectedCat(cat); setSelectedCredit(null); }}
+                style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 10px", borderRadius: 8, border: "none", cursor: "pointer", fontFamily: "inherit", textAlign: "left",
+                  background: selectedCat === cat ? cc.bg : "transparent", color: selectedCat === cat ? cc.color : "#64748b", fontWeight: selectedCat === cat ? 700 : 500, fontSize: 12 }}>
+                <span style={{ width: 8, height: 8, borderRadius: "50%", background: cc.color, flexShrink: 0, opacity: pursuingCount > 0 ? 1 : 0.3 }} />
+                {cat}
+                {pursuingCount > 0 && <span style={{ marginLeft: "auto", fontSize: 10, opacity: 0.7 }}>({pursuingCount})</span>}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Credit list for selected category */}
+        <div style={{ flex: 1, overflowY: "auto", padding: "0 12px 12px" }}>
+          <div style={{ fontSize: 10, color: "#475569", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8, padding: "0 8px" }}>
+            {selectedCat} — {catCredits.length} credits
+          </div>
+          {catCredits.map(c => {
+            const sc = STATUS_COLORS[c.pursuing ? "in_progress" : "not_pursuing"];
+            const cc = CATEGORY_COLORS[c.category] || CATEGORY_COLORS.Management;
+            return (
+              <div key={c.code} onClick={() => setSelectedCredit(c)}
+                style={{ padding: "10px 12px", borderRadius: 9, marginBottom: 4, cursor: "pointer",
+                  background: selectedCredit?.code === c.code ? "rgba(124,58,237,0.12)" : "rgba(255,255,255,0.03)",
+                  border: `1px solid ${selectedCredit?.code === c.code ? "rgba(124,58,237,0.3)" : "rgba(255,255,255,0.06)"}` }}>
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 3 }}>
+                  <span style={{ fontSize: 11, fontWeight: 800, color: cc.color }}>{c.code}</span>
+                  {c.pursuing
+                    ? <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 6px", borderRadius: 20, background: "rgba(16,185,129,0.12)", color: "#10b981" }}>PURSUING</span>
+                    : <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 6px", borderRadius: 20, background: "rgba(100,116,139,0.12)", color: "#64748b" }}>SKIP</span>}
+                </div>
+                <div style={{ fontSize: 11, color: "#94a3b8", lineHeight: 1.3 }}>{c.title}</div>
+                {c.available > 1 && <div style={{ fontSize: 10, color: "#475569", marginTop: 2 }}>{c.available} credits available</div>}
+              </div>
+            );
+          })}
+          {catCredits.length === 0 && (
+            <div style={{ fontSize: 11, color: "#334155", textAlign: "center", padding: 20 }}>No credits in this category</div>
+          )}
+        </div>
       </div>
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
-        {[1, 2].map(p => (
-          <button key={p} onClick={() => setPart(p)}
-            style={{ padding: "8px 18px", borderRadius: 9, border: "none", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit",
-              background: part === p ? "rgba(124,58,237,0.2)" : "rgba(255,255,255,0.05)", color: part === p ? "#c4b5fd" : "#64748b" }}>
-            Part {p} — {p === 1 ? "Asset Performance" : "Building Management"}
-          </button>
-        ))}
-        <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: 12, color: "#10b981", fontWeight: 700 }}>{pursuing.length} pursuing</span>
-          <span style={{ fontSize: 12, color: "#475569" }}>|</span>
-          <span style={{ fontSize: 12, color: "#64748b" }}>{notPursuing.length} skipping</span>
-        </div>
-      </div>
+      {/* RIGHT PANEL — Credit detail or empty state */}
+      <div style={{ flex: 1, overflowY: "auto", padding: "28px 32px" }}>
+        {!displayCredit ? (
+          <div style={{ color: "#334155", fontSize: 13, padding: "80px 20px", textAlign: "center", border: "1px dashed rgba(255,255,255,0.07)", borderRadius: 12 }}>
+            Select a credit from the left to view criteria and make your decision
+          </div>
+        ) : (
+          <div>
+            {/* Credit header */}
+            <div style={{ marginBottom: 20 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                <span style={{ fontSize: 11, fontWeight: 800, background: "rgba(124,58,237,0.15)", color: "#a78bfa", padding: "4px 10px", borderRadius: 20 }}>{displayCredit.code}</span>
+                <span style={{ fontSize: 13, color: "#94a3b8" }}>{displayCredit.title}</span>
+                <span style={{ fontSize: 11, color: "#475569" }}>Part {displayCredit.part} · {displayCredit.category}</span>
+                {displayCredit.available > 1 && <span style={{ fontSize: 11, color: "#475569" }}>· {displayCredit.available} credits</span>}
+              </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-        <div>
-          <div style={{ fontSize: 11, color: "#10b981", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>🔍 Pursuing ({pursuing.length})</div>
-          {pursuing.map(c => <CreditCard key={c.code} credit={c} onUpdate={onUpdate} readOnly={false} />)}
-          {pursuing.length === 0 && <div style={{ color: "#334155", fontSize: 13, padding: 20, textAlign: "center" }}>No credits selected</div>}
-        </div>
-        <div>
-          <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>⏭️ Skipping ({notPursuing.length})</div>
-          {notPursuing.map(c => <CreditCard key={c.code} credit={c} onUpdate={onUpdate} readOnly={false} />)}
-          {notPursuing.length === 0 && <div style={{ color: "#334155", fontSize: 13, padding: 20, textAlign: "center" }}>All credits pursuing</div>}
-        </div>
+              {/* Pursue / Skip toggle */}
+              <div style={{ display: "flex", gap: 10, marginTop: 14 }}>
+                <button
+                  onClick={() => {
+                    const updated = { ...displayCredit, pursuing: true, status: "in_progress" };
+                    onUpdate(updated);
+                    setSelectedCredit(updated);
+                  }}
+                  style={{ padding: "10px 24px", borderRadius: 10, border: displayCredit.pursuing ? "2px solid #10b981" : "1px solid rgba(255,255,255,0.1)", background: displayCredit.pursuing ? "rgba(16,185,129,0.1)" : "rgba(255,255,255,0.04)", color: displayCredit.pursuing ? "#10b981" : "#64748b", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>
+                  ✓ Pursue this credit
+                </button>
+                <button
+                  onClick={() => {
+                    const updated = { ...displayCredit, pursuing: false, status: "not_pursuing", score: 0 };
+                    onUpdate(updated);
+                  }}
+                  style={{ padding: "10px 24px", borderRadius: 10, border: !displayCredit.pursuing ? "2px solid #64748b" : "1px solid rgba(255,255,255,0.1)", background: !displayCredit.pursuing ? "rgba(100,116,139,0.1)" : "rgba(255,255,255,0.04)", color: !displayCredit.pursuing ? "#94a3b8" : "#475569", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>
+                  ✗ Skip this credit
+                </button>
+              </div>
+            </div>
+
+            {/* Show full criteria only if pursuing */}
+            {displayCredit.pursuing && displayCredit.criteria ? (
+              <div>
+                {/* Answer options dropdown */}
+                {displayCredit.answers && (
+                  <div style={{ marginBottom: 20, background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 12, padding: "16px 20px" }}>
+                    <div style={{ fontSize: 11, color: "#a78bfa", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
+                      Question — select answer
+                    </div>
+                    <div style={{ fontSize: 12, color: "#94a3b8", marginBottom: 12, fontStyle: "italic" }}>
+                      {displayCredit.question}
+                    </div>
+                    {displayCredit.instruction && (
+                      <div style={{ fontSize: 11, color: "#fbbf24", marginBottom: 10, padding: "6px 10px", background: "rgba(251,191,36,0.08)", borderRadius: 6 }}>
+                        {displayCredit.instruction}
+                      </div>
+                    )}
+                    <select
+                      value={displayCredit.selectedAnswer || ""}
+                      onChange={e => {
+                        const ans = displayCredit.answers.find(a => a.id === e.target.value);
+                        const updated = { ...displayCredit, selectedAnswer: e.target.value, score: ans ? ans.credits : 0 };
+                        onUpdate(updated);
+                        setSelectedCredit(updated);
+                      }}
+                      style={{ width: "100%", padding: "10px 14px", boxSizing: "border-box", borderRadius: 9, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "#e2e8f0", fontSize: 13, fontFamily: "inherit", marginBottom: 8 }}
+                    >
+                      <option value="">— Select an answer —</option>
+                      {displayCredit.answers.map(a => (
+                        <option key={a.id} value={a.id}>Option {a.id}: {a.label} ({a.credits} credit{a.credits !== 1 ? "s" : ""})</option>
+                      ))}
+                    </select>
+                    {displayCredit.selectedAnswer && (
+                      <div style={{ marginTop: 10, padding: "10px 14px", background: "rgba(16,185,129,0.08)", borderRadius: 8, fontSize: 12, color: "#10b981" }}>
+                        <strong>Selected:</strong> Option {displayCredit.selectedAnswer} — {displayCredit.answers.find(a => a.id === displayCredit.selectedAnswer)?.label}
+                        <span style={{ marginLeft: 12, fontWeight: 700 }}>{displayCredit.answers.find(a => a.id === displayCredit.selectedAnswer)?.credits} credit(s)</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Assessment criteria */}
+                {displayCredit.criteria && displayCredit.criteria.length > 0 && (
+                  <div style={{ marginBottom: 18 }}>
+                    <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
+                      Assessment Criteria
+                    </div>
+                    {displayCredit.criteria.map(cr => (
+                      <div key={cr.id} style={{ marginBottom: 14, padding: "12px 16px", borderRadius: 9, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                          <span style={{ fontSize: 10, fontWeight: 800, background: "rgba(124,58,237,0.15)", color: "#a78bfa", padding: "2px 7px", borderRadius: 20 }}>#{cr.id}</span>
+                          {cr.answer && <span style={{ fontSize: 10, fontWeight: 700, background: "rgba(245,158,11,0.12)", color: "#fbbf24", padding: "2px 7px", borderRadius: 20 }}>→ {cr.answer}</span>}
+                        </div>
+                        <div style={{ fontSize: 12, color: "#e2e8f0", lineHeight: 1.55 }}>{cr.text}</div>
+                        {cr.details && cr.details.length > 0 && (
+                          <ul style={{ margin: "8px 0 0", paddingLeft: 20 }}>
+                            {cr.details.map((d, i) => (
+                              <li key={i} style={{ fontSize: 11, color: "#94a3b8", lineHeight: 1.5, marginBottom: 4 }}>{d}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Methodology */}
+                {displayCredit.methodology && displayCredit.methodology.length > 0 && (
+                  <div style={{ marginBottom: 18 }}>
+                    <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
+                      Methodology
+                    </div>
+                    <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 9, padding: "14px 18px" }}>
+                      {displayCredit.methodology.filter(Boolean).map((line, i) => (
+                        <div key={i} style={{ fontSize: 12, color: line.startsWith(" ") ? "#94a3b8" : "#e2e8f0", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>{line}</div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Evidence requirements */}
+                {displayCredit.evidence && displayCredit.evidence.length > 0 && (
+                  <div style={{ marginBottom: 18 }}>
+                    <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
+                      Evidence Requirements
+                    </div>
+                    <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 9, padding: "14px 18px" }}>
+                      {displayCredit.evidence.map((ev, i) => (
+                        <div key={i} style={{ fontSize: 12, color: "#94a3b8", lineHeight: 1.5, marginBottom: 6, display: "flex", gap: 8 }}>
+                          <span style={{ color: "#60a5fa", fontWeight: 700, flexShrink: 0 }}>•</span>
+                          {ev}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Asset-specific notes */}
+                {displayCredit.notes && displayCredit.notes.length > 0 && (
+                  <div style={{ marginBottom: 18 }}>
+                    <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
+                      Asset-Specific Notes
+                    </div>
+                    {displayCredit.notes.map((note, i) => (
+                      <div key={i} style={{ fontSize: 12, color: "#64748b", lineHeight: 1.55, marginBottom: 8, padding: "10px 14px", background: "rgba(245,158,11,0.05)", border: "1px solid rgba(245,158,11,0.12)", borderRadius: 8 }}>{note}</div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Assessor comments */}
+                <div style={{ marginTop: 20 }}>
+                  <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>
+                    Assessor Comments / Evidence Notes
+                  </div>
+                  <textarea
+                    value={displayCredit.narrative || ""}
+                    onChange={e => {
+                      const updated = { ...displayCredit, narrative: e.target.value };
+                      onUpdate(updated);
+                      setSelectedCredit(updated);
+                    }}
+                    rows={5}
+                    placeholder="Record your assessment notes, evidence references, calculations, and justification here..."
+                    style={{ width: "100%", boxSizing: "border-box", padding: "12px 14px", borderRadius: 9, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.03)", color: "#e2e8f0", fontSize: 13, lineHeight: 1.55, resize: "vertical", fontFamily: "inherit" }}
+                  />
+                </div>
+
+                {/* Score achieved */}
+                <div style={{ marginTop: 16 }}>
+                  <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>
+                    Credits Achieved (0 – {displayCredit.available})
+                  </div>
+                  <input
+                    type="number" min="0" max={displayCredit.available}
+                    value={displayCredit.score || 0}
+                    onChange={e => {
+                      const updated = { ...displayCredit, score: parseInt(e.target.value) || 0 };
+                      onUpdate(updated);
+                      setSelectedCredit(updated);
+                    }}
+                    style={{ width: 100, padding: "8px 12px", borderRadius: 8, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "#e2e8f0", fontSize: 16, fontWeight: 700, fontFamily: "inherit" }}
+                  />
+                  <span style={{ fontSize: 12, color: "#475569", marginLeft: 12 }}>
+                    out of {displayCredit.available} available credits
+                  </span>
+                </div>
+
+                {/* Status */}
+                <div style={{ marginTop: 16 }}>
+                  <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>
+                    Status
+                  </div>
+                  <select
+                    value={displayCredit.status || "in_progress"}
+                    onChange={e => {
+                      const updated = { ...displayCredit, status: e.target.value };
+                      onUpdate(updated);
+                      setSelectedCredit(updated);
+                    }}
+                    style={{ padding: "8px 12px", borderRadius: 8, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "#e2e8f0", fontSize: 13, fontFamily: "inherit" }}>
+                    <option value="in_progress">In Progress</option>
+                    <option value="complete">Complete</option>
+                  </select>
+                </div>
+              </div>
+            ) : displayCredit.pursuing && !displayCredit.criteria ? (
+              <div style={{ color: "#334155", fontSize: 12, padding: 20, textAlign: "center", border: "1px dashed rgba(255,255,255,0.07)", borderRadius: 10 }}>
+                BREEAM criteria for {displayCredit.code} not yet loaded — upload the credit PDF collection to populate.
+              </div>
+            ) : (
+              <div style={{ color: "#475569", fontSize: 12, padding: 20, textAlign: "center" }}>
+                Toggle <strong>Pursue</strong> above to load full BREEAM criteria for {displayCredit.code}.
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
