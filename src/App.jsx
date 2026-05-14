@@ -1,6 +1,15 @@
 import { useState, useEffect, useRef } from "react";
 import { CREDITS } from "./data/credits.js";
 import { DEMO_PROJECT } from "./data/projects.js";
+import { idbGet, idbSet, idbDel, lsGet, lsSet, lsDel } from "./utils/storage.js";
+
+// ── Folder definitions (mirrors TaskDash pattern) ──────────────────────────────
+const FOLDER_DEFS = [
+  { key: 'projects',  label: 'Projects',     mode: 'readwrite', required: true,  desc: 'Where BREEAM project JSON files are saved and loaded from' },
+  { key: 'evidence', label: 'Evidence',     mode: 'readwrite', required: false, desc: 'Evidence files (photos, PDFs, reports) per credit' },
+];
+const FOLDER_SETUP_SEEN = 'biuFolderSetupV1';
+const PROJECTS_FOLDER_KEY = 'biu_projects_file';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const tod = (d = new Date()) => d.toISOString().slice(0, 10);
@@ -80,6 +89,22 @@ function calcPartScores(credits) {
     part2Score: part2.reduce((s, c) => s + (c.score || 0), 0),
     part2Avail: part2.reduce((s, c) => s + c.available, 0),
   };
+}
+
+// ── Folder helpers (File System Access API) ──────────────────────────────────
+async function loadProjectsFromFolder(dirHandle) {
+  try {
+    const fileHandle = await dirHandle.getFileHandle('projects.json');
+    const text = await (await fileHandle.getFile()).text();
+    return JSON.parse(text);
+  } catch { return null; }
+}
+
+async function saveProjectsToFolder(dirHandle, projects) {
+  const fileHandle = await dirHandle.getFileHandle('projects.json', { create: true });
+  const w = await fileHandle.createWritable();
+  await w.write(JSON.stringify(projects, null, 2));
+  await w.close();
 }
 
 // ── Nav pills ────────────────────────────────────────────────────────────────
@@ -1445,11 +1470,59 @@ export default function App() {
   const [page, setPage] = useState("home");
   const [meetings, setMeetings] = useState(loadMeetings);
   const [showNewProject, setShowNewProject] = useState(false);
+  const [showFolderSetup, setShowFolderSetup] = useState(false);
+  const [folderStatus, setFolderStatus] = useState({});
+  const [folderBusy, setFolderBusy] = useState(false);
 
   const activeProject = projects.find(p => p.id === activeProjectId) || projects[0];
 
   useEffect(() => { saveProjects(projects); }, [projects]);
   useEffect(() => { saveMeetings(meetings); }, [meetings]);
+  useEffect(() => { saveProjectsToFile(); }, [projects]);
+
+  // Boot: check if folder was previously saved
+  useEffect(() => {
+    (async () => {
+      try {
+        const saved = await idbGet(PROJECTS_FOLDER_KEY);
+        if (saved) {
+          try {
+            const perm = await saved.queryPermission({ mode: 'readwrite' });
+            if (perm === 'granted') {
+              const data = await loadProjectsFromFolder(saved);
+              if (data?.projects?.length) {
+                setProjects(data.projects.map(p => initProject(p)));
+              }
+              setFolderStatus({ projects: 'connected' });
+            } else {
+              setFolderStatus({ projects: 'saved' });
+            }
+          } catch {
+            setFolderStatus({ projects: 'saved' });
+          }
+        }
+      } catch { /* no folder yet */ }
+    })();
+  }, []);
+
+  const pickProjectsFolder = async () => {
+    setFolderBusy(true);
+    try {
+      const dir = await window.showDirectoryPicker({ mode: 'readwrite' });
+      await idbSet(PROJECTS_FOLDER_KEY, dir);
+      setFolderStatus({ projects: 'connected' });
+      const data = await loadProjectsFromFolder(dir);
+      if (data?.projects?.length) {
+        setProjects(data.projects.map(p => initProject(p)));
+      }
+    } catch (e) { if (e.name !== 'AbortError') alert('Error: ' + e.message); }
+    setFolderBusy(false);
+  };
+
+  const saveProjectsToFile = async () => {
+    const saved = await idbGet(PROJECTS_FOLDER_KEY);
+    if (saved) await saveProjectsToFolder(saved, projects);
+  };
 
   const updateCredit = (updated) => {
     setProjects(prev => prev.map(p => {
