@@ -2,6 +2,14 @@ import { useState, useEffect, useRef } from "react";
 import { CREDITS } from "./data/credits.js";
 import { DEMO_PROJECT } from "./data/projects.js";
 import { idbGet, idbSet, idbDel, lsGet, lsSet, lsDel } from "./utils/storage.js";
+import {
+  createProjectFolderStructure,
+  getCreditFolder,
+  getMeetingsFolder,
+  saveTextFile,
+  readTextFile,
+  listDir,
+} from "./utils/fileApi.js";
 
 // ── Folder definitions (mirrors TaskDash pattern) ──────────────────────────────
 const FOLDER_DEFS = [
@@ -9,7 +17,7 @@ const FOLDER_DEFS = [
   { key: 'evidence', label: 'Evidence',     mode: 'readwrite', required: false, desc: 'Evidence files (photos, PDFs, reports) per credit' },
 ];
 const FOLDER_SETUP_SEEN = 'biuFolderSetupV1';
-const PROJECTS_FOLDER_KEY = 'biu_projects_file';
+const PROJECT_ROOT_KEY = 'biu_projects_file';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const tod = (d = new Date()) => d.toISOString().slice(0, 10);
@@ -1565,6 +1573,7 @@ export default function App() {
   const [showFolderSetup, setShowFolderSetup] = useState(false);
   const [folderStatus, setFolderStatus] = useState({});
   const [folderBusy, setFolderBusy] = useState(false);
+  const [projectRoot, setProjectRoot] = useState(null); // FileSystemDirectoryHandle
 
   const activeProject = projects.find(p => p.id === activeProjectId) || projects[0];
 
@@ -1572,11 +1581,11 @@ export default function App() {
   useEffect(() => { saveMeetings(meetings); }, [meetings]);
   useEffect(() => { saveProjectsToFile(); }, [projects]);
 
-  // Boot: check if folder was previously saved
+  // Boot: check if project root folder was previously saved
   useEffect(() => {
     (async () => {
       try {
-        const saved = await idbGet(PROJECTS_FOLDER_KEY);
+        const saved = await idbGet(PROJECT_ROOT_KEY);
         if (saved) {
           try {
             const perm = await saved.queryPermission({ mode: 'readwrite' });
@@ -1585,6 +1594,7 @@ export default function App() {
               if (data?.projects?.length) {
                 setProjects(data.projects.map(p => initProject(p)));
               }
+              setProjectRoot(saved);
               setFolderStatus({ projects: 'connected' });
             } else {
               setFolderStatus({ projects: 'saved' });
@@ -1601,8 +1611,10 @@ export default function App() {
     setFolderBusy(true);
     try {
       const dir = await window.showDirectoryPicker({ mode: 'readwrite' });
-      await idbSet(PROJECTS_FOLDER_KEY, dir);
+      await idbSet(PROJECT_ROOT_KEY, dir);
+      setProjectRoot(dir);
       setFolderStatus({ projects: 'connected' });
+      // Load projects.json from root if it exists (backwards compat)
       const data = await loadProjectsFromFolder(dir);
       if (data?.projects?.length) {
         setProjects(data.projects.map(p => initProject(p)));
@@ -1612,8 +1624,14 @@ export default function App() {
   };
 
   const saveProjectsToFile = async () => {
-    const saved = await idbGet(PROJECTS_FOLDER_KEY);
-    if (saved) await saveProjectsToFolder(saved, projects);
+    const saved = await idbGet(PROJECT_ROOT_KEY);
+    if (!saved) return;
+    // Save each project as its own JSON file inside the root
+    for (const project of projects) {
+      const projectSlug = project.slug || slugify(project.name);
+      const projectDir = await saved.getDirectoryHandle(projectSlug, { create: true });
+      await saveTextFile(projectDir, 'project.json', JSON.stringify(project, null, 2));
+    }
   };
 
   const updateCredit = (updated) => {
@@ -1623,23 +1641,7 @@ export default function App() {
     }));
   };
 
-  const createProject = (formData) => {
-    const newProject = {
-      id: Date.now(),
-      name: formData.name,
-      slug: slugify(formData.name),
-      category: formData.category,
-      location: formData.location,
-      area_sqm: formData.area_sqm,
-      assessor: formData.assessor,
-      assessment_date: formData.assessment_date,
-      target_date: formData.target_date,
-      credits: CREDITS.map(c => ({ ...c, pursuing: false, status: "not_pursuing", score: 0, completion: 0, narrative: "", evidence: [] })),
-    };
-    setProjects(prev => [...prev, newProject]);
-    setActiveProjectId(newProject.id);
-    setPage("home");
-  };
+  
 
   const project = { ...activeProject };
   const pages = {
