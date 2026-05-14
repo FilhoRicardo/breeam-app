@@ -30,14 +30,24 @@ const LS_MEETINGS = "biu_meetings_v1";
 function loadProjects() {
   try {
     const raw = localStorage.getItem(LS_KEY);
-    if (!raw) return [DEMO_PROJECT];
+    if (!raw) return [initProject(DEMO_PROJECT)];
     const arr = JSON.parse(raw);
-    return arr.length ? arr : [DEMO_PROJECT];
-  } catch { return [DEMO_PROJECT]; }
+    return arr.length ? arr.map(p => initProject(p)) : [initProject(DEMO_PROJECT)];
+  } catch { return [initProject(DEMO_PROJECT)]; }
 }
 
 function saveProjects(projects) {
   localStorage.setItem(LS_KEY, JSON.stringify(projects));
+}
+
+function initProject(project) {
+  return {
+    ...project,
+    credits: project.credits.map(pc => {
+      const def = CREDITS.find(c => c.code === pc.code);
+      return def ? { ...pc, part: def.part, category: def.category } : { ...pc, part: 1, category: "Management" };
+    }),
+  };
 }
 
 function loadMeetings() {
@@ -531,7 +541,13 @@ function PreAssessmentPage({ project, onUpdate }) {
 
   const CATEGORIES = ["Management", "Energy", "Water", "Materials", "Waste", "Health", "Pollution", "Transport", "Ecology"];
 
-  const credits = project.credits.filter(c => c.part === part);
+  const credits = project.credits
+    .map(pc => {
+      const def = CREDITS.find(c => c.code === pc.code);
+      return def ? { ...pc, part: def.part, category: def.category } : null;
+    })
+    .filter(Boolean)
+    .filter(c => c.part === part);
   const catCredits = credits.filter(c => c.category === selectedCat);
 
   const pursuing = credits.filter(c => c.pursuing);
