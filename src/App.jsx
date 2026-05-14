@@ -1464,6 +1464,98 @@ function MeetingsPage({ project, meetings, onMeetingsChange }) {
 }
 
 // ── Main App ─────────────────────────────────────────────────────────────────
+// ── Folder Setup Screen ─────────────────────────────────────────────────────────
+function FolderSetupScreen({ folderStatus, onPick, onClose }) {
+  const isConnected = folderStatus.projects === 'connected';
+  const isSaved = folderStatus.projects === 'saved';
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 200,
+      background: 'rgba(0,0,0,0.75)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      backdropFilter: 'blur(4px)',
+    }}>
+      <div style={{
+        background: '#1a1035', border: '1px solid rgba(124,58,237,0.3)',
+        borderRadius: 16, padding: '32px 36px', width: 440,
+        boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 22 }}>📁</span>
+            <span style={{ fontSize: 17, fontWeight: 800, color: '#f1f5f9' }}>Projects Folder</span>
+          </div>
+          <button onClick={onClose} style={{
+            background: 'none', border: 'none', color: '#64748b', cursor: 'pointer',
+            fontSize: 20, lineHeight: 1, padding: 4,
+          }}>✕</button>
+        </div>
+
+        <div style={{
+          background: isConnected ? 'rgba(16,185,129,0.08)' : isSaved ? 'rgba(245,158,11,0.08)' : 'rgba(239,68,68,0.08)',
+          border: `1px solid ${isConnected ? 'rgba(16,185,129,0.25)' : isSaved ? 'rgba(245,158,11,0.25)' : 'rgba(239,68,68,0.25)'}`,
+          borderRadius: 12, padding: '14px 18px', marginBottom: 20,
+        }}>
+          <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6,
+            color: isConnected ? '#10b981' : isSaved ? '#f59e0b' : '#f87171' }}>
+            {isConnected ? 'Connected' : isSaved ? 'Access lost — reconnect' : 'Not connected'}
+          </div>
+          <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.5 }}>
+            {isConnected
+              ? 'Projects are saved to and loaded from your selected folder.'
+              : isSaved
+              ? 'Browser permissions were revoked. Reconnect to restore folder access.'
+              : 'Select a folder on your device to store project files.'}
+          </div>
+        </div>
+
+        <button
+          onClick={onPick}
+          style={{
+            width: '100%', padding: '12px 20px', borderRadius: 10,
+            border: 'none', background: 'rgba(124,58,237,0.2)',
+            color: '#a78bfa', cursor: 'pointer', fontWeight: 700, fontSize: 14,
+            fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+          }}
+        >
+          📂 {isConnected ? 'Change Folder' : isSaved ? 'Reconnect Folder' : 'Select Folder'}
+        </button>
+
+        <div style={{ marginTop: 14, fontSize: 11, color: '#475569', textAlign: 'center', lineHeight: 1.5 }}>
+          Uses the browser's native File System Access API.<br />Your data stays on your device.
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Folder Status Pill (nav element) ───────────────────────────────────────────
+function FolderStatusPill({ folderStatus, onClick }) {
+  const isConnected = folderStatus.projects === 'connected';
+  const isSaved = folderStatus.projects === 'saved';
+  const bg = isConnected ? 'rgba(16,185,129,0.1)' : isSaved ? 'rgba(245,158,11,0.1)' : 'rgba(100,116,139,0.1)';
+  const color = isConnected ? '#10b981' : isSaved ? '#f59e0b' : '#64748b';
+  const icon = isConnected ? '✅' : isSaved ? '⚠️' : '📁';
+  const label = isConnected ? 'Folder connected' : isSaved ? 'Folder — reconnect' : 'Folder not set';
+
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 8,
+        width: '100%', padding: '9px 12px',
+        borderRadius: 8, border: 'none', cursor: 'pointer',
+        background: bg, color, fontSize: 11, fontWeight: 600,
+        fontFamily: 'inherit', textAlign: 'left',
+      }}
+    >
+      <span style={{ fontSize: 13 }}>{icon}</span>
+      {label}
+    </button>
+  );
+}
+
 export default function App() {
   const [projects, setProjects] = useState(loadProjects);
   const [activeProjectId, setActiveProjectId] = useState(DEMO_PROJECT.id);
@@ -1575,13 +1667,9 @@ export default function App() {
         <NavPill label="Meetings"         icon="📅"  active={page === "meetings"}      onClick={() => setPage("meetings")} />
 
         <div style={{ marginTop: "auto", padding: "16px 12px 0", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
-          <button
-            onClick={() => setShowNewProject(true)}
-            style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px dashed rgba(124,58,237,0.35)", background: "rgba(124,58,237,0.06)", color: "#a78bfa", cursor: "pointer", fontWeight: 700, fontSize: 12, fontFamily: "inherit", marginBottom: 10 }}
-          >
-            + New Project
-          </button>
-          <div style={{ fontSize: 10, color: "#475569", marginBottom: 6 }}>Active project</div>
+          <FolderStatusPill folderStatus={folderStatus} onClick={() => setShowFolderSetup(true)} />
+
+          <div style={{ marginTop: 10, marginBottom: 6, fontSize: 10, color: "#475569" }}>Active project</div>
           <select
             value={activeProjectId}
             onChange={e => setActiveProjectId(parseInt(e.target.value))}
@@ -1589,11 +1677,24 @@ export default function App() {
           >
             {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
+          <button
+            onClick={() => setShowNewProject(true)}
+            style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px dashed rgba(124,58,237,0.35)", background: "rgba(124,58,237,0.06)", color: "#a78bfa", cursor: "pointer", fontWeight: 700, fontSize: 12, fontFamily: "inherit", marginTop: 8 }}
+          >
+            + New Project
+          </button>
         </div>
       </nav>
 
       <main style={{ flex: 1, overflowY: "auto" }}>
         {pages[page] || pages.home}
+        {showFolderSetup && (
+          <FolderSetupScreen
+            folderStatus={folderStatus}
+            onPick={pickProjectsFolder}
+            onClose={() => setShowFolderSetup(false)}
+          />
+        )}
         {showNewProject && (
           <NewProjectModal
             onClose={() => setShowNewProject(false)}
