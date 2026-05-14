@@ -1,22 +1,32 @@
 // File System Access API — folder structure + file I/O
-// Folder structure per project:
-// project-root/
-//   meetings/
-//     <date>_<title>.md
-//   Part 1/
-//     Tra 1/
-//       pre-assessment.md
-//       assessment.md
-//       evidence/
-//         <file>
-//     Hea 1/
-//     Man 1/
-//     ...
-//   Part 2/
-//     <credit>/
+//
+// Folder structure per project (per-user-folder):
+// user-selected-root/
+//   [project-slug]/
+//     project.json
+//     Part 1/
+//       Tra 1/
+//         assessment.md
+//         evidence/
+//           <file>
+//       Man 1/
+//       ...
+//     Part 2/
+//       Man 5/
+//       ...
+//     meetings/
+//       <date>_<title>.md
+
+import { CREDITS } from '../data/credits.js';
 
 const PROJECT_ROOT_KEY = 'biu_project_root';
 
+// ── Browser compatibility ─────────────────────────────────────────────────────
+export function isFileSystemAccessSupported() {
+  return 'showDirectoryPicker' in window;
+}
+
+// ── Low-level dir ops ─────────────────────────────────────────────────────────
 export async function ensureDir(parent, name) {
   try {
     return await parent.getDirectoryHandle(name, { create: true });
@@ -69,6 +79,7 @@ export async function listDir(dirHandle) {
   }
 }
 
+// ── Evidence ──────────────────────────────────────────────────────────────────
 export async function saveEvidenceFile(creditDirHandle, file) {
   try {
     const evidenceDir = await creditDirHandle.getDirectoryHandle('evidence', { create: true });
@@ -91,31 +102,37 @@ export async function listEvidence(creditDirHandle) {
   }
 }
 
-export async function createProjectFolderStructure(rootHandle, projectName) {
-  // Creates all subfolders for a new project
-  const slug = slugifyName(projectName);
+// ── Slug helper ───────────────────────────────────────────────────────────────
+export function slugifyName(name) {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
 
-  // meetings/
-  const meetingsDir = await ensureDir(rootHandle, 'meetings');
-  if (!meetingsDir) return false;
+// ── Create full per-project folder structure ───────────────────────────────────
+// project: { slug, name, credits: [{code, part}] }
+export async function createProjectFolderStructure(rootHandle, project) {
+  const slug = project.slug || slugifyName(project.name);
 
-  // Part 1/
-  const part1Dir = await ensureDir(rootHandle, 'Part 1');
-  if (!part1Dir) return false;
+  // root/[slug]/
+  const projectDir = await ensureDir(rootHandle, slug);
+  if (!projectDir) return false;
 
-  // Part 2/
-  const part2Dir = await ensureDir(rootHandle, 'Part 2');
-  if (!part2Dir) return false;
+  // root/[slug]/meetings/
+  await ensureDir(projectDir, 'meetings');
 
-  // Per-credit subfolders
-  const CREDIT_CODES_P1 = ['Tra 1','Tra 2','Tra 3','Tra 4','Man 1','Man 2','Man 3','Man 4','Hea 1','Hea 2','Hea 3','Hea 4','Ene 1','Ene 2','Ene 3','Ene 4','Ene 5','Ene 6','Wat 1','Wat 2','Wat 3','Mat 1','Mat 2','Mat 3','Mat 4','Mat 5','Mat 6','Mat 7','Was 1','Was 2','Was 3','Pol 1','Pol 2','Pol 3','Pol 4','Eco 1','Eco 2','Eco 3'];
-  const CREDIT_CODES_P2 = ['Man 5','Man 6','Man 7','Man 8','Man 9','Hea 5','Hea 6','Ene 7','Ene 8','Wat 4','Mat 8','Was 4','Was 5','Pol 5','Tra 5'];
+  // root/[slug]/Part 1/ and Part 2/
+  const part1Dir = await ensureDir(projectDir, 'Part 1');
+  const part2Dir = await ensureDir(projectDir, 'Part 2');
+  if (!part1Dir || !part2Dir) return false;
 
-  for (const code of CREDIT_CODES_P1) {
+  // Derive credit codes dynamically from CREDITS
+  const part1Codes = CREDITS.filter(c => c.part === 1).map(c => c.code);
+  const part2Codes = CREDITS.filter(c => c.part === 2).map(c => c.code);
+
+  for (const code of part1Codes) {
     const creditDir = await ensureDir(part1Dir, code);
     if (creditDir) await ensureDir(creditDir, 'evidence');
   }
-  for (const code of CREDIT_CODES_P2) {
+  for (const code of part2Codes) {
     const creditDir = await ensureDir(part2Dir, code);
     if (creditDir) await ensureDir(creditDir, 'evidence');
   }
@@ -123,28 +140,71 @@ export async function createProjectFolderStructure(rootHandle, projectName) {
   return true;
 }
 
-function slugifyName(name) {
-  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-}
-
-// Get or create a credit's subfolder under Part 1 or Part 2
-export async function getCreditFolder(rootHandle, creditCode, part) {
-  const partDir = part === 1
-    ? await rootHandle.getDirectoryHandle('Part 1', { create: false })
-    : await rootHandle.getDirectoryHandle('Part 2', { create: false });
-  if (!partDir) return null;
+// ── Get a credit's folder: root/[slug]/Part N/[code] ─────────────────────────
+export async function getCreditFolder(rootHandle, projectSlug, creditCode, part) {
   try {
+    const projectDir = await rootHandle.getDirectoryHandle(projectSlug, { create: false });
+    if (!projectDir) return null;
+    const partDir = await projectDir.getDirectoryHandle(`Part ${part}`, { create: false });
+    if (!partDir) return null;
     return await partDir.getDirectoryHandle(creditCode, { create: true });
   } catch {
     return null;
   }
 }
 
-// Meetings folder
-export async function getMeetingsFolder(rootHandle) {
+// ── Get meetings folder: root/[slug]/meetings/ ────────────────────────────────
+export async function getMeetingsFolder(rootHandle, projectSlug) {
   try {
-    return await rootHandle.getDirectoryHandle('meetings', { create: true });
+    const projectDir = await rootHandle.getDirectoryHandle(projectSlug, { create: false });
+    if (!projectDir) return null;
+    return await projectDir.getDirectoryHandle('meetings', { create: true });
   } catch {
     return null;
   }
+}
+
+// ── Load projects.json from root/[slug]/project.json ─────────────────────────
+export async function loadProjectFromFolder(rootHandle, projectSlug) {
+  try {
+    const projectDir = await rootHandle.getDirectoryHandle(projectSlug, { create: false });
+    if (!projectDir) return null;
+    const fileHandle = await projectDir.getFileHandle('project.json');
+    const text = await (await fileHandle.getFile()).text();
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
+// ── Save project.json to root/[slug]/project.json ────────────────────────────
+export async function saveProjectToFolder(rootHandle, projectSlug, project) {
+  try {
+    const projectDir = await ensureDir(rootHandle, projectSlug);
+    if (!projectDir) return false;
+    const fileHandle = await projectDir.getFileHandle('project.json', { create: true });
+    const writable = await fileHandle.createWritable();
+    await writable.write(JSON.stringify(project, null, 2));
+    await writable.close();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// ── List all project slugs in root ───────────────────────────────────────────
+export async function listProjectSlugs(rootHandle) {
+  const entries = await listDir(rootHandle);
+  const slugs = [];
+  for (const entry of entries) {
+    if (entry.isFolder) {
+      // Check if it looks like a project folder (has Part 1 or Part 2 subfolder)
+      try {
+        const projectDir = await rootHandle.getDirectoryHandle(entry.name, { create: false });
+        const part1Exists = await projectDir.getDirectoryHandle('Part 1', { create: false }).then(h => !!h).catch(() => false);
+        if (part1Exists) slugs.push(entry.name);
+      } catch { /* skip */ }
+    }
+  }
+  return slugs;
 }

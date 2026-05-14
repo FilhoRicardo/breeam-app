@@ -10,6 +10,10 @@ import {
   readTextFile,
   listDir,
   saveEvidenceFile,
+  isFileSystemAccessSupported,
+  saveProjectToFolder,
+  loadProjectFromFolder,
+  listProjectSlugs,
 } from "./utils/fileApi.js";
 
 // ── Folder definitions (mirrors TaskDash pattern) ──────────────────────────────
@@ -239,7 +243,7 @@ function CreditCard({ credit, onUpdate, readOnly }) {
 }
 
 // ── Evidence Modal ───────────────────────────────────────────────────────────
-function EvidenceModal({ credit, onClose, onSave, projectRoot }) {
+function EvidenceModal({ credit, onClose, onSave, projectRoot, projectSlug }) {
   const [files, setFiles] = useState([]);
   const [links, setLinks] = useState((credit.evidence || []).filter(e => typeof e === "string").join("\n"));
   const [saving, setSaving] = useState(false);
@@ -250,7 +254,7 @@ function EvidenceModal({ credit, onClose, onSave, projectRoot }) {
     (async () => {
       const creditDef = CREDITS.find(c => c.code === credit.code);
       const part = creditDef?.part || credit.part || 1;
-      const creditDir = await getCreditFolder(projectRoot, credit.code, part);
+      const creditDir = await getCreditFolder(projectRoot, projectSlug, credit.code, part);
       if (!creditDir) return;
       const existingFiles = await listEvidence(creditDir);
       const diskFiles = existingFiles.filter(f => f.isFile);
@@ -277,7 +281,7 @@ function EvidenceModal({ credit, onClose, onSave, projectRoot }) {
       if (projectRoot && files.length > 0) {
         const creditDef = CREDITS.find(c => c.code === credit.code);
         const part = creditDef?.part || credit.part || 1;
-        const creditDir = await getCreditFolder(projectRoot, credit.code, part);
+        const creditDir = await getCreditFolder(projectRoot, projectSlug, credit.code, part);
         if (creditDir) {
           for (const file of files) {
             await saveEvidenceFile(creditDir, file);
@@ -608,7 +612,7 @@ function HomePage({ project, onNavigate }) {
 }
 
 // ── PAGE: Pre-Assessment ─────────────────────────────────────────────────────
-function PreAssessmentPage({ project, onUpdate, projectRoot }) {
+function PreAssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
   const [part, setPart] = useState(1);
   const [selectedCat, setSelectedCat] = useState("Management");
   const [selectedCredit, setSelectedCredit] = useState(null);
@@ -637,7 +641,7 @@ function PreAssessmentPage({ project, onUpdate, projectRoot }) {
     const creditDef = CREDITS.find(c => c.code === displayCredit.code);
     const partNum = creditDef?.part || displayCredit.part || 1;
     (async () => {
-      const creditDir = await getCreditFolder(projectRoot, displayCredit.code, partNum);
+      const creditDir = await getCreditFolder(projectRoot, projectSlug, displayCredit.code, partNum);
       if (!creditDir) return;
       const selectedAns = displayCredit.answers?.find(a => a.id === displayCredit.selectedAnswer);
       const content = [
@@ -1181,6 +1185,7 @@ function AssessmentPage({ project, onUpdate }) {
         <EvidenceModal
           credit={activeCredit}
           projectRoot={projectRoot}
+          projectSlug={projectSlug}
           onClose={() => setActiveCredit({ ...activeCredit, _showEvidence: false })}
           onSave={updated => {
             onUpdate(updated);
@@ -1343,7 +1348,7 @@ function EvidencePackagePage({ project }) {
 }
 
 // ── PAGE: Meetings ───────────────────────────────────────────────────────────
-function MeetingsPage({ project, meetings, onMeetingsChange, projectRoot }) {
+function MeetingsPage({ project, meetings, onMeetingsChange, projectRoot, projectSlug }) {
   const [selected, setSelected] = useState(null);
   const [form, setForm] = useState({ title: "", date: tod(), attendees: "", notes: "" });
 
@@ -1351,7 +1356,7 @@ function MeetingsPage({ project, meetings, onMeetingsChange, projectRoot }) {
   useEffect(() => {
     if (!projectRoot) return;
     (async () => {
-      const meetingsDir = await getMeetingsFolder(projectRoot);
+      const meetingsDir = await getMeetingsFolder(projectRoot, projectSlug);
       if (!meetingsDir) return;
       const entries = await listDir(meetingsDir);
       const mdFiles = entries.filter(e => e.isFile && e.name.endsWith('.md'));
@@ -1413,7 +1418,7 @@ function MeetingsPage({ project, meetings, onMeetingsChange, projectRoot }) {
     const updated = [m, ...meetings];
     // Fix 2: Write initial .md to disk
     if (projectRoot) {
-      getMeetingsFolder(projectRoot).then(meetingsDir => {
+      getMeetingsFolder(projectRoot, projectSlug).then(meetingsDir => {
         if (!meetingsDir) return;
         const filename = `${m.date}_untitled.md`;
         const content = [
@@ -1463,7 +1468,7 @@ function MeetingsPage({ project, meetings, onMeetingsChange, projectRoot }) {
     if (projectRoot) {
       const saved = updated.find(m => m.id === selected.id);
       if (saved) {
-        getMeetingsFolder(projectRoot).then(meetingsDir => {
+        getMeetingsFolder(projectRoot, projectSlug).then(meetingsDir => {
           if (!meetingsDir) return;
           const filename = `${saved.date}_${slugify(saved.title || "untitled")}.md`;
           const content = [
@@ -1507,7 +1512,7 @@ function MeetingsPage({ project, meetings, onMeetingsChange, projectRoot }) {
     if (projectRoot) {
       const saved = updated.find(m => m.id === selected.id);
       if (saved) {
-        getMeetingsFolder(projectRoot).then(meetingsDir => {
+        getMeetingsFolder(projectRoot, projectSlug).then(meetingsDir => {
           if (!meetingsDir) return;
           const filename = `${saved.date}_${slugify(saved.title || "untitled")}.md`;
           const content = [
@@ -1770,15 +1775,16 @@ export default function App() {
   const [folderStatus, setFolderStatus] = useState({});
   const [folderBusy, setFolderBusy] = useState(false);
   const [projectRoot, setProjectRoot] = useState(null); // FileSystemDirectoryHandle
+  const [browserUnsupported, setBrowserUnsupported] = useState(!isFileSystemAccessSupported());
 
   const activeProject = projects.find(p => p.id === activeProjectId) || projects[0];
 
   useEffect(() => { saveProjects(projects); }, [projects]);
   useEffect(() => { saveMeetings(meetings); }, [meetings]);
-  useEffect(() => { saveProjectsToFile(); }, [projects]);
 
   // Boot: check if project root folder was previously saved
   useEffect(() => {
+    if (!isFileSystemAccessSupported()) { setBrowserUnsupported(true); return; }
     (async () => {
       try {
         const saved = await idbGet(PROJECT_ROOT_KEY);
@@ -1786,9 +1792,18 @@ export default function App() {
           try {
             const perm = await saved.queryPermission({ mode: 'readwrite' });
             if (perm === 'granted') {
-              const data = await loadProjectsFromFolder(saved);
-              if (data?.projects?.length) {
-                setProjects(data.projects.map(p => initProject(p)));
+              // Discover all project slugs in this folder
+              const slugs = await listProjectSlugs(saved);
+              if (slugs.length) {
+                const loadedProjects = [];
+                for (const slug of slugs) {
+                  const data = await loadProjectFromFolder(saved, slug);
+                  if (data) loadedProjects.push(initProject(data));
+                }
+                if (loadedProjects.length) {
+                  setProjects(loadedProjects);
+                  setActiveProjectId(loadedProjects[0].id);
+                }
               }
               setProjectRoot(saved);
               setFolderStatus({ projects: 'connected' });
@@ -1810,25 +1825,33 @@ export default function App() {
       await idbSet(PROJECT_ROOT_KEY, dir);
       setProjectRoot(dir);
       setFolderStatus({ projects: 'connected' });
-      // Load projects.json from root if it exists (backwards compat)
-      const data = await loadProjectsFromFolder(dir);
-      if (data?.projects?.length) {
-        setProjects(data.projects.map(p => initProject(p)));
+      setBrowserUnsupported(false);
+      // Discover existing projects in the newly picked folder
+      const slugs = await listProjectSlugs(dir);
+      if (slugs.length) {
+        const loadedProjects = [];
+        for (const slug of slugs) {
+          const data = await loadProjectFromFolder(dir, slug);
+          if (data) loadedProjects.push(initProject(data));
+        }
+        if (loadedProjects.length) {
+          setProjects(loadedProjects);
+          setActiveProjectId(loadedProjects[0].id);
+        }
       }
     } catch (e) { if (e.name !== 'AbortError') alert('Error: ' + e.message); }
     setFolderBusy(false);
   };
 
-  const saveProjectsToFile = async () => {
-    const saved = await idbGet(PROJECT_ROOT_KEY);
-    if (!saved) return;
-    // Save each project as its own JSON file inside the root
-    for (const project of projects) {
-      const projectSlug = project.slug || slugify(project.name);
-      const projectDir = await saved.getDirectoryHandle(projectSlug, { create: true });
-      await saveTextFile(projectDir, 'project.json', JSON.stringify(project, null, 2));
-    }
-  };
+  // Save each project to its own per-slug folder on every change
+  useEffect(() => {
+    if (!projectRoot) return;
+    (async () => {
+      for (const project of projects) {
+        await saveProjectToFolder(projectRoot, project.slug, project);
+      }
+    })();
+  }, [projects, projectRoot]);
 
   const updateCredit = (updated) => {
     setProjects(prev => prev.map(p => {
@@ -1863,79 +1886,89 @@ export default function App() {
     setProjects(prev => [...prev, initialized]);
     setActiveProjectId(id);
 
-    // Create folder structure in File System Access API root
+    // Create folder structure for this new project inside the root
     (async () => {
       const saved = await idbGet(PROJECT_ROOT_KEY);
       if (!saved) return;
       try {
         await createProjectFolderStructure(saved, initialized);
+        // Immediately save the project.json
+        await saveProjectToFolder(saved, initialized.slug, initialized);
       } catch (e) { /* non-fatal */ }
     })();
   };
 
-  
-
   const project = { ...activeProject };
   const pages = {
     home: <HomePage project={project} onNavigate={setPage} />,
-    preassessment: <PreAssessmentPage project={project} onUpdate={updateCredit} projectRoot={projectRoot} />,
-    assessment: <AssessmentPage project={project} onUpdate={updateCredit} projectRoot={projectRoot} />,
+    preassessment: <PreAssessmentPage project={project} onUpdate={updateCredit} projectRoot={projectRoot} projectSlug={project.slug} />,
+    assessment: <AssessmentPage project={project} onUpdate={updateCredit} projectRoot={projectRoot} projectSlug={project.slug} />,
     vault: <EvidenceVaultPage project={project} />,
     package: <EvidencePackagePage project={project} />,
-    meetings: <MeetingsPage project={project} meetings={meetings} onMeetingsChange={setMeetings} projectRoot={projectRoot} />,
+    meetings: <MeetingsPage project={project} meetings={meetings} onMeetingsChange={setMeetings} projectRoot={projectRoot} projectSlug={project.slug} />,
   };
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "#f1f5f9", color: "#1e293b" }}>
-      <nav style={{ width: 220, minHeight: "100vh", borderRight: "1px solid rgba(0,0,0,0.06)", padding: "24px 16px", display: "flex", flexDirection: "column", gap: 4, flexShrink: 0 }}>
-        <div style={{ padding: "0 12px 20px", borderBottom: "1px solid rgba(0,0,0,0.06)", marginBottom: 12 }}>
-          <div style={{ fontSize: 10, color: "#7c3aed", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 4 }}>BREEAM In Use</div>
-          <div style={{ fontSize: 15, fontWeight: 800, color: "#1e293b" }}>BIU Tracker</div>
+    <>
+      {browserUnsupported && (
+        <div style={{
+          background: '#fef3c7', borderBottom: '2px solid #f59e0b',
+          padding: '10px 20px', fontSize: 13, color: '#92400e', textAlign: 'center',
+        }}>
+          ⚠️ Your browser doesn't support the File System Access API (Firefox/Safari). Please use <strong>Chrome, Edge, or Arc</strong> to enable local folder storage.
         </div>
+      )}
+      <div style={{ display: "flex", minHeight: "100vh", background: "#f1f5f9", color: "#1e293b" }}>
+        <nav style={{ width: 220, minHeight: "100vh", borderRight: "1px solid rgba(0,0,0,0.06)", padding: "24px 16px", display: "flex", flexDirection: "column", gap: 4, flexShrink: 0 }}>
+          <div style={{ padding: "0 12px 20px", borderBottom: "1px solid rgba(0,0,0,0.06)", marginBottom: 12 }}>
+            <div style={{ fontSize: 10, color: "#7c3aed", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 4 }}>BREEAM In Use</div>
+            <div style={{ fontSize: 15, fontWeight: 800, color: "#1e293b" }}>BIU Tracker</div>
+          </div>
 
-        <NavPill label="Home"             icon="🏠"  active={page === "home"}          onClick={() => setPage("home")} />
-        <NavPill label="Pre-Assessment"   icon="🔍"  active={page === "preassessment"} onClick={() => setPage("preassessment")} />
-        <NavPill label="Assessment"       icon="📋"  active={page === "assessment"}    onClick={() => setPage("assessment")} />
-        <NavPill label="Evidence Vault"   icon="📦"  active={page === "vault"}         onClick={() => setPage("vault")} />
-        <NavPill label="Evidence Package" icon="📄"  active={page === "package"}       onClick={() => setPage("package")} />
-        <NavPill label="Meetings"         icon="📅"  active={page === "meetings"}      onClick={() => setPage("meetings")} />
+          <NavPill label="Home"             icon="🏠"  active={page === "home"}          onClick={() => setPage("home")} />
+          <NavPill label="Pre-Assessment"   icon="🔍"  active={page === "preassessment"} onClick={() => setPage("preassessment")} />
+          <NavPill label="Assessment"       icon="📋"  active={page === "assessment"}    onClick={() => setPage("assessment")} />
+          <NavPill label="Evidence Vault"   icon="📦"  active={page === "vault"}         onClick={() => setPage("vault")} />
+          <NavPill label="Evidence Package" icon="📄"  active={page === "package"}       onClick={() => setPage("package")} />
+          <NavPill label="Meetings"         icon="📅"  active={page === "meetings"}      onClick={() => setPage("meetings")} />
 
-        <div style={{ marginTop: "auto", padding: "16px 12px 0", borderTop: "1px solid rgba(0,0,0,0.06)" }}>
-          <FolderStatusPill folderStatus={folderStatus} onClick={() => setShowFolderSetup(true)} />
+          <div style={{ marginTop: "auto", padding: "16px 12px 0", borderTop: "1px solid rgba(0,0,0,0.06)" }}>
+            <FolderStatusPill folderStatus={folderStatus} onClick={() => setShowFolderSetup(true)} />
 
-          <div style={{ marginTop: 10, marginBottom: 6, fontSize: 10, color: "#475569" }}>Active project</div>
-          <select
-            value={activeProjectId}
-            onChange={e => setActiveProjectId(parseInt(e.target.value))}
-            style={{ width: "100%", padding: "7px 10px", borderRadius: 8, background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.10)", color: "#1e293b", fontSize: 12, fontFamily: "inherit" }}
-          >
-            {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-          </select>
-          <button
-            onClick={() => setShowNewProject(true)}
-            style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px dashed rgba(124,58,237,0.25)", background: "rgba(124,58,237,0.05)", color: "#7c3aed", cursor: "pointer", fontWeight: 700, fontSize: 12, fontFamily: "inherit", marginTop: 8 }}
-          >
-            + New Project
-          </button>
-        </div>
-      </nav>
+            <div style={{ marginTop: 10, marginBottom: 6, fontSize: 10, color: "#475569" }}>Active project</div>
+            <select
+              value={activeProjectId}
+              onChange={e => setActiveProjectId(parseInt(e.target.value))}
+              style={{ width: "100%", padding: "7px 10px", borderRadius: 8, background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.10)", color: "#1e293b", fontSize: 12, fontFamily: "inherit" }}
+            >
+              {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+            </select>
+            <button
+              onClick={() => setShowNewProject(true)}
+              style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px dashed rgba(124,58,237,0.25)", background: "rgba(124,58,237,0.05)", color: "#7c3aed", cursor: "pointer", fontWeight: 700, fontSize: 12, fontFamily: "inherit", marginTop: 8 }}
+            >
+              + New Project
+            </button>
+          </div>
+        </nav>
 
-      <main style={{ flex: 1, overflowY: "auto" }}>
-        {pages[page] || pages.home}
-        {showFolderSetup && (
-          <FolderSetupScreen
-            folderStatus={folderStatus}
-            onPick={pickProjectsFolder}
-            onClose={() => setShowFolderSetup(false)}
-          />
-        )}
-        {showNewProject && (
-          <NewProjectModal
-            onClose={() => setShowNewProject(false)}
-            onCreate={createProject}
-          />
-        )}
-      </main>
-    </div>
+        <main style={{ flex: 1, overflowY: "auto" }}>
+          {pages[page] || pages.home}
+          {showFolderSetup && (
+            <FolderSetupScreen
+              folderStatus={folderStatus}
+              onPick={pickProjectsFolder}
+              onClose={() => setShowFolderSetup(false)}
+            />
+          )}
+          {showNewProject && (
+            <NewProjectModal
+              onClose={() => setShowNewProject(false)}
+              onCreate={createProject}
+            />
+          )}
+        </main>
+      </div>
+    </>
   );
 }
