@@ -9,6 +9,7 @@ import {
   saveTextFile,
   readTextFile,
   listDir,
+  saveEvidenceFile,
 } from "./utils/fileApi.js";
 
 // ── Folder definitions (mirrors TaskDash pattern) ──────────────────────────────
@@ -75,7 +76,7 @@ function loadMeetings() {
 }
 
 function saveMeetings(meetings) {
-  localStorage.setItem(LS_MEETINGS, JSON.stringify(meetings));
+  try { localStorage.setItem(LS_MEETINGS, JSON.stringify(meetings)); } catch {}
 }
 
 // ── Scoring helpers ──────────────────────────────────────────────────────────
@@ -238,20 +239,37 @@ function CreditCard({ credit, onUpdate, readOnly }) {
 }
 
 // ── Evidence Modal ───────────────────────────────────────────────────────────
-function EvidenceModal({ credit, onClose, onSave }) {
+function EvidenceModal({ credit, onClose, onSave, projectRoot }) {
   const [files, setFiles] = useState([]);
   const [links, setLinks] = useState((credit.evidence || []).join("\n"));
+  const [saving, setSaving] = useState(false);
 
   const addFiles = (incoming) => setFiles(prev => [...prev, ...incoming]);
   const removeFile = (i) => setFiles(prev => prev.filter((_, idx) => idx !== i));
 
-  const handleSave = () => {
-    const evidence = [
-      ...files.map(f => ({ name: f.name, type: "upload", size: f.size })),
-      ...links.split("\n").filter(l => l.trim()),
-    ];
-    onSave({ ...credit, evidence });
-    onClose();
+  const handleSave = async () => {
+    setSaving(true);
+    try {
+      // Save any new file uploads to the credit's folder in the File System Access API
+      if (projectRoot && files.length > 0) {
+        const creditDef = CREDITS.find(c => c.code === credit.code);
+        const part = creditDef?.part || credit.part || 1;
+        const creditDir = await getCreditFolder(projectRoot, credit.code, part);
+        if (creditDir) {
+          for (const file of files) {
+            await saveEvidenceFile(creditDir, file);
+          }
+        }
+      }
+      const evidence = [
+        ...files.map(f => ({ name: f.name, type: "upload", size: f.size })),
+        ...links.split("\n").filter(l => l.trim()),
+      ];
+      onSave({ ...credit, evidence });
+      onClose();
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -315,7 +333,7 @@ function EvidenceModal({ credit, onClose, onSave }) {
 
         <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(0,0,0,0.08)", display: "flex", justifyContent: "flex-end", gap: 10 }}>
           <button onClick={onClose} style={{ padding: "9px 18px", borderRadius: 9, border: "1px solid rgba(0,0,0,0.10)", background: "transparent", color: "#475569", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>Cancel</button>
-          <button onClick={handleSave} style={{ padding: "9px 20px", borderRadius: 9, border: "none", background: "linear-gradient(135deg,#7c3aed,#3b82f6)", color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>Save Evidence</button>
+          <button onClick={handleSave} disabled={saving} style={{ padding: "9px 20px", borderRadius: 9, border: "none", background: saving ? "rgba(124,58,237,0.5)" : "linear-gradient(135deg,#7c3aed,#3b82f6)", color: "#fff", cursor: saving ? "not-allowed" : "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>{saving ? "Saving..." : "Save Evidence"}</button>
         </div>
       </div>
     </div>
@@ -1106,6 +1124,7 @@ function AssessmentPage({ project, onUpdate }) {
       {activeCredit?._showEvidence && (
         <EvidenceModal
           credit={activeCredit}
+          projectRoot={projectRoot}
           onClose={() => setActiveCredit({ ...activeCredit, _showEvidence: false })}
           onSave={updated => {
             onUpdate(updated);
@@ -1683,7 +1702,7 @@ export default function App() {
   const pages = {
     home: <HomePage project={project} onNavigate={setPage} />,
     preassessment: <PreAssessmentPage project={project} onUpdate={updateCredit} />,
-    assessment: <AssessmentPage project={project} onUpdate={updateCredit} />,
+    assessment: <AssessmentPage project={project} onUpdate={updateCredit} projectRoot={projectRoot} />,
     vault: <EvidenceVaultPage project={project} />,
     package: <EvidencePackagePage project={project} />,
     meetings: <MeetingsPage project={project} meetings={meetings} onMeetingsChange={setMeetings} />,
