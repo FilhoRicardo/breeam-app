@@ -16,20 +16,20 @@ const tod = (d = new Date()) => d.toISOString().slice(0, 10);
 const slugify = s => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 const CATEGORY_COLORS = {
-  Management:  { bg: "rgba(124,58,237,0.12)",  border: "rgba(124,58,237,0.35)", color: "#a78bfa" },
-  Energy:       { bg: "rgba(245,158,11,0.12)",   border: "rgba(245,158,11,0.35)",  color: "#fbbf24" },
-  Water:        { bg: "rgba(59,130,246,0.12)",   border: "rgba(59,130,246,0.35)",  color: "#60a5fa" },
-  Materials:    { bg: "rgba(16,185,129,0.12)",   border: "rgba(16,185,129,0.35)",  color: "#10b981" },
-  Waste:        { bg: "rgba(168,85,247,0.12)",   border: "rgba(168,85,247,0.35)",  color: "#c084fc" },
-  Health:       { bg: "rgba(236,72,153,0.12)",    border: "rgba(236,72,153,0.35)",  color: "#f472b6" },
-  Pollution:    { bg: "rgba(239,68,68,0.12)",    border: "rgba(239,68,68,0.35)",   color: "#f87171" },
-  Transport:    { bg: "rgba(34,211,238,0.12)",    border: "rgba(34,211,238,0.35)",  color: "#22d3ee" },
-  Ecology:      { bg: "rgba(132,204,22,0.12)",    border: "rgba(132,204,22,0.35)",  color: "#a3e635" },
+  Management:  { bg: "rgba(124,58,237,0.08)",  border: "rgba(124,58,237,0.25)", color: "#7c3aed" },
+  Energy:       { bg: "rgba(245,158,11,0.05)",   border: "rgba(245,158,11,0.25)",  color: "#d97706" },
+  Water:        { bg: "rgba(59,130,246,0.08)",   border: "rgba(59,130,246,0.25)",  color: "#2563eb" },
+  Materials:    { bg: "rgba(16,185,129,0.06)",   border: "rgba(16,185,129,0.25)",  color: "#059669" },
+  Waste:        { bg: "rgba(168,85,247,0.08)",   border: "rgba(168,85,247,0.25)",  color: "#9333ea" },
+  Health:       { bg: "rgba(236,72,153,0.08)",    border: "rgba(236,72,153,0.25)",  color: "#db2777" },
+  Pollution:    { bg: "rgba(239,68,68,0.08)",    border: "rgba(239,68,68,0.25)",   color: "#dc2626" },
+  Transport:    { bg: "rgba(34,211,238,0.08)",    border: "rgba(34,211,238,0.25)",  color: "#0891b2" },
+  Ecology:      { bg: "rgba(132,204,22,0.08)",    border: "rgba(132,204,22,0.25)",  color: "#65a30d" },
 };
 const STATUS_COLORS = {
-  complete:     { bg: "rgba(16,185,129,0.12)",   color: "#10b981" },
-  in_progress:  { bg: "rgba(99,102,241,0.12)",   color: "#818cf8" },
-  not_pursuing: { bg: "rgba(100,116,139,0.12)",  color: "#64748b" },
+  complete:     { bg: "rgba(16,185,129,0.06)",   color: "#059669" },
+  in_progress:  { bg: "rgba(99,102,241,0.10)",   color: "#6366f1" },
+  not_pursuing: { bg: "rgba(100,116,139,0.10)",  color: "#64748b" },
 };
 
 // ── Storage ──────────────────────────────────────────────────────────────────
@@ -116,8 +116,8 @@ function NavPill({ label, icon, active, onClick }) {
         display: "flex", alignItems: "center", gap: 10,
         width: "100%", padding: "11px 16px",
         borderRadius: 10, border: "none", cursor: "pointer",
-        background: active ? "rgba(124,58,237,0.15)" : "transparent",
-        color: active ? "#c4b5fd" : "#64748b",
+        background: active ? "rgba(124,58,237,0.10)" : "transparent",
+        color: active ? "#a78bfa" : "#64748b",
         fontSize: 13, fontWeight: active ? 700 : 500,
         fontFamily: "inherit", textAlign: "left",
         transition: "all 0.15s",
@@ -133,16 +133,16 @@ function NavPill({ label, icon, active, onClick }) {
 function ScoreBar({ score, available, target }) {
   const pct = available ? (score / available) * 100 : 0;
   const targetPct = available ? (target / available) * 100 : 0;
-  const color = pct >= targetPct ? "#10b981" : pct >= targetPct * 0.7 ? "#fbbf24" : "#f87171";
+  const color = pct >= targetPct ? "#059669" : pct >= targetPct * 0.7 ? "#d97706" : "#dc2626";
   return (
     <div style={{ marginBottom: 14 }}>
       <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11, color: "#64748b", marginBottom: 5 }}>
         <span style={{ fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em" }}></span>
         <span>{score} / {available} <span style={{ color: "#475569" }}>(target: {target})</span></span>
       </div>
-      <div style={{ height: 6, borderRadius: 99, background: "rgba(255,255,255,0.07)", overflow: "hidden", position: "relative" }}>
+      <div style={{ height: 6, borderRadius: 99, background: "rgba(0,0,0,0.07)", overflow: "hidden", position: "relative" }}>
         <div style={{ height: "100%", width: `${pct}%`, background: color, borderRadius: 99, transition: "width 0.6s" }} />
-        <div style={{ position: "absolute", top: 0, left: `${targetPct}%`, width: 2, height: "100%", background: "rgba(255,255,255,0.4)" }} />
+        <div style={{ position: "absolute", top: 0, left: `${targetPct}%`, width: 2, height: "100%", background: "rgba(0,0,0,0.25)" }} />
       </div>
     </div>
   );
@@ -172,10 +172,10 @@ function CreditCard({ credit, onUpdate, readOnly }) {
               </span>
               <span style={{ fontSize: 11, color: "#64748b" }}>{credit.category}</span>
             </div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: "#e2e8f0", lineHeight: 1.3 }}>{credit.title}</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: "#1e293b", lineHeight: 1.3 }}>{credit.title}</div>
             <div style={{ fontSize: 11, color: "#64748b", marginTop: 3 }}>
               {credit.available} credits available
-              {credit.pursuing && credit.score > 0 && <> · <strong style={{ color: "#10b981" }}>{credit.score} achieved</strong></>}
+              {credit.pursuing && credit.score > 0 && <> · <strong style={{ color: "#059669" }}>{credit.score} achieved</strong></>}
             </div>
           </div>
           <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 6, flexShrink: 0 }}>
@@ -189,8 +189,8 @@ function CreditCard({ credit, onUpdate, readOnly }) {
                 style={{
                   fontSize: 10, fontWeight: 700, padding: "3px 8px", borderRadius: 20,
                   border: "none", cursor: "pointer",
-                  background: credit.pursuing ? "rgba(16,185,129,0.15)" : "rgba(100,116,139,0.12)",
-                  color: credit.pursuing ? "#10b981" : "#64748b",
+                  background: credit.pursuing ? "rgba(16,185,129,0.10)" : "rgba(100,116,139,0.10)",
+                  color: credit.pursuing ? "#059669" : "#64748b",
                 }}
               >
                 {credit.pursuing ? "Pursuing" : "Skip"}
@@ -198,8 +198,8 @@ function CreditCard({ credit, onUpdate, readOnly }) {
             )}
             {credit.pursuing && (
               <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                <div style={{ width: 80, height: 4, borderRadius: 99, background: "rgba(255,255,255,0.08)" }}>
-                  <div style={{ height: "100%", width: `${credit.completion}%`, background: "#818cf8", borderRadius: 99 }} />
+                <div style={{ width: 80, height: 4, borderRadius: 99, background: "rgba(0,0,0,0.08)" }}>
+                  <div style={{ height: "100%", width: `${credit.completion}%`, background: "#6366f1", borderRadius: 99 }} />
                 </div>
                 <span style={{ fontSize: 10, color: "#64748b" }}>{credit.completion}%</span>
               </div>
@@ -217,8 +217,8 @@ function CreditCard({ credit, onUpdate, readOnly }) {
               rows={3}
               style={{
                 width: "100%", boxSizing: "border-box", padding: "10px 12px",
-                borderRadius: 8, border: "1px solid rgba(255,255,255,0.08)",
-                background: "rgba(255,255,255,0.03)", color: "#e2e8f0",
+                borderRadius: 8, border: "1px solid rgba(0,0,0,0.08)",
+                background: "rgba(255,255,255,0.03)", color: "#1e293b",
                 fontSize: 12, lineHeight: 1.55, resize: "vertical", fontFamily: "inherit",
               }}
             />
@@ -257,9 +257,9 @@ function EvidenceModal({ credit, onClose, onSave }) {
         borderRadius: 16, width: "100%", maxWidth: 620, maxHeight: "90vh",
         overflow: "hidden", display: "flex", flexDirection: "column",
       }}>
-        <div style={{ padding: "20px 24px", borderBottom: "1px solid rgba(255,255,255,0.08)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ padding: "20px 24px", borderBottom: "1px solid rgba(0,0,0,0.08)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
-            <div style={{ fontSize: 10, color: "#a78bfa", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Evidence</div>
+            <div style={{ fontSize: 10, color: "#7c3aed", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Evidence</div>
             <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: "#f1f5f9" }}>{credit.code} — {credit.title}</h2>
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", fontSize: 22 }}>×</button>
@@ -282,13 +282,13 @@ function EvidenceModal({ credit, onClose, onSave }) {
                   addFiles(valid);
                 }}
               />
-              <div style={{ fontSize: 13, color: "#a78bfa", fontWeight: 700 }}>+ Drop files or click to browse</div>
+              <div style={{ fontSize: 13, color: "#7c3aed", fontWeight: 700 }}>+ Drop files or click to browse</div>
               <div style={{ fontSize: 11, color: "#475569", marginTop: 4 }}>PDF, images, spreadsheets, DOCX, archives (ZIP, 7Z, RAR, TAR.GZ)</div>
             </label>
             {files.map((f, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", borderRadius: 8, background: "rgba(255,255,255,0.04)", marginTop: 6 }}>
-                <span style={{ fontSize: 12, color: "#e2e8f0" }}>{f.name}</span>
-                <button onClick={() => removeFile(i)} style={{ background: "none", border: "none", color: "#f87171", cursor: "pointer", fontSize: 16 }}>×</button>
+              <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "8px 12px", borderRadius: 8, background: "rgba(0,0,0,0.03)", marginTop: 6 }}>
+                <span style={{ fontSize: 12, color: "#1e293b" }}>{f.name}</span>
+                <button onClick={() => removeFile(i)} style={{ background: "none", border: "none", color: "#dc2626", cursor: "pointer", fontSize: 16 }}>×</button>
               </div>
             ))}
           </div>
@@ -300,13 +300,13 @@ function EvidenceModal({ credit, onClose, onSave }) {
               onChange={e => setLinks(e.target.value)}
               rows={4}
               placeholder={"../greenwich_part1_man1/timber_coc.pdf\nhttps://example.com/energy-cert.pdf"}
-              style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.03)", color: "#e2e8f0", fontSize: 12, lineHeight: 1.55, resize: "vertical", fontFamily: "inherit" }}
+              style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.08)", background: "rgba(255,255,255,0.03)", color: "#1e293b", fontSize: 12, lineHeight: 1.55, resize: "vertical", fontFamily: "inherit" }}
             />
           </div>
         </div>
 
-        <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(255,255,255,0.08)", display: "flex", justifyContent: "flex-end", gap: 10 }}>
-          <button onClick={onClose} style={{ padding: "9px 18px", borderRadius: 9, border: "1px solid rgba(255,255,255,0.1)", background: "transparent", color: "#94a3b8", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>Cancel</button>
+        <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(0,0,0,0.08)", display: "flex", justifyContent: "flex-end", gap: 10 }}>
+          <button onClick={onClose} style={{ padding: "9px 18px", borderRadius: 9, border: "1px solid rgba(0,0,0,0.10)", background: "transparent", color: "#475569", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>Cancel</button>
           <button onClick={handleSave} style={{ padding: "9px 20px", borderRadius: 9, border: "none", background: "linear-gradient(135deg,#7c3aed,#3b82f6)", color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>Save Evidence</button>
         </div>
       </div>
@@ -323,7 +323,7 @@ function generatePDF(project) {
   let html = `<!DOCTYPE html><html><head><meta charset="utf-8"><title>${project.name} — BREEAM Evidence Package</title>
 <style>
   body { font-family: Arial, sans-serif; margin: 40px; color: #111; font-size: 13px; }
-  h1 { font-size: 22px; border-bottom: 2px solid #10b981; padding-bottom: 10px; }
+  h1 { font-size: 22px; border-bottom: 2px solid #059669; padding-bottom: 10px; }
   h2 { font-size: 16px; color: #444; margin-top: 30px; border-bottom: 1px solid #ddd; padding-bottom: 6px; }
   .score-section { background: #f8f9fa; padding: 16px 20px; border-radius: 8px; margin: 20px 0; }
   .credit { margin-bottom: 20px; padding: 14px; border-left: 4px solid #7c3aed; background: #fafafa; }
@@ -392,9 +392,9 @@ function NewProjectModal({ onClose, onCreate }) {
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}>
       <div style={{ background: "#1e1b4b", border: "1px solid rgba(124,58,237,0.3)", borderRadius: 16, width: "100%", maxWidth: 520, maxHeight: "90vh", overflow: "auto" }}>
-        <div style={{ padding: "20px 24px", borderBottom: "1px solid rgba(255,255,255,0.08)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div style={{ padding: "20px 24px", borderBottom: "1px solid rgba(0,0,0,0.08)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <div>
-            <div style={{ fontSize: 10, color: "#a78bfa", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>New Project</div>
+            <div style={{ fontSize: 10, color: "#7c3aed", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>New Project</div>
             <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: "#f1f5f9" }}>Create BREEAM Project</h2>
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", fontSize: 22 }}>×</button>
@@ -413,18 +413,18 @@ function NewProjectModal({ onClose, onCreate }) {
               <div style={{ fontSize: 10, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 5 }}>{label}</div>
               {type === "select" ? (
                 <select value={form[key]} onChange={e => set(key, e.target.value)}
-                  style={{ width: "100%", padding: "8px 11px", boxSizing: "border-box", borderRadius: 8, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#e2e8f0", fontSize: 13, fontFamily: "inherit" }}>
+                  style={{ width: "100%", padding: "8px 11px", boxSizing: "border-box", borderRadius: 8, background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.08)", color: "#1e293b", fontSize: 13, fontFamily: "inherit" }}>
                   {options.map(o => <option key={o} value={o}>{o}</option>)}
                 </select>
               ) : (
                 <input type={type} value={form[key]} onChange={e => set(key, e.target.value)} placeholder={placeholder}
-                  style={{ width: "100%", padding: "8px 11px", boxSizing: "border-box", borderRadius: 8, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#e2e8f0", fontSize: 13, fontFamily: "inherit" }} />
+                  style={{ width: "100%", padding: "8px 11px", boxSizing: "border-box", borderRadius: 8, background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.08)", color: "#1e293b", fontSize: 13, fontFamily: "inherit" }} />
               )}
             </div>
           ))}
         </div>
-        <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(255,255,255,0.08)", display: "flex", justifyContent: "flex-end", gap: 10 }}>
-          <button onClick={onClose} style={{ padding: "9px 18px", borderRadius: 9, border: "1px solid rgba(255,255,255,0.1)", background: "transparent", color: "#94a3b8", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>Cancel</button>
+        <div style={{ padding: "16px 24px", borderTop: "1px solid rgba(0,0,0,0.08)", display: "flex", justifyContent: "flex-end", gap: 10 }}>
+          <button onClick={onClose} style={{ padding: "9px 18px", borderRadius: 9, border: "1px solid rgba(0,0,0,0.10)", background: "transparent", color: "#475569", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>Cancel</button>
           <button onClick={handleCreate} style={{ padding: "9px 20px", borderRadius: 9, border: "none", background: "linear-gradient(135deg,#7c3aed,#3b82f6)", color: "#fff", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>Create Project</button>
         </div>
       </div>
@@ -482,33 +482,33 @@ function HomePage({ project, onNavigate }) {
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginBottom: 28 }}>
-        <div style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 14, padding: "20px 22px" }}>
+        <div style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(124,58,237,0.15)", borderRadius: 14, padding: "20px 22px" }}>
           <div style={{ fontSize: 11, color: "#7c3aed", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Overall Score</div>
           <div style={{ fontSize: 36, fontWeight: 800, color: "#f1f5f9" }}>{overallScore}</div>
-          <div style={{ fontSize: 12, color: "#10b981", fontWeight: 600, marginTop: 4 }}>{overallRating}</div>
+          <div style={{ fontSize: 12, color: "#059669", fontWeight: 600, marginTop: 4 }}>{overallRating}</div>
         </div>
-        <div style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)", borderRadius: 14, padding: "20px 22px" }}>
+        <div style={{ background: "rgba(245,158,11,0.05)", border: "1px solid rgba(245,158,11,0.15)", borderRadius: 14, padding: "20px 22px" }}>
           <div style={{ fontSize: 11, color: "#f59e0b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Part 1 — Asset</div>
           <div style={{ fontSize: 36, fontWeight: 800, color: "#f1f5f9" }}>{part1Score}<span style={{ fontSize: 18, color: "#475569" }}>/{part1Avail}</span></div>
           <ScoreBar score={part1Score} available={part1Avail} target={part1Target} />
         </div>
-        <div style={{ background: "rgba(59,130,246,0.08)", border: "1px solid rgba(59,130,246,0.2)", borderRadius: 14, padding: "20px 22px" }}>
-          <div style={{ fontSize: 11, color: "#60a5fa", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Part 2 — BM</div>
+        <div style={{ background: "rgba(59,130,246,0.08)", border: "1px solid rgba(59,130,246,0.15)", borderRadius: 14, padding: "20px 22px" }}>
+          <div style={{ fontSize: 11, color: "#2563eb", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 6 }}>Part 2 — BM</div>
           <div style={{ fontSize: 36, fontWeight: 800, color: "#f1f5f9" }}>{part2Score}<span style={{ fontSize: 18, color: "#475569" }}>/{part2Avail}</span></div>
           <ScoreBar score={part2Score} available={part2Avail} target={part2Target} />
         </div>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 28 }}>
-        <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, padding: "20px 22px" }}>
+        <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 14, padding: "20px 22px" }}>
           <div style={{ fontSize: 12, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 14 }}>Credit Progress</div>
           <div style={{ display: "flex", gap: 24 }}>
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 28, fontWeight: 800, color: "#10b981" }}>{complete.length}</div>
+              <div style={{ fontSize: 28, fontWeight: 800, color: "#059669" }}>{complete.length}</div>
               <div style={{ fontSize: 11, color: "#64748b" }}>Complete</div>
             </div>
             <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: 28, fontWeight: 800, color: "#818cf8" }}>{inProgress.length}</div>
+              <div style={{ fontSize: 28, fontWeight: 800, color: "#6366f1" }}>{inProgress.length}</div>
               <div style={{ fontSize: 11, color: "#64748b" }}>In Progress</div>
             </div>
             <div style={{ textAlign: "center" }}>
@@ -523,18 +523,18 @@ function HomePage({ project, onNavigate }) {
             })}
           </div>
         </div>
-        <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, padding: "20px 22px" }}>
+        <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 14, padding: "20px 22px" }}>
           <div style={{ fontSize: 12, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 14 }}>Quick Actions</div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-            <button onClick={() => onNavigate("assessment")} style={{ padding: "9px 16px", borderRadius: 9, border: "none", background: "rgba(124,58,237,0.15)", color: "#a78bfa", cursor: "pointer", fontWeight: 700, fontSize: 12, fontFamily: "inherit" }}>Continue Assessment →</button>
-            <button onClick={() => onNavigate("preassessment")} style={{ padding: "9px 16px", borderRadius: 9, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)", color: "#94a3b8", cursor: "pointer", fontWeight: 700, fontSize: 12, fontFamily: "inherit" }}>Pre-Assessment</button>
-            <button onClick={() => generatePDF(project)} style={{ padding: "9px 16px", borderRadius: 9, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)", color: "#94a3b8", cursor: "pointer", fontWeight: 700, fontSize: 12, fontFamily: "inherit" }}>📄 Generate PDF</button>
-            <button onClick={() => onNavigate("meetings")} style={{ padding: "9px 16px", borderRadius: 9, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)", color: "#94a3b8", cursor: "pointer", fontWeight: 700, fontSize: 12, fontFamily: "inherit" }}>📅 Meetings</button>
+            <button onClick={() => onNavigate("assessment")} style={{ padding: "9px 16px", borderRadius: 9, border: "none", background: "rgba(124,58,237,0.10)", color: "#7c3aed", cursor: "pointer", fontWeight: 700, fontSize: 12, fontFamily: "inherit" }}>Continue Assessment →</button>
+            <button onClick={() => onNavigate("preassessment")} style={{ padding: "9px 16px", borderRadius: 9, border: "1px solid rgba(0,0,0,0.08)", background: "rgba(0,0,0,0.03)", color: "#475569", cursor: "pointer", fontWeight: 700, fontSize: 12, fontFamily: "inherit" }}>Pre-Assessment</button>
+            <button onClick={() => generatePDF(project)} style={{ padding: "9px 16px", borderRadius: 9, border: "1px solid rgba(0,0,0,0.08)", background: "rgba(0,0,0,0.03)", color: "#475569", cursor: "pointer", fontWeight: 700, fontSize: 12, fontFamily: "inherit" }}>📄 Generate PDF</button>
+            <button onClick={() => onNavigate("meetings")} style={{ padding: "9px 16px", borderRadius: 9, border: "1px solid rgba(0,0,0,0.08)", background: "rgba(0,0,0,0.03)", color: "#475569", cursor: "pointer", fontWeight: 700, fontSize: 12, fontFamily: "inherit" }}>📅 Meetings</button>
           </div>
         </div>
       </div>
 
-      <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, padding: "20px 22px" }}>
+      <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(0,0,0,0.07)", borderRadius: 14, padding: "20px 22px" }}>
         <div style={{ fontSize: 12, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 16 }}>By Category — Part 1 Asset Performance</div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 10 }}>
           {["Management","Energy","Water","Materials","Waste","Health","Pollution","Transport","Ecology"].map(cat => {
@@ -585,7 +585,7 @@ function PreAssessmentPage({ project, onUpdate }) {
   return (
     <div style={{ display: "flex", flex: 1, overflow: "hidden" }}>
       {/* LEFT PANEL — Category tabs + credit list */}
-      <div style={{ width: 320, borderRight: "1px solid rgba(255,255,255,0.06)", display: "flex", flexDirection: "column", flexShrink: 0 }}>
+      <div style={{ width: 320, borderRight: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column", flexShrink: 0 }}>
         <div style={{ padding: "20px 20px 0" }}>
           <div style={{ fontSize: 11, color: "#7c3aed", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 4 }}>Pre-Assessment</div>
           <h1 style={{ margin: "0 0 4px", fontSize: 18, fontWeight: 800, color: "#f1f5f9" }}>Credit Decision</h1>
@@ -596,12 +596,12 @@ function PreAssessmentPage({ project, onUpdate }) {
             {[1, 2].map(p => (
               <button key={p} onClick={() => { setPart(p); setSelectedCredit(null); }}
                 style={{ flex: 1, padding: "7px 10px", borderRadius: 8, border: "none", cursor: "pointer", fontWeight: 700, fontSize: 11, fontFamily: "inherit",
-                  background: part === p ? "rgba(124,58,237,0.2)" : "rgba(255,255,255,0.04)", color: part === p ? "#c4b5fd" : "#64748b" }}>
+                  background: part === p ? "rgba(124,58,237,0.15)" : "rgba(0,0,0,0.03)", color: part === p ? "#a78bfa" : "#64748b" }}>
                 Part {p}
               </button>
             ))}
             <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-              <span style={{ fontSize: 10, color: "#10b981", fontWeight: 700 }}>{pursuing.length}✓</span>
+              <span style={{ fontSize: 10, color: "#059669", fontWeight: 700 }}>{pursuing.length}✓</span>
               <span style={{ fontSize: 10, color: "#475569" }}>|</span>
               <span style={{ fontSize: 10, color: "#64748b" }}>{notPursuing.length}✗</span>
             </div>
@@ -637,15 +637,15 @@ function PreAssessmentPage({ project, onUpdate }) {
             return (
               <div key={c.code} onClick={() => setSelectedCredit(c)}
                 style={{ padding: "10px 12px", borderRadius: 9, marginBottom: 4, cursor: "pointer",
-                  background: selectedCredit?.code === c.code ? "rgba(124,58,237,0.12)" : "rgba(255,255,255,0.03)",
-                  border: `1px solid ${selectedCredit?.code === c.code ? "rgba(124,58,237,0.3)" : "rgba(255,255,255,0.06)"}` }}>
+                  background: selectedCredit?.code === c.code ? "rgba(124,58,237,0.08)" : "rgba(255,255,255,0.03)",
+                  border: `1px solid ${selectedCredit?.code === c.code ? "rgba(124,58,237,0.3)" : "rgba(0,0,0,0.06)"}` }}>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 3 }}>
                   <span style={{ fontSize: 11, fontWeight: 800, color: cc.color }}>{c.code}</span>
                   {c.pursuing
-                    ? <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 6px", borderRadius: 20, background: "rgba(16,185,129,0.12)", color: "#10b981" }}>PURSUING</span>
-                    : <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 6px", borderRadius: 20, background: "rgba(100,116,139,0.12)", color: "#64748b" }}>SKIP</span>}
+                    ? <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 6px", borderRadius: 20, background: "rgba(16,185,129,0.06)", color: "#059669" }}>PURSUING</span>
+                    : <span style={{ fontSize: 9, fontWeight: 700, padding: "2px 6px", borderRadius: 20, background: "rgba(100,116,139,0.10)", color: "#64748b" }}>SKIP</span>}
                 </div>
-                <div style={{ fontSize: 11, color: "#94a3b8", lineHeight: 1.3 }}>{c.title}</div>
+                <div style={{ fontSize: 11, color: "#475569", lineHeight: 1.3 }}>{c.title}</div>
                 {c.available > 1 && <div style={{ fontSize: 10, color: "#475569", marginTop: 2 }}>{c.available} credits available</div>}
               </div>
             );
@@ -659,7 +659,7 @@ function PreAssessmentPage({ project, onUpdate }) {
       {/* RIGHT PANEL — Credit detail or empty state */}
       <div style={{ flex: 1, overflowY: "auto", padding: "28px 32px" }}>
         {!displayCredit ? (
-          <div style={{ color: "#334155", fontSize: 13, padding: "80px 20px", textAlign: "center", border: "1px dashed rgba(255,255,255,0.07)", borderRadius: 12 }}>
+          <div style={{ color: "#334155", fontSize: 13, padding: "80px 20px", textAlign: "center", border: "1px dashed rgba(0,0,0,0.07)", borderRadius: 12 }}>
             Select a credit from the left to view criteria and make your decision
           </div>
         ) : (
@@ -667,8 +667,8 @@ function PreAssessmentPage({ project, onUpdate }) {
             {/* Credit header */}
             <div style={{ marginBottom: 20 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                <span style={{ fontSize: 11, fontWeight: 800, background: "rgba(124,58,237,0.15)", color: "#a78bfa", padding: "4px 10px", borderRadius: 20 }}>{displayCredit.code}</span>
-                <span style={{ fontSize: 13, color: "#94a3b8" }}>{displayCredit.title}</span>
+                <span style={{ fontSize: 11, fontWeight: 800, background: "rgba(124,58,237,0.10)", color: "#7c3aed", padding: "4px 10px", borderRadius: 20 }}>{displayCredit.code}</span>
+                <span style={{ fontSize: 13, color: "#475569" }}>{displayCredit.title}</span>
                 <span style={{ fontSize: 11, color: "#475569" }}>Part {displayCredit.part} · {displayCredit.category}</span>
                 {displayCredit.available > 1 && <span style={{ fontSize: 11, color: "#475569" }}>· {displayCredit.available} credits</span>}
               </div>
@@ -681,7 +681,7 @@ function PreAssessmentPage({ project, onUpdate }) {
                     onUpdate(updated);
                     setSelectedCredit(updated);
                   }}
-                  style={{ padding: "10px 24px", borderRadius: 10, border: displayCredit.pursuing ? "2px solid #10b981" : "1px solid rgba(255,255,255,0.1)", background: displayCredit.pursuing ? "rgba(16,185,129,0.1)" : "rgba(255,255,255,0.04)", color: displayCredit.pursuing ? "#10b981" : "#64748b", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>
+                  style={{ padding: "10px 24px", borderRadius: 10, border: displayCredit.pursuing ? "2px solid #059669" : "1px solid rgba(0,0,0,0.10)", background: displayCredit.pursuing ? "rgba(16,185,129,0.1)" : "rgba(0,0,0,0.03)", color: displayCredit.pursuing ? "#059669" : "#64748b", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>
                   ✓ Pursue this credit
                 </button>
                 <button
@@ -689,7 +689,7 @@ function PreAssessmentPage({ project, onUpdate }) {
                     const updated = { ...displayCredit, pursuing: false, status: "not_pursuing", score: 0 };
                     onUpdate(updated);
                   }}
-                  style={{ padding: "10px 24px", borderRadius: 10, border: !displayCredit.pursuing ? "2px solid #64748b" : "1px solid rgba(255,255,255,0.1)", background: !displayCredit.pursuing ? "rgba(100,116,139,0.1)" : "rgba(255,255,255,0.04)", color: !displayCredit.pursuing ? "#94a3b8" : "#475569", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>
+                  style={{ padding: "10px 24px", borderRadius: 10, border: !displayCredit.pursuing ? "2px solid #64748b" : "1px solid rgba(0,0,0,0.10)", background: !displayCredit.pursuing ? "rgba(100,116,139,0.1)" : "rgba(0,0,0,0.03)", color: !displayCredit.pursuing ? "#475569" : "#475569", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>
                   ✗ Skip this credit
                 </button>
               </div>
@@ -700,15 +700,15 @@ function PreAssessmentPage({ project, onUpdate }) {
               <div>
                 {/* Answer options dropdown */}
                 {displayCredit.answers && (
-                  <div style={{ marginBottom: 20, background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 12, padding: "16px 20px" }}>
-                    <div style={{ fontSize: 11, color: "#a78bfa", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
+                  <div style={{ marginBottom: 20, background: "rgba(124,58,237,0.05)", border: "1px solid rgba(124,58,237,0.15)", borderRadius: 12, padding: "16px 20px" }}>
+                    <div style={{ fontSize: 11, color: "#7c3aed", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
                       Question — select answer
                     </div>
-                    <div style={{ fontSize: 12, color: "#94a3b8", marginBottom: 12, fontStyle: "italic" }}>
+                    <div style={{ fontSize: 12, color: "#475569", marginBottom: 12, fontStyle: "italic" }}>
                       {displayCredit.question}
                     </div>
                     {displayCredit.instruction && (
-                      <div style={{ fontSize: 11, color: "#fbbf24", marginBottom: 10, padding: "6px 10px", background: "rgba(251,191,36,0.08)", borderRadius: 6 }}>
+                      <div style={{ fontSize: 11, color: "#d97706", marginBottom: 10, padding: "6px 10px", background: "rgba(251,191,36,0.10)", borderRadius: 6 }}>
                         {displayCredit.instruction}
                       </div>
                     )}
@@ -720,7 +720,7 @@ function PreAssessmentPage({ project, onUpdate }) {
                         onUpdate(updated);
                         setSelectedCredit(updated);
                       }}
-                      style={{ width: "100%", padding: "10px 14px", boxSizing: "border-box", borderRadius: 9, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "#e2e8f0", fontSize: 13, fontFamily: "inherit", marginBottom: 8 }}
+                      style={{ width: "100%", padding: "10px 14px", boxSizing: "border-box", borderRadius: 9, background: "rgba(0,0,0,0.06)", border: "1px solid rgba(0,0,0,0.12)", color: "#1e293b", fontSize: 13, fontFamily: "inherit", marginBottom: 8 }}
                     >
                       <option value="">— Select an answer —</option>
                       {displayCredit.answers.map(a => (
@@ -728,7 +728,7 @@ function PreAssessmentPage({ project, onUpdate }) {
                       ))}
                     </select>
                     {displayCredit.selectedAnswer && (
-                      <div style={{ marginTop: 10, padding: "10px 14px", background: "rgba(16,185,129,0.08)", borderRadius: 8, fontSize: 12, color: "#10b981" }}>
+                      <div style={{ marginTop: 10, padding: "10px 14px", background: "rgba(16,185,129,0.06)", borderRadius: 8, fontSize: 12, color: "#059669" }}>
                         <strong>Selected:</strong> Option {displayCredit.selectedAnswer} — {displayCredit.answers.find(a => a.id === displayCredit.selectedAnswer)?.label}
                         <span style={{ marginLeft: 12, fontWeight: 700 }}>{displayCredit.answers.find(a => a.id === displayCredit.selectedAnswer)?.credits} credit(s)</span>
                       </div>
@@ -739,14 +739,14 @@ function PreAssessmentPage({ project, onUpdate }) {
                 {/* Assessment criteria */}
                 {displayCredit.criteria && displayCredit.criteria.length > 0 && (
                   <div style={{ marginBottom: 18 }}>
-                    <div style={{ fontSize: 11, color: "#a78bfa", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
+                    <div style={{ fontSize: 11, color: "#7c3aed", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
                       Assessment Criteria
                     </div>
                     {displayCredit.criteria.map(cr => (
-                      <div key={cr.id} style={{ marginBottom: 14, padding: "12px 16px", borderRadius: 9, background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.2)" }}>
+                      <div key={cr.id} style={{ marginBottom: 14, padding: "12px 16px", borderRadius: 9, background: "rgba(124,58,237,0.05)", border: "1px solid rgba(124,58,237,0.15)" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                          <span style={{ fontSize: 10, fontWeight: 800, background: "rgba(124,58,237,0.2)", color: "#a78bfa", padding: "2px 7px", borderRadius: 20 }}>#{cr.id}</span>
-                          {cr.answer && <span style={{ fontSize: 10, fontWeight: 700, background: "rgba(245,158,11,0.15)", color: "#fbbf24", padding: "2px 7px", borderRadius: 20 }}>→ {cr.answer}</span>}
+                          <span style={{ fontSize: 10, fontWeight: 800, background: "rgba(124,58,237,0.15)", color: "#7c3aed", padding: "2px 7px", borderRadius: 20 }}>#{cr.id}</span>
+                          {cr.answer && <span style={{ fontSize: 10, fontWeight: 700, background: "rgba(245,158,11,0.10)", color: "#d97706", padding: "2px 7px", borderRadius: 20 }}>→ {cr.answer}</span>}
                         </div>
                         <div style={{ fontSize: 13, color: "#334155", lineHeight: 1.55, fontWeight: 500 }}>{cr.text}</div>
                         {cr.details && cr.details.length > 0 && (
@@ -764,10 +764,10 @@ function PreAssessmentPage({ project, onUpdate }) {
                 {/* Methodology */}
                 {displayCredit.methodology && displayCredit.methodology.length > 0 && (
                   <div style={{ marginBottom: 18 }}>
-                    <div style={{ fontSize: 11, color: "#60a5fa", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
+                    <div style={{ fontSize: 11, color: "#2563eb", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
                       Methodology
                     </div>
-                    <div style={{ background: "rgba(59,130,246,0.06)", border: "1px solid rgba(59,130,246,0.2)", borderRadius: 9, padding: "14px 18px" }}>
+                    <div style={{ background: "rgba(59,130,246,0.05)", border: "1px solid rgba(59,130,246,0.15)", borderRadius: 9, padding: "14px 18px" }}>
                       {displayCredit.methodology.filter(Boolean).map((line, i) => (
                         <div key={i} style={{ fontSize: 12, color: line.startsWith(" ") ? "#475569" : "#334155", lineHeight: 1.6, whiteSpace: "pre-wrap", fontWeight: line.startsWith(" ") ? 400 : 500 }}>{line}</div>
                       ))}
@@ -778,13 +778,13 @@ function PreAssessmentPage({ project, onUpdate }) {
                 {/* Evidence requirements */}
                 {displayCredit.evidence && displayCredit.evidence.length > 0 && (
                   <div style={{ marginBottom: 18 }}>
-                    <div style={{ fontSize: 11, color: "#10b981", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
+                    <div style={{ fontSize: 11, color: "#059669", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
                       Evidence Requirements
                     </div>
-                    <div style={{ background: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.2)", borderRadius: 9, padding: "14px 18px" }}>
+                    <div style={{ background: "rgba(16,185,129,0.05)", border: "1px solid rgba(16,185,129,0.15)", borderRadius: 9, padding: "14px 18px" }}>
                       {displayCredit.evidence.map((ev, i) => (
                         <div key={i} style={{ fontSize: 12, color: "#334155", lineHeight: 1.5, marginBottom: 6, display: "flex", gap: 8 }}>
-                          <span style={{ color: "#10b981", fontWeight: 700, flexShrink: 0 }}>•</span>
+                          <span style={{ color: "#059669", fontWeight: 700, flexShrink: 0 }}>•</span>
                           {ev}
                         </div>
                       ))}
@@ -795,11 +795,11 @@ function PreAssessmentPage({ project, onUpdate }) {
                 {/* Asset-specific notes */}
                 {displayCredit.notes && displayCredit.notes.length > 0 && (
                   <div style={{ marginBottom: 18 }}>
-                    <div style={{ fontSize: 11, color: "#fbbf24", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
+                    <div style={{ fontSize: 11, color: "#d97706", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>
                       Asset-Specific Notes
                     </div>
                     {displayCredit.notes.map((note, i) => (
-                      <div key={i} style={{ fontSize: 12, color: "#475569", lineHeight: 1.55, marginBottom: 8, padding: "10px 14px", background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.15)", borderRadius: 8 }}>{note}</div>
+                      <div key={i} style={{ fontSize: 12, color: "#475569", lineHeight: 1.55, marginBottom: 8, padding: "10px 14px", background: "rgba(245,158,11,0.05)", border: "1px solid rgba(245,158,11,0.10)", borderRadius: 8 }}>{note}</div>
                     ))}
                   </div>
                 )}
@@ -818,7 +818,7 @@ function PreAssessmentPage({ project, onUpdate }) {
                     }}
                     rows={5}
                     placeholder="Record your assessment notes, evidence references, calculations, and justification here..."
-                    style={{ width: "100%", boxSizing: "border-box", padding: "12px 14px", borderRadius: 9, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.03)", color: "#e2e8f0", fontSize: 13, lineHeight: 1.55, resize: "vertical", fontFamily: "inherit" }}
+                    style={{ width: "100%", boxSizing: "border-box", padding: "12px 14px", borderRadius: 9, border: "1px solid rgba(0,0,0,0.08)", background: "rgba(255,255,255,0.03)", color: "#1e293b", fontSize: 13, lineHeight: 1.55, resize: "vertical", fontFamily: "inherit" }}
                   />
                 </div>
 
@@ -835,7 +835,7 @@ function PreAssessmentPage({ project, onUpdate }) {
                       onUpdate(updated);
                       setSelectedCredit(updated);
                     }}
-                    style={{ width: 100, padding: "8px 12px", borderRadius: 8, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "#e2e8f0", fontSize: 16, fontWeight: 700, fontFamily: "inherit" }}
+                    style={{ width: 100, padding: "8px 12px", borderRadius: 8, background: "rgba(0,0,0,0.06)", border: "1px solid rgba(0,0,0,0.12)", color: "#1e293b", fontSize: 16, fontWeight: 700, fontFamily: "inherit" }}
                   />
                   <span style={{ fontSize: 12, color: "#475569", marginLeft: 12 }}>
                     out of {displayCredit.available} available credits
@@ -854,14 +854,14 @@ function PreAssessmentPage({ project, onUpdate }) {
                       onUpdate(updated);
                       setSelectedCredit(updated);
                     }}
-                    style={{ padding: "8px 12px", borderRadius: 8, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", color: "#e2e8f0", fontSize: 13, fontFamily: "inherit" }}>
+                    style={{ padding: "8px 12px", borderRadius: 8, background: "rgba(0,0,0,0.06)", border: "1px solid rgba(0,0,0,0.12)", color: "#1e293b", fontSize: 13, fontFamily: "inherit" }}>
                     <option value="in_progress">In Progress</option>
                     <option value="complete">Complete</option>
                   </select>
                 </div>
               </div>
             ) : displayCredit.pursuing && !displayCredit.criteria ? (
-              <div style={{ color: "#334155", fontSize: 12, padding: 20, textAlign: "center", border: "1px dashed rgba(255,255,255,0.07)", borderRadius: 10 }}>
+              <div style={{ color: "#334155", fontSize: 12, padding: 20, textAlign: "center", border: "1px dashed rgba(0,0,0,0.07)", borderRadius: 10 }}>
                 BREEAM criteria for {displayCredit.code} not yet loaded — upload the credit PDF collection to populate.
               </div>
             ) : (
@@ -883,9 +883,9 @@ function AssessmentPage({ project, onUpdate }) {
   const credits = project.credits.filter(c => c.part === part && c.pursuing);
 
   return (
-    <div style={{ padding: "28px 32px", maxWidth: 1100 }}>
+    <div style={{ padding: "28px 32px" }}>
       <div style={{ marginBottom: 24 }}>
-        <div style={{ fontSize: 11, color: "#7c3aed", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>Assessment</div>
+        <div style={{ fontSize: 12, color: "#7c3aed", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>Assessment</div>
         <h1 style={{ margin: 0, fontSize: 22, fontWeight: 800, color: "#f1f5f9" }}>Assessment — Narratives & Evidence</h1>
       </div>
 
@@ -895,7 +895,7 @@ function AssessmentPage({ project, onUpdate }) {
           return (
             <button key={p} onClick={() => setPart(p)}
               style={{ padding: "8px 18px", borderRadius: 9, border: "none", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit",
-                background: part === p ? "rgba(124,58,237,0.2)" : "rgba(255,255,255,0.05)", color: part === p ? "#c4b5fd" : "#64748b" }}>
+                background: part === p ? "rgba(124,58,237,0.15)" : "rgba(0,0,0,0.05)", color: part === p ? "#a78bfa" : "#64748b" }}>
               Part {p} — {p === 1 ? "Asset Performance" : "Building Management"} ({count})
             </button>
           );
@@ -904,22 +904,22 @@ function AssessmentPage({ project, onUpdate }) {
 
       <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
         {/* LEFT — credit list */}
-        <div style={{ width: 360, flexShrink: 0 }}>
+        <div style={{ width: 380, flexShrink: 0 }}>
           {credits.map(c => (
             <div key={c.code}
               onClick={() => setActiveCredit(c.code === activeCredit?.code ? null : c)}
               style={{
                 padding: "14px 16px", borderRadius: 10, marginBottom: 8, cursor: "pointer",
-                background: activeCredit?.code === c.code ? "rgba(124,58,237,0.12)" : "rgba(255,255,255,0.03)",
-                border: `1px solid ${activeCredit?.code === c.code ? "rgba(124,58,237,0.3)" : "rgba(255,255,255,0.07)"}`,
+                background: activeCredit?.code === c.code ? "rgba(124,58,237,0.08)" : "rgba(255,255,255,0.03)",
+                border: `1px solid ${activeCredit?.code === c.code ? "rgba(124,58,237,0.3)" : "rgba(0,0,0,0.07)"}`,
               }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                 <div>
-                  <span style={{ fontSize: 11, fontWeight: 800, color: "#a78bfa" }}>{c.code}</span>
-                  <span style={{ fontSize: 12, color: "#94a3b8", marginLeft: 8 }}>{c.title}</span>
+                  <span style={{ fontSize: 11, fontWeight: 800, color: "#7c3aed" }}>{c.code}</span>
+                  <span style={{ fontSize: 12, color: "#475569", marginLeft: 8 }}>{c.title}</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  {c.score > 0 && <span style={{ fontSize: 10, fontWeight: 700, color: "#10b981" }}>{c.score} cr</span>}
+                  {c.score > 0 && <span style={{ fontSize: 10, fontWeight: 700, color: "#059669" }}>{c.score} cr</span>}
                   <span style={{ fontSize: 10, color: "#475569" }}>→</span>
                 </div>
               </div>
@@ -931,23 +931,23 @@ function AssessmentPage({ project, onUpdate }) {
         {/* RIGHT — credit detail, fills remaining width */}
         <div style={{ flex: 1, minWidth: 0 }}>
           {!activeCredit ? (
-            <div style={{ color: "#334155", fontSize: 13, padding: "60px 20px", textAlign: "center", border: "1px dashed rgba(255,255,255,0.07)", borderRadius: 12 }}>
+            <div style={{ color: "#334155", fontSize: 13, padding: "60px 20px", textAlign: "center", border: "1px dashed rgba(0,0,0,0.07)", borderRadius: 12 }}>
               Select a credit to write narrative and add evidence
             </div>
           ) : (() => {
             const credit = project.credits.find(c => c.code === activeCredit.code);
             return (
-              <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: "20px" }}>
+              <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 14, padding: "20px" }}>
                 <div style={{ marginBottom: 14 }}>
-                  <span style={{ fontSize: 11, fontWeight: 800, background: "rgba(124,58,237,0.15)", color: "#a78bfa", padding: "3px 8px", borderRadius: 20 }}>{credit.code}</span>
-                  <span style={{ fontSize: 13, color: "#94a3b8", marginLeft: 8 }}>{credit.title}</span>
+                  <span style={{ fontSize: 11, fontWeight: 800, background: "rgba(124,58,237,0.10)", color: "#7c3aed", padding: "3px 8px", borderRadius: 20 }}>{credit.code}</span>
+                  <span style={{ fontSize: 13, color: "#475569", marginLeft: 8 }}>{credit.title}</span>
                   <span style={{ fontSize: 11, color: "#475569", marginLeft: 8 }}>{credit.available} credits avail</span>
                 </div>
 
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 6 }}>Status</div>
                   <select value={credit.status} onChange={e => onUpdate({ ...credit, status: e.target.value })}
-                    style={{ padding: "6px 10px", borderRadius: 7, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#e2e8f0", fontSize: 13, fontFamily: "inherit" }}>
+                    style={{ padding: "6px 10px", borderRadius: 7, background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.10)", color: "#1e293b", fontSize: 13, fontFamily: "inherit" }}>
                     <option value="in_progress">In Progress</option>
                     <option value="complete">Complete</option>
                   </select>
@@ -959,12 +959,12 @@ function AssessmentPage({ project, onUpdate }) {
                     <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>
                       Answer
                     </div>
-                    <div style={{ background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.2)", borderRadius: 9, padding: "14px 16px" }}>
+                    <div style={{ background: "rgba(124,58,237,0.05)", border: "1px solid rgba(124,58,237,0.15)", borderRadius: 9, padding: "14px 16px" }}>
                       {credit.question && (
                         <div style={{ fontSize: 12, color: "#475569", fontStyle: "italic", marginBottom: 10 }}>{credit.question}</div>
                       )}
                       {credit.instruction && (
-                        <div style={{ fontSize: 11, color: "#fbbf24", marginBottom: 10, padding: "5px 8px", background: "rgba(251,191,36,0.08)", borderRadius: 5 }}>
+                        <div style={{ fontSize: 11, color: "#d97706", marginBottom: 10, padding: "5px 8px", background: "rgba(251,191,36,0.10)", borderRadius: 5 }}>
                           {credit.instruction}
                         </div>
                       )}
@@ -974,14 +974,14 @@ function AssessmentPage({ project, onUpdate }) {
                           const ans = credit.answers.find(a => a.id === e.target.value);
                           onUpdate({ ...credit, selectedAnswer: e.target.value, score: ans ? ans.credits : 0 });
                         }}
-                        style={{ width: "100%", padding: "8px 12px", boxSizing: "border-box", borderRadius: 8, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#e2e8f0", fontSize: 13, fontFamily: "inherit" }}>
+                        style={{ width: "100%", padding: "8px 12px", boxSizing: "border-box", borderRadius: 8, background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.10)", color: "#1e293b", fontSize: 13, fontFamily: "inherit" }}>
                         <option value="">— Select an answer —</option>
                         {credit.answers.map(a => (
                           <option key={a.id} value={a.id}>Option {a.id}: {a.label} ({a.credits} credit{a.credits !== 1 ? "s" : ""})</option>
                         ))}
                       </select>
                       {credit.selectedAnswer && (
-                        <div style={{ marginTop: 8, padding: "8px 12px", background: "rgba(16,185,129,0.08)", borderRadius: 7, fontSize: 12, color: "#10b981" }}>
+                        <div style={{ marginTop: 8, padding: "8px 12px", background: "rgba(16,185,129,0.06)", borderRadius: 7, fontSize: 12, color: "#059669" }}>
                           <strong>Selected:</strong> Option {credit.selectedAnswer} — {credit.answers.find(a => a.id === credit.selectedAnswer)?.label}
                           <span style={{ marginLeft: 10, fontWeight: 700 }}>{credit.answers.find(a => a.id === credit.selectedAnswer)?.credits} credit(s)</span>
                         </div>
@@ -993,14 +993,14 @@ function AssessmentPage({ project, onUpdate }) {
                 {/* Assessment criteria — copy of Pre-Assessment */}
                 {credit.criteria && credit.criteria.length > 0 && (
                   <div style={{ marginBottom: 14 }}>
-                    <div style={{ fontSize: 11, color: "#a78bfa", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>
+                    <div style={{ fontSize: 11, color: "#7c3aed", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>
                       Assessment Criteria
                     </div>
                     {credit.criteria.map(cr => (
-                      <div key={cr.id} style={{ marginBottom: 10, padding: "10px 14px", borderRadius: 8, background: "rgba(124,58,237,0.06)", border: "1px solid rgba(124,58,237,0.2)" }}>
+                      <div key={cr.id} style={{ marginBottom: 10, padding: "10px 14px", borderRadius: 8, background: "rgba(124,58,237,0.05)", border: "1px solid rgba(124,58,237,0.15)" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4 }}>
-                          <span style={{ fontSize: 10, fontWeight: 800, background: "rgba(124,58,237,0.2)", color: "#a78bfa", padding: "2px 7px", borderRadius: 20 }}>#{cr.id}</span>
-                          {cr.answer && <span style={{ fontSize: 10, fontWeight: 700, background: "rgba(245,158,11,0.15)", color: "#fbbf24", padding: "2px 7px", borderRadius: 20 }}>→ {cr.answer}</span>}
+                          <span style={{ fontSize: 10, fontWeight: 800, background: "rgba(124,58,237,0.15)", color: "#7c3aed", padding: "2px 7px", borderRadius: 20 }}>#{cr.id}</span>
+                          {cr.answer && <span style={{ fontSize: 10, fontWeight: 700, background: "rgba(245,158,11,0.10)", color: "#d97706", padding: "2px 7px", borderRadius: 20 }}>→ {cr.answer}</span>}
                         </div>
                         <div style={{ fontSize: 12, color: "#334155", lineHeight: 1.5 }}>{cr.text}</div>
                         {cr.details && cr.details.length > 0 && (
@@ -1018,10 +1018,10 @@ function AssessmentPage({ project, onUpdate }) {
                 {/* Methodology — copy of Pre-Assessment */}
                 {credit.methodology && credit.methodology.length > 0 && (
                   <div style={{ marginBottom: 14 }}>
-                    <div style={{ fontSize: 11, color: "#60a5fa", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>
+                    <div style={{ fontSize: 11, color: "#2563eb", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>
                       Methodology
                     </div>
-                    <div style={{ background: "rgba(59,130,246,0.06)", border: "1px solid rgba(59,130,246,0.2)", borderRadius: 8, padding: "12px 16px" }}>
+                    <div style={{ background: "rgba(59,130,246,0.05)", border: "1px solid rgba(59,130,246,0.15)", borderRadius: 8, padding: "12px 16px" }}>
                       {credit.methodology.filter(Boolean).map((line, i) => (
                         <div key={i} style={{ fontSize: 11, color: line.startsWith(" ") ? "#475569" : "#334155", lineHeight: 1.6, whiteSpace: "pre-wrap", fontWeight: line.startsWith(" ") ? 400 : 500 }}>{line}</div>
                       ))}
@@ -1032,13 +1032,13 @@ function AssessmentPage({ project, onUpdate }) {
                 {/* Evidence requirements — copy of Pre-Assessment */}
                 {credit.evidence && credit.evidence.length > 0 && (
                   <div style={{ marginBottom: 14 }}>
-                    <div style={{ fontSize: 11, color: "#10b981", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>
+                    <div style={{ fontSize: 11, color: "#059669", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>
                       Evidence Requirements
                     </div>
-                    <div style={{ background: "rgba(16,185,129,0.06)", border: "1px solid rgba(16,185,129,0.2)", borderRadius: 8, padding: "12px 16px" }}>
+                    <div style={{ background: "rgba(16,185,129,0.05)", border: "1px solid rgba(16,185,129,0.15)", borderRadius: 8, padding: "12px 16px" }}>
                       {credit.evidence.map((ev, i) => (
                         <div key={i} style={{ fontSize: 11, color: "#334155", lineHeight: 1.5, marginBottom: 5, display: "flex", gap: 6 }}>
-                          <span style={{ color: "#10b981", fontWeight: 700, flexShrink: 0 }}>•</span>
+                          <span style={{ color: "#059669", fontWeight: 700, flexShrink: 0 }}>•</span>
                           {ev}
                         </div>
                       ))}
@@ -1049,11 +1049,11 @@ function AssessmentPage({ project, onUpdate }) {
                 {/* Asset-specific notes — copy of Pre-Assessment */}
                 {credit.notes && credit.notes.length > 0 && (
                   <div style={{ marginBottom: 14 }}>
-                    <div style={{ fontSize: 11, color: "#fbbf24", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>
+                    <div style={{ fontSize: 11, color: "#d97706", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>
                       Asset-Specific Notes
                     </div>
                     {credit.notes.map((note, i) => (
-                      <div key={i} style={{ fontSize: 11, color: "#475569", lineHeight: 1.5, marginBottom: 6, padding: "8px 12px", background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.15)", borderRadius: 7 }}>{note}</div>
+                      <div key={i} style={{ fontSize: 11, color: "#475569", lineHeight: 1.5, marginBottom: 6, padding: "8px 12px", background: "rgba(245,158,11,0.05)", border: "1px solid rgba(245,158,11,0.10)", borderRadius: 7 }}>{note}</div>
                     ))}
                   </div>
                 )}
@@ -1062,7 +1062,7 @@ function AssessmentPage({ project, onUpdate }) {
                   <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 6 }}>Narrative</div>
                   <textarea value={credit.narrative || ""} onChange={e => onUpdate({ ...credit, narrative: e.target.value })}
                     rows={6} placeholder="Describe the evidence and assessment rationale..."
-                    style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", borderRadius: 8, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.03)", color: "#e2e8f0", fontSize: 13, lineHeight: 1.55, resize: "vertical", fontFamily: "inherit" }} />
+                    style={{ width: "100%", boxSizing: "border-box", padding: "10px 12px", borderRadius: 8, border: "1px solid rgba(0,0,0,0.08)", background: "rgba(255,255,255,0.03)", color: "#1e293b", fontSize: 13, lineHeight: 1.55, resize: "vertical", fontFamily: "inherit" }} />
                 </div>
 
                 <div style={{ marginBottom: 14 }}>
@@ -1077,14 +1077,14 @@ function AssessmentPage({ project, onUpdate }) {
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
                     <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em" }}>Evidence ({credit.evidence?.length || 0} files)</div>
                     <button onClick={() => setActiveCredit({ ...credit, _showEvidence: true })}
-                      style={{ padding: "6px 12px", borderRadius: 7, border: "none", background: "rgba(124,58,237,0.15)", color: "#a78bfa", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "inherit" }}>
+                      style={{ padding: "6px 12px", borderRadius: 7, border: "none", background: "rgba(124,58,237,0.10)", color: "#7c3aed", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "inherit" }}>
                       + Add Evidence
                     </button>
                   </div>
                   {credit.evidence?.map((e, i) => (
-                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 10px", borderRadius: 7, background: "rgba(255,255,255,0.04)", marginBottom: 4 }}>
+                    <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 10px", borderRadius: 7, background: "rgba(0,0,0,0.03)", marginBottom: 4 }}>
                       <span style={{ fontSize: 13 }}>📄</span>
-                      <span style={{ fontSize: 12, color: "#e2e8f0", flex: 1 }}>{typeof e === "string" ? e : e.name}</span>
+                      <span style={{ fontSize: 12, color: "#1e293b", flex: 1 }}>{typeof e === "string" ? e : e.name}</span>
                     </div>
                   ))}
                   {!credit.evidence?.length && <div style={{ fontSize: 11, color: "#334155", textAlign: "center", padding: "12px" }}>No evidence yet</div>}
@@ -1126,7 +1126,7 @@ function EvidenceVaultPage({ project }) {
         {[1, 2].map(p => (
           <button key={p} onClick={() => setPart(p)}
             style={{ padding: "8px 18px", borderRadius: 9, border: "none", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit",
-              background: part === p ? "rgba(124,58,237,0.2)" : "rgba(255,255,255,0.05)", color: part === p ? "#c4b5fd" : "#64748b" }}>
+              background: part === p ? "rgba(124,58,237,0.15)" : "rgba(0,0,0,0.05)", color: part === p ? "#a78bfa" : "#64748b" }}>
             Part {p}
           </button>
         ))}
@@ -1139,7 +1139,7 @@ function EvidenceVaultPage({ project }) {
             <div style={{ padding: "14px 18px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div>
                 <span style={{ fontSize: 11, fontWeight: 800, color: cc.color }}>{c.code}</span>
-                <span style={{ fontSize: 13, color: "#e2e8f0", marginLeft: 10 }}>{c.title}</span>
+                <span style={{ fontSize: 13, color: "#1e293b", marginLeft: 10 }}>{c.title}</span>
                 <span style={{ fontSize: 11, color: "#64748b", marginLeft: 8 }}>{c.evidence?.length || 0} files</span>
               </div>
               <div style={{ fontSize: 11, color: "#64748b" }}>
@@ -1189,27 +1189,27 @@ function EvidencePackagePage({ project }) {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 20 }}>
         <div>
           <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 16 }}>
-            <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, color: "#94a3b8" }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", fontSize: 13, color: "#475569" }}>
               <input type="checkbox" checked={onlyComplete} onChange={e => setOnlyComplete(e.target.checked)} style={{ accentColor: "#7c3aed" }} />
               Only complete credits
             </label>
             <button onClick={() => setSelected(new Set(project.credits.filter(c => c.pursuing).map(c => c.code)))}
-              style={{ padding: "6px 12px", borderRadius: 7, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)", color: "#94a3b8", cursor: "pointer", fontSize: 12, fontFamily: "inherit" }}>
+              style={{ padding: "6px 12px", borderRadius: 7, border: "1px solid rgba(0,0,0,0.08)", background: "rgba(0,0,0,0.03)", color: "#475569", cursor: "pointer", fontSize: 12, fontFamily: "inherit" }}>
               Select all pursuing
             </button>
           </div>
 
           <div style={{ marginBottom: 20 }}>
-            <div style={{ fontSize: 11, color: "#a78bfa", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>Part 1 — Asset Performance</div>
+            <div style={{ fontSize: 11, color: "#7c3aed", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>Part 1 — Asset Performance</div>
             {part1.map(c => (
               <div key={c.code} onClick={() => toggle(c.code)}
                 style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderRadius: 9, marginBottom: 6, cursor: "pointer",
                   background: selected.has(c.code) ? "rgba(124,58,237,0.1)" : "rgba(255,255,255,0.03)",
-                  border: `1px solid ${selected.has(c.code) ? "rgba(124,58,237,0.3)" : "rgba(255,255,255,0.07)"}` }}>
+                  border: `1px solid ${selected.has(c.code) ? "rgba(124,58,237,0.3)" : "rgba(0,0,0,0.07)"}` }}>
                 <input type="checkbox" checked={selected.has(c.code)} onChange={() => {}} style={{ accentColor: "#7c3aed" }} />
                 <div style={{ flex: 1 }}>
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#a78bfa" }}>{c.code}</span>
-                  <span style={{ fontSize: 12, color: "#94a3b8", marginLeft: 6 }}>{c.title}</span>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: "#7c3aed" }}>{c.code}</span>
+                  <span style={{ fontSize: 12, color: "#475569", marginLeft: 6 }}>{c.title}</span>
                 </div>
                 <div style={{ fontSize: 11, color: "#64748b" }}>{c.score}/{c.available}</div>
               </div>
@@ -1217,16 +1217,16 @@ function EvidencePackagePage({ project }) {
           </div>
 
           <div>
-            <div style={{ fontSize: 11, color: "#60a5fa", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>Part 2 — Building Management</div>
+            <div style={{ fontSize: 11, color: "#2563eb", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>Part 2 — Building Management</div>
             {part2.map(c => (
               <div key={c.code} onClick={() => toggle(c.code)}
                 style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderRadius: 9, marginBottom: 6, cursor: "pointer",
                   background: selected.has(c.code) ? "rgba(124,58,237,0.1)" : "rgba(255,255,255,0.03)",
-                  border: `1px solid ${selected.has(c.code) ? "rgba(124,58,237,0.3)" : "rgba(255,255,255,0.07)"}` }}>
+                  border: `1px solid ${selected.has(c.code) ? "rgba(124,58,237,0.3)" : "rgba(0,0,0,0.07)"}` }}>
                 <input type="checkbox" checked={selected.has(c.code)} onChange={() => {}} style={{ accentColor: "#7c3aed" }} />
                 <div style={{ flex: 1 }}>
-                  <span style={{ fontSize: 12, fontWeight: 800, color: "#60a5fa" }}>{c.code}</span>
-                  <span style={{ fontSize: 12, color: "#94a3b8", marginLeft: 6 }}>{c.title}</span>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: "#2563eb" }}>{c.code}</span>
+                  <span style={{ fontSize: 12, color: "#475569", marginLeft: 6 }}>{c.title}</span>
                 </div>
                 <div style={{ fontSize: 11, color: "#64748b" }}>{c.score}/{c.available}</div>
               </div>
@@ -1234,16 +1234,16 @@ function EvidencePackagePage({ project }) {
           </div>
         </div>
 
-        <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 14, padding: "20px", position: "sticky", top: 20, alignSelf: "start" }}>
+        <div style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 14, padding: "20px", position: "sticky", top: 20, alignSelf: "start" }}>
           <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 14 }}>Package Summary</div>
-          <div style={{ fontSize: 13, color: "#e2e8f0", marginBottom: 8 }}><strong>{credits.length}</strong> credits selected</div>
-          <div style={{ fontSize: 13, color: "#e2e8f0", marginBottom: 8 }}><strong>{totalScore}</strong> total credits</div>
+          <div style={{ fontSize: 13, color: "#1e293b", marginBottom: 8 }}><strong>{credits.length}</strong> credits selected</div>
+          <div style={{ fontSize: 13, color: "#1e293b", marginBottom: 8 }}><strong>{totalScore}</strong> total credits</div>
           <div style={{ fontSize: 12, color: "#64748b", marginBottom: 16 }}>Part 1: {part1.reduce((s,c) => s+(c.score||0),0)} credits<br/>Part 2: {part2.reduce((s,c) => s+(c.score||0),0)} credits</div>
 
-          <div style={{ borderTop: "1px solid rgba(255,255,255,0.07)", paddingTop: 14, marginBottom: 14 }}>
+          <div style={{ borderTop: "1px solid rgba(0,0,0,0.07)", paddingTop: 14, marginBottom: 14 }}>
             {credits.slice(0, 8).map(c => (
               <div key={c.code} style={{ fontSize: 11, color: "#64748b", marginBottom: 4 }}>
-                <span style={{ color: "#a78bfa" }}>{c.code}</span> — {c.narrative?.slice(0, 40) || "no narrative"}...
+                <span style={{ color: "#7c3aed" }}>{c.code}</span> — {c.narrative?.slice(0, 40) || "no narrative"}...
               </div>
             ))}
             {credits.length > 8 && <div style={{ fontSize: 11, color: "#475569" }}>+ {credits.length - 8} more credits</div>}
@@ -1343,13 +1343,13 @@ function MeetingsPage({ project, meetings, onMeetingsChange }) {
           </button>
         </div>
         <div style={{ fontSize: 12, color: "#64748b", marginTop: 4 }}>
-          {projectMeetings.length} meeting{projectMeetings.length !== 1 ? "s" : ""} · Stored as .md files in <code style={{ color: "#a78bfa" }}>meetings/</code>
+          {projectMeetings.length} meeting{projectMeetings.length !== 1 ? "s" : ""} · Stored as .md files in <code style={{ color: "#7c3aed" }}>meetings/</code>
         </div>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "280px 1fr", gap: 20, flex: 1, minHeight: 0 }}>
         {/* Meeting list */}
-        <div style={{ borderRight: "1px solid rgba(255,255,255,0.06)", paddingRight: 16 }}>
+        <div style={{ borderRight: "1px solid rgba(0,0,0,0.06)", paddingRight: 16 }}>
           {projectMeetings.length === 0 && (
             <div style={{ color: "#334155", fontSize: 13, textAlign: "center", padding: "40px 10px" }}>
               No meetings yet.<br />Click "+ New Meeting" to start.
@@ -1360,11 +1360,11 @@ function MeetingsPage({ project, meetings, onMeetingsChange }) {
               onClick={() => selectMeeting(m)}
               style={{
                 padding: "12px 14px", borderRadius: 10, marginBottom: 6, cursor: "pointer",
-                background: selected?.id === m.id ? "rgba(124,58,237,0.15)" : "rgba(255,255,255,0.03)",
-                border: `1px solid ${selected?.id === m.id ? "rgba(124,58,237,0.35)" : "rgba(255,255,255,0.07)"}`,
+                background: selected?.id === m.id ? "rgba(124,58,237,0.10)" : "rgba(255,255,255,0.03)",
+                border: `1px solid ${selected?.id === m.id ? "rgba(124,58,237,0.25)" : "rgba(0,0,0,0.07)"}`,
               }}>
               <div style={{ fontSize: 10, color: "#64748b", fontWeight: 700, marginBottom: 3 }}>{m.date}</div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: "#e2e8f0", marginBottom: 3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              <div style={{ fontSize: 13, fontWeight: 600, color: "#1e293b", marginBottom: 3, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                 {m.title || <em style={{ color: "#475569" }}>Untitled meeting</em>}
               </div>
               {m.attendees?.length > 0 && (
@@ -1378,7 +1378,7 @@ function MeetingsPage({ project, meetings, onMeetingsChange }) {
 
         {/* Meeting editor */}
         {!selected ? (
-          <div style={{ color: "#334155", fontSize: 13, padding: "60px 20px", textAlign: "center", border: "1px dashed rgba(255,255,255,0.07)", borderRadius: 12 }}>
+          <div style={{ color: "#334155", fontSize: 13, padding: "60px 20px", textAlign: "center", border: "1px dashed rgba(0,0,0,0.07)", borderRadius: 12 }}>
             Select a meeting or click "+ New Meeting"
           </div>
         ) : (
@@ -1391,7 +1391,7 @@ function MeetingsPage({ project, meetings, onMeetingsChange }) {
                   value={form.title}
                   onChange={e => handleFieldChange("title", e.target.value)}
                   placeholder="e.g. BREEAM Kick-off Meeting"
-                  style={{ width: "100%", padding: "8px 11px", boxSizing: "border-box", borderRadius: 8, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#e2e8f0", fontSize: 14, fontFamily: "inherit" }}
+                  style={{ width: "100%", padding: "8px 11px", boxSizing: "border-box", borderRadius: 8, background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.08)", color: "#1e293b", fontSize: 14, fontFamily: "inherit" }}
                 />
               </div>
               <div>
@@ -1400,7 +1400,7 @@ function MeetingsPage({ project, meetings, onMeetingsChange }) {
                   type="date"
                   value={form.date}
                   onChange={e => handleFieldChange("date", e.target.value)}
-                  style={{ width: "100%", padding: "8px 11px", boxSizing: "border-box", borderRadius: 8, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#e2e8f0", fontSize: 13, fontFamily: "inherit" }}
+                  style={{ width: "100%", padding: "8px 11px", boxSizing: "border-box", borderRadius: 8, background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.08)", color: "#1e293b", fontSize: 13, fontFamily: "inherit" }}
                 />
               </div>
               <div>
@@ -1409,7 +1409,7 @@ function MeetingsPage({ project, meetings, onMeetingsChange }) {
                   value={form.attendees}
                   onChange={e => handleFieldChange("attendees", e.target.value)}
                   placeholder="Jane, John, Lucy"
-                  style={{ width: "100%", padding: "8px 11px", boxSizing: "border-box", borderRadius: 8, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)", color: "#e2e8f0", fontSize: 13, fontFamily: "inherit" }}
+                  style={{ width: "100%", padding: "8px 11px", boxSizing: "border-box", borderRadius: 8, background: "rgba(0,0,0,0.03)", border: "1px solid rgba(0,0,0,0.08)", color: "#1e293b", fontSize: 13, fontFamily: "inherit" }}
                 />
               </div>
             </div>
@@ -1424,8 +1424,8 @@ function MeetingsPage({ project, meetings, onMeetingsChange }) {
                 style={{
                   width: "100%", minHeight: 340, boxSizing: "border-box",
                   padding: "14px 16px", borderRadius: 10,
-                  background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)",
-                  color: "#e2e8f0", fontSize: 13, lineHeight: 1.65, resize: "vertical",
+                  background: "rgba(255,255,255,0.03)", border: "1px solid rgba(0,0,0,0.08)",
+                  color: "#1e293b", fontSize: 13, lineHeight: 1.65, resize: "vertical",
                   fontFamily: "ui-monospace, SFMono-Regular, Consolas, monospace",
                 }}
               />
@@ -1435,7 +1435,7 @@ function MeetingsPage({ project, meetings, onMeetingsChange }) {
             <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
               <button
                 onClick={() => saveCurrent()}
-                style={{ padding: "9px 18px", borderRadius: 9, border: "none", background: "rgba(124,58,237,0.15)", color: "#a78bfa", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>
+                style={{ padding: "9px 18px", borderRadius: 9, border: "none", background: "rgba(124,58,237,0.10)", color: "#7c3aed", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>
                 💾 Save
               </button>
               <button
@@ -1443,12 +1443,12 @@ function MeetingsPage({ project, meetings, onMeetingsChange }) {
                   const m = meetings.find(m => m.id === selected.id);
                   if (m) exportMeetingMd(m);
                 }}
-                style={{ padding: "9px 18px", borderRadius: 9, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)", color: "#94a3b8", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>
+                style={{ padding: "9px 18px", borderRadius: 9, border: "1px solid rgba(0,0,0,0.08)", background: "rgba(0,0,0,0.03)", color: "#475569", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>
                 📥 Export .md
               </button>
               <button
                 onClick={() => deleteMeeting(selected.id)}
-                style={{ padding: "9px 18px", borderRadius: 9, border: "1px solid rgba(239,68,68,0.2)", background: "rgba(239,68,68,0.06)", color: "#f87171", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>
+                style={{ padding: "9px 18px", borderRadius: 9, border: "1px solid rgba(239,68,68,0.15)", background: "rgba(239,68,68,0.05)", color: "#dc2626", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>
                 🗑 Delete
               </button>
 
@@ -1472,19 +1472,19 @@ function FolderSetupScreen({ folderStatus, onPick, onClose }) {
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 200,
-      background: 'rgba(0,0,0,0.75)',
+      background: 'rgba(0,0,0,0.5)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       backdropFilter: 'blur(4px)',
     }}>
       <div style={{
-        background: '#1a1035', border: '1px solid rgba(124,58,237,0.3)',
+        background: '#ffffff', border: '1px solid rgba(124,58,237,0.2)',
         borderRadius: 16, padding: '32px 36px', width: 440,
-        boxShadow: '0 24px 80px rgba(0,0,0,0.6)',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <span style={{ fontSize: 22 }}>📁</span>
-            <span style={{ fontSize: 17, fontWeight: 800, color: '#f1f5f9' }}>Projects Folder</span>
+            <span style={{ fontSize: 17, fontWeight: 800, color: '#1e293b' }}>Projects Folder</span>
           </div>
           <button onClick={onClose} style={{
             background: 'none', border: 'none', color: '#64748b', cursor: 'pointer',
@@ -1493,15 +1493,15 @@ function FolderSetupScreen({ folderStatus, onPick, onClose }) {
         </div>
 
         <div style={{
-          background: isConnected ? 'rgba(16,185,129,0.08)' : isSaved ? 'rgba(245,158,11,0.08)' : 'rgba(239,68,68,0.08)',
-          border: `1px solid ${isConnected ? 'rgba(16,185,129,0.25)' : isSaved ? 'rgba(245,158,11,0.25)' : 'rgba(239,68,68,0.25)'}`,
+          background: isConnected ? 'rgba(5,150,105,0.06)' : isSaved ? 'rgba(245,158,11,0.08)' : 'rgba(220,38,38,0.06)',
+          border: `1px solid ${isConnected ? 'rgba(5,150,105,0.2)' : isSaved ? 'rgba(245,158,11,0.2)' : 'rgba(220,38,38,0.2)'}`,
           borderRadius: 12, padding: '14px 18px', marginBottom: 20,
         }}>
           <div style={{ fontSize: 12, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6,
-            color: isConnected ? '#10b981' : isSaved ? '#f59e0b' : '#f87171' }}>
+            color: isConnected ? '#059669' : isSaved ? '#d97706' : '#dc2626' }}>
             {isConnected ? 'Connected' : isSaved ? 'Access lost — reconnect' : 'Not connected'}
           </div>
-          <div style={{ fontSize: 12, color: '#94a3b8', lineHeight: 1.5 }}>
+          <div style={{ fontSize: 12, color: '#475569', lineHeight: 1.5 }}>
             {isConnected
               ? 'Projects are saved to and loaded from your selected folder.'
               : isSaved
@@ -1514,15 +1514,15 @@ function FolderSetupScreen({ folderStatus, onPick, onClose }) {
           onClick={onPick}
           style={{
             width: '100%', padding: '12px 20px', borderRadius: 10,
-            border: 'none', background: 'rgba(124,58,237,0.2)',
-            color: '#a78bfa', cursor: 'pointer', fontWeight: 700, fontSize: 14,
+            border: 'none', background: 'rgba(124,58,237,0.1)',
+            color: '#7c3aed', cursor: 'pointer', fontWeight: 700, fontSize: 14,
             fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
           }}
         >
           📂 {isConnected ? 'Change Folder' : isSaved ? 'Reconnect Folder' : 'Select Folder'}
         </button>
 
-        <div style={{ marginTop: 14, fontSize: 11, color: '#475569', textAlign: 'center', lineHeight: 1.5 }}>
+        <div style={{ marginTop: 14, fontSize: 11, color: '#64748b', textAlign: 'center', lineHeight: 1.5 }}>
           Uses the browser's native File System Access API.<br />Your data stays on your device.
         </div>
       </div>
@@ -1535,7 +1535,7 @@ function FolderStatusPill({ folderStatus, onClick }) {
   const isConnected = folderStatus.projects === 'connected';
   const isSaved = folderStatus.projects === 'saved';
   const bg = isConnected ? 'rgba(16,185,129,0.1)' : isSaved ? 'rgba(245,158,11,0.1)' : 'rgba(100,116,139,0.1)';
-  const color = isConnected ? '#10b981' : isSaved ? '#f59e0b' : '#64748b';
+  const color = isConnected ? '#059669' : isSaved ? '#f59e0b' : '#64748b';
   const icon = isConnected ? '✅' : isSaved ? '⚠️' : '📁';
   const label = isConnected ? 'Folder connected' : isSaved ? 'Folder — reconnect' : 'Folder not set';
 
@@ -1652,9 +1652,9 @@ export default function App() {
   };
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "#0f0a1e", color: "#e2e8f0" }}>
-      <nav style={{ width: 220, minHeight: "100vh", borderRight: "1px solid rgba(255,255,255,0.06)", padding: "24px 16px", display: "flex", flexDirection: "column", gap: 4, flexShrink: 0 }}>
-        <div style={{ padding: "0 12px 20px", borderBottom: "1px solid rgba(255,255,255,0.06)", marginBottom: 12 }}>
+    <div style={{ display: "flex", minHeight: "100vh", background: "#f1f5f9", color: "#1e293b" }}>
+      <nav style={{ width: 220, minHeight: "100vh", borderRight: "1px solid rgba(0,0,0,0.06)", padding: "24px 16px", display: "flex", flexDirection: "column", gap: 4, flexShrink: 0 }}>
+        <div style={{ padding: "0 12px 20px", borderBottom: "1px solid rgba(0,0,0,0.06)", marginBottom: 12 }}>
           <div style={{ fontSize: 10, color: "#7c3aed", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 4 }}>BREEAM In Use</div>
           <div style={{ fontSize: 15, fontWeight: 800, color: "#f1f5f9" }}>BIU Tracker</div>
         </div>
@@ -1666,20 +1666,20 @@ export default function App() {
         <NavPill label="Evidence Package" icon="📄"  active={page === "package"}       onClick={() => setPage("package")} />
         <NavPill label="Meetings"         icon="📅"  active={page === "meetings"}      onClick={() => setPage("meetings")} />
 
-        <div style={{ marginTop: "auto", padding: "16px 12px 0", borderTop: "1px solid rgba(255,255,255,0.06)" }}>
+        <div style={{ marginTop: "auto", padding: "16px 12px 0", borderTop: "1px solid rgba(0,0,0,0.06)" }}>
           <FolderStatusPill folderStatus={folderStatus} onClick={() => setShowFolderSetup(true)} />
 
           <div style={{ marginTop: 10, marginBottom: 6, fontSize: 10, color: "#475569" }}>Active project</div>
           <select
             value={activeProjectId}
             onChange={e => setActiveProjectId(parseInt(e.target.value))}
-            style={{ width: "100%", padding: "7px 10px", borderRadius: 8, background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.1)", color: "#e2e8f0", fontSize: 12, fontFamily: "inherit" }}
+            style={{ width: "100%", padding: "7px 10px", borderRadius: 8, background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.10)", color: "#1e293b", fontSize: 12, fontFamily: "inherit" }}
           >
             {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
           <button
             onClick={() => setShowNewProject(true)}
-            style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px dashed rgba(124,58,237,0.35)", background: "rgba(124,58,237,0.06)", color: "#a78bfa", cursor: "pointer", fontWeight: 700, fontSize: 12, fontFamily: "inherit", marginTop: 8 }}
+            style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px dashed rgba(124,58,237,0.25)", background: "rgba(124,58,237,0.05)", color: "#7c3aed", cursor: "pointer", fontWeight: 700, fontSize: 12, fontFamily: "inherit", marginTop: 8 }}
           >
             + New Project
           </button>
