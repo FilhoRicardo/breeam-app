@@ -877,8 +877,9 @@ function AssessmentPage({ project, onUpdate }) {
         })}
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20 }}>
-        <div>
+      <div style={{ display: "flex", gap: 20, alignItems: "flex-start" }}>
+        {/* LEFT — credit list */}
+        <div style={{ width: 360, flexShrink: 0 }}>
           {credits.map(c => (
             <div key={c.code}
               onClick={() => setActiveCredit(c.code === activeCredit?.code ? null : c)}
@@ -892,14 +893,18 @@ function AssessmentPage({ project, onUpdate }) {
                   <span style={{ fontSize: 11, fontWeight: 800, color: "#a78bfa" }}>{c.code}</span>
                   <span style={{ fontSize: 12, color: "#94a3b8", marginLeft: 8 }}>{c.title}</span>
                 </div>
-                <span style={{ fontSize: 10, color: "#475569" }}>→</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  {c.score > 0 && <span style={{ fontSize: 10, fontWeight: 700, color: "#10b981" }}>{c.score} cr</span>}
+                  <span style={{ fontSize: 10, color: "#475569" }}>→</span>
+                </div>
               </div>
               {c.narrative && <div style={{ fontSize: 11, color: "#475569", marginTop: 5, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.narrative}</div>}
             </div>
           ))}
         </div>
 
-        <div>
+        {/* RIGHT — credit detail, fills remaining width */}
+        <div style={{ flex: 1, minWidth: 0 }}>
           {!activeCredit ? (
             <div style={{ color: "#334155", fontSize: 13, padding: "60px 20px", textAlign: "center", border: "1px dashed rgba(255,255,255,0.07)", borderRadius: 12 }}>
               Select a credit to write narrative and add evidence
