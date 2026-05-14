@@ -1475,50 +1475,43 @@ export default function App() {
 
   return (
     <>
-      {browserUnsupported && (
-        <div style={{ background: "#fef3c7", borderBottom: "2px solid #f59e0b", padding: "10px 20px", fontSize: 13, color: "#92400e", textAlign: "center" }}>
-          ⚠️ Your browser doesn't support the File System Access API (Firefox/Safari). Please use <strong>Chrome, Edge, or Arc</strong> to enable local folder storage.
+      <nav style={{ width: 220, minHeight: "100vh", borderRight: "1px solid rgba(0,0,0,0.06)", padding: "24px 16px", display: "flex", flexDirection: "column", gap: 4, flexShrink: 0, background: "#ffffff", position: "sticky", top: 0, alignSelf: "flex-start" }}>
+        <div style={{ padding: "0 12px 20px", borderBottom: "1px solid rgba(0,0,0,0.06)", marginBottom: 12 }}>
+          <div style={{ fontSize: 10, color: "#7c3aed", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 4 }}>BREEAM In Use</div>
+          <div style={{ fontSize: 15, fontWeight: 800, color: "#1e293b" }}>BIU Tracker</div>
         </div>
-      )}
-      <div style={{ display: "flex", minHeight: "100vh", background: "#f1f5f9", color: "#1e293b" }}>
-        <nav style={{ width: 220, minHeight: "100vh", borderRight: "1px solid rgba(0,0,0,0.06)", padding: "24px 16px", display: "flex", flexDirection: "column", gap: 4, flexShrink: 0 }}>
-          <div style={{ padding: "0 12px 20px", borderBottom: "1px solid rgba(0,0,0,0.06)", marginBottom: 12 }}>
-            <div style={{ fontSize: 10, color: "#7c3aed", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 4 }}>BREEAM In Use</div>
-            <div style={{ fontSize: 15, fontWeight: 800, color: "#1e293b" }}>BIU Tracker</div>
-          </div>
 
-          <NavPill label="Home"             icon="🏠"  active={page === "home"}          onClick={() => setPage("home")} />
-          <NavPill label="Pre-Assessment"   icon="🔍"  active={page === "preassessment"} onClick={() => setPage("preassessment")} />
-          <NavPill label="Assessment"       icon="📋"  active={page === "assessment"}    onClick={() => setPage("assessment")} />
-          <NavPill label="Evidence Vault"   icon="📦"  active={page === "vault"}         onClick={() => setPage("vault")} />
-          <NavPill label="Evidence Package" icon="📄"  active={page === "package"}       onClick={() => setPage("package")} />
-          <NavPill label="Meetings"         icon="📅"  active={page === "meetings"}      onClick={() => setPage("meetings")} />
+        <NavPill label="Home"             icon="🏠"  active={page === "home"}          onClick={() => setPage("home")} />
+        <NavPill label="Pre-Assessment"   icon="🔍"  active={page === "preassessment"} onClick={() => setPage("preassessment")} />
+        <NavPill label="Assessment"       icon="📋"  active={page === "assessment"}    onClick={() => setPage("assessment")} />
+        <NavPill label="Evidence Vault"   icon="📦"  active={page === "vault"}         onClick={() => setPage("vault")} />
+        <NavPill label="Evidence Package" icon="📄"  active={page === "package"}       onClick={() => setPage("package")} />
+        <NavPill label="Meetings"         icon="📅"  active={page === "meetings"}      onClick={() => setPage("meetings")} />
 
-          <div style={{ marginTop: "auto", padding: "16px 12px 0", borderTop: "1px solid rgba(0,0,0,0.06)" }}>
-            <FolderStatusPill folderStatus={folderStatus} onClick={() => setShowFolderSetup(true)} />
+        <div style={{ marginTop: "auto", padding: "16px 12px 0", borderTop: "1px solid rgba(0,0,0,0.06)" }}>
+          <FolderStatusPill folderStatus={folderStatus} onClick={() => setShowFolderSetup(true)} />
 
-            <div style={{ marginTop: 10, marginBottom: 6, fontSize: 10, color: "#475569" }}>Active project</div>
-            <select value={activeProjectId} onChange={e => setActiveProjectId(parseInt(e.target.value))}
-              style={{ width: "100%", padding: "7px 10px", borderRadius: 8, background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.10)", color: "#1e293b", fontSize: 12, fontFamily: "inherit" }}>
-              {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-            </select>
-            <button onClick={() => setShowNewProject(true)}
-              style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px dashed rgba(124,58,237,0.25)", background: "rgba(124,58,237,0.05)", color: "#7c3aed", cursor: "pointer", fontWeight: 700, fontSize: 12, fontFamily: "inherit", marginTop: 8 }}>
-              + New Project
-            </button>
-          </div>
-        </nav>
+          <div style={{ marginTop: 10, marginBottom: 6, fontSize: 10, color: "#475569" }}>Active project</div>
+          <select value={activeProjectId} onChange={e => setActiveProjectId(parseInt(e.target.value))}
+            style={{ width: "100%", padding: "7px 10px", borderRadius: 8, background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.10)", color: "#1e293b", fontSize: 12, fontFamily: "inherit" }}>
+            {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
+          <button onClick={() => setShowNewProject(true)}
+            style={{ width: "100%", padding: "8px 10px", borderRadius: 8, border: "1px dashed rgba(124,58,237,0.25)", background: "rgba(124,58,237,0.05)", color: "#7c3aed", cursor: "pointer", fontWeight: 700, fontSize: 12, fontFamily: "inherit", marginTop: 8 }}>
+            + New Project
+          </button>
+        </div>
+      </nav>
 
-        <main style={{ flex: 1, overflowY: "auto" }}>
-          {pages[page] || pages.home}
-          {showFolderSetup && (
-            <FolderSetupScreen folderStatus={folderStatus} onPick={pickProjectsFolder} onClose={() => setShowFolderSetup(false)} />
-          )}
-          {showNewProject && (
-            <NewProjectModal onClose={() => setShowNewProject(false)} onCreate={createProject} />
-          )}
-        </main>
-      </div>
+      <main style={{ flex: 1, overflowY: "auto" }}>
+        {pages[page] || pages.home}
+        {showFolderSetup && (
+          <FolderSetupScreen folderStatus={folderStatus} onPick={pickProjectsFolder} onClose={() => setShowFolderSetup(false)} />
+        )}
+        {showNewProject && (
+          <NewProjectModal onClose={() => setShowNewProject(false)} onCreate={createProject} />
+        )}
+      </main>
     </>
   );
 }
