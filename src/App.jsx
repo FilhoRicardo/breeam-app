@@ -4,7 +4,7 @@ import { DEMO_PROJECT } from "./data/projects.js";
 import { idbGet, idbSet, idbDel, lsGet, lsSet, lsDel } from "./utils/storage.js";
 import {
   isFileSystemAccessSupported, createProjectFolderStructure,
-  getCreditFolder, getMeetingsFolder, listDir, readTextFile, saveTextFile,
+  getCreditFolder, getMeetingsFolder, listDir, listEvidence, readTextFile, saveEvidenceFile, saveTextFile,
   listProjectSlugs, loadProjectFromFolder, saveProjectToFolder,
 } from "./utils/fileApi.js";
 
@@ -145,12 +145,55 @@ const loadMeetings = () => {
 };
 const saveMeetings = (ms) => { try { lsSet("biu:meetings", ms); } catch { /* quota */ } };
 
+const isLikelyEvidenceFile = (item) => {
+  if (!item) return false;
+  if (typeof item === "object") return Boolean(item.name);
+  if (typeof item !== "string") return false;
+  return /\.[a-z0-9]{2,8}$/i.test(item) || item.includes("/") || item.includes("\\");
+};
+
+const normalizeAnswerOptions = (answers = []) =>
+  answers.map((answer) => ({
+    ...answer,
+    points: answer.points ?? answer.credits ?? 0,
+  }));
+
+const normalizeCredit = (template, existing = {}) => {
+  const answers = normalizeAnswerOptions(existing.answers || template.answers || []);
+  const legacyEvidence = existing.evidenceFiles ?? existing.evidence ?? [];
+  const evidenceFiles = Array.isArray(legacyEvidence)
+    ? legacyEvidence.filter(isLikelyEvidenceFile)
+    : [];
+
+  return {
+    ...template,
+    ...existing,
+    answers,
+    description: existing.description ?? template.description ?? template.aim ?? "",
+    guidance: existing.guidance ?? template.guidance ?? [
+      template.question ? `Question: ${template.question}` : null,
+      template.instruction || null,
+    ].filter(Boolean),
+    questions: existing.questions ?? template.questions ?? (
+      answers.length
+        ? [{
+            question: template.question || "Select the applicable answer",
+            options: answers,
+          }]
+        : []
+    ),
+    evidenceRequirements: existing.evidenceRequirements ?? template.evidenceRequirements ?? template.evidence ?? [],
+    evidenceFiles,
+    evidence: evidenceFiles,
+  };
+};
+
 // ── Project init ─────────────────────────────────────────────────────────────
 const initProject = (data) => ({
   ...data,
   credits: CREDITS.map(tmpl => {
     const existing = (data.credits || []).find(c => c.code === tmpl.code);
-    return existing ? { ...tmpl, ...existing } : { ...tmpl };
+    return normalizeCredit(tmpl, existing);
   }),
 });
 
@@ -202,6 +245,7 @@ const generatePDF = (project) => {
   w.document.write(`<h1>${project.name} — BREEAM Evidence Package</h1>`);
   w.document.write(`<p style="color:#64748b;font-size:13px">Generated: ${tod()} | ${project.credits.filter(c=>c.pursuing).length} credits pursued</p>`);
   project.credits.filter(c => c.pursuing).forEach(c => {
+    const evidenceFiles = c.evidenceFiles || c.evidence || [];
     w.document.write(`<div class="credit">
       <div class="credit-header">
         <span class="code">${c.code}</span>
@@ -209,7 +253,7 @@ const generatePDF = (project) => {
       </div>
       <div style="font-size:12px;color:#475569;margin-top:4px">${c.title}</div>
       ${c.narrative ? `<div class="narrative">${c.narrative}</div>` : ""}
-      ${(c.evidence || []).length ? `<div class="evidence">📎 ${(c.evidence||[]).map(e=>typeof e==="string"?e:e.name).join(", ")}</div>` : ""}
+      ${evidenceFiles.length ? `<div class="evidence">📎 ${evidenceFiles.map(e=>typeof e==="string"?e:e.name).join(", ")}</div>` : ""}
     </div>`);
   });
   w.document.write(`</body></html>`);
@@ -332,10 +376,6 @@ function PreAssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
     if (!projectRoot || !projectSlug) return;
     const credit = selectedCredit;
     if (!credit || !credit.pursuing) return;
-    // Write assessment.md to the credit's Part N folder
-    const partN = credit.part === 2 ? "Part-2" : "Part-1";
-    const creditFolder = `${credit.part}-${credit.code.replace(" ", "-")}`;
-    const partPath = `${partN}/${creditFolder}/`;
     const label = credit.selectedAnswer
       ? `${credit.answers?.find(a => a.label === credit.selectedAnswer)?.points || 0} credits`
       : "not assessed";
@@ -359,7 +399,7 @@ function PreAssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
       credit.narrative ? `## Assessor Narrative\n\n${credit.narrative}` : "_No narrative recorded._",
     ].join("\n");
     (async () => {
-      const folder = await getCreditFolder(projectRoot, projectSlug, partPath);
+      const folder = await getCreditFolder(projectRoot, projectSlug, credit.code, credit.part);
       if (folder) await saveTextFile(folder, "assessment.md", body);
     })();
   }, [selectedCredit?.code, selectedCredit?.pursuing, selectedCredit?.selectedAnswer,
@@ -520,7 +560,7 @@ function PreAssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
 // ── PAGE: Assessment (detailed) ───────────────────────────────────────────────
 function AssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
   const [selectedCredit, setSelectedCredit] = useState(null);
-  const categories = [...new Set(CREDITS.map(c => c.category))];
+  const [evidenceModalCredit, setEvidenceModalCredit] = useState(null);
 
   return (
     <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
@@ -642,11 +682,11 @@ function AssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
               )}
 
               {/* Evidence requirements */}
-              {displayCredit.evidence && displayCredit.evidence.length > 0 && (
+              {displayCredit.evidenceRequirements && displayCredit.evidenceRequirements.length > 0 && (
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ fontSize: 11, color: "#059669", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>Evidence Requirements</div>
                   <div style={{ background: "rgba(16,185,129,0.05)", border: "1px solid rgba(16,185,129,0.15)", borderRadius: 8, padding: "12px 16px" }}>
-                    {displayCredit.evidence.map((ev, i) => (
+                    {displayCredit.evidenceRequirements.map((ev, i) => (
                       <div key={i} style={{ fontSize: 11, color: "#334155", lineHeight: 1.5, marginBottom: 5, display: "flex", gap: 6 }}>
                         <span style={{ color: "#059669", fontWeight: 700, flexShrink: 0 }}>•</span>
                         {ev}
@@ -683,19 +723,19 @@ function AssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
 
               <div>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-                  <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em" }}>Evidence ({displayCredit.evidence?.length || 0} files)</div>
-                  <button onClick={() => setActiveCredit({ ...displayCredit, _showEvidence: true })}
+                  <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em" }}>Evidence ({displayCredit.evidenceFiles?.length || 0} files)</div>
+                  <button onClick={() => setEvidenceModalCredit(displayCredit)}
                     style={{ padding: "6px 12px", borderRadius: 7, border: "none", background: "rgba(124,58,237,0.10)", color: "#7c3aed", cursor: "pointer", fontSize: 12, fontWeight: 700, fontFamily: "inherit" }}>
                     + Add Evidence
                   </button>
                 </div>
-                {displayCredit.evidence?.map((e, i) => (
+                {displayCredit.evidenceFiles?.map((e, i) => (
                   <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "7px 10px", borderRadius: 7, background: "rgba(0,0,0,0.03)", marginBottom: 4 }}>
                     <span style={{ fontSize: 13 }}>📄</span>
                     <span style={{ fontSize: 12, color: "#1e293b", flex: 1 }}>{typeof e === "string" ? e : e.name}</span>
                   </div>
                 ))}
-                {!displayCredit.evidence?.length && <div style={{ fontSize: 11, color: "#334155", textAlign: "center", padding: "12px" }}>No evidence yet</div>}
+                {!displayCredit.evidenceFiles?.length && <div style={{ fontSize: 11, color: "#334155", textAlign: "center", padding: "12px" }}>No evidence yet</div>}
               </div>
 
               {/* Pursue / Skip toggle */}
@@ -733,15 +773,16 @@ function AssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
         })()}
       </div>
 
-      {activeCredit?._showEvidence && (
+      {evidenceModalCredit && (
         <EvidenceModal
-          credit={activeCredit}
+          credit={evidenceModalCredit}
           projectRoot={projectRoot}
           projectSlug={projectSlug}
-          onClose={() => setActiveCredit({ ...activeCredit, _showEvidence: false })}
+          onClose={() => setEvidenceModalCredit(null)}
           onSave={updated => {
             onUpdate(updated);
-            setActiveCredit({ ...updated, _showEvidence: false });
+            if (selectedCredit?.code === updated.code) setSelectedCredit(updated);
+            setEvidenceModalCredit(null);
           }}
         />
       )}
@@ -750,9 +791,6 @@ function AssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
 }
 
 // ── Helper state for EvidenceModal (lifted up from AssessmentPage) ───────────
-let activeCredit = null;
-function setActiveCredit(c) { activeCredit = c; }
-
 // ── PAGE: Evidence Vault ────────────────────────────────────────────────────
 function EvidenceVaultPage({ project }) {
   const [part, setPart] = useState(1);
@@ -784,20 +822,20 @@ function EvidenceVaultPage({ project }) {
               <div>
                 <span style={{ fontSize: 11, fontWeight: 800, color: cc.color }}>{c.code}</span>
                 <span style={{ fontSize: 13, color: "#1e293b", marginLeft: 10 }}>{c.title}</span>
-                <span style={{ fontSize: 11, color: "#64748b", marginLeft: 8 }}>{c.evidence?.length || 0} files</span>
+                <span style={{ fontSize: 11, color: "#64748b", marginLeft: 8 }}>{c.evidenceFiles?.length || 0} files</span>
               </div>
               <div style={{ fontSize: 11, color: "#64748b" }}>
-                {c.evidence?.map((e, i) => (
+                {c.evidenceFiles?.map((e, i) => (
                   <span key={i} style={{ marginLeft: 6 }}>📄 {typeof e === "string" ? e.split("/").pop() : e.name}</span>
                 ))}
-                {!c.evidence?.length && <span style={{ color: "#334155" }}>— no files</span>}
+                {!c.evidenceFiles?.length && <span style={{ color: "#334155" }}>— no files</span>}
               </div>
             </div>
           </div>
         );
       })}
 
-      {credits.every(c => !c.evidence?.length) && (
+      {credits.every(c => !c.evidenceFiles?.length) && (
         <div style={{ color: "#334155", fontSize: 13, padding: 40, textAlign: "center" }}>
           No evidence files uploaded yet. Go to Assessment to add evidence.
         </div>
@@ -1116,19 +1154,23 @@ function EvidenceModal({ credit, projectRoot, projectSlug, onClose, onSave }) {
   const [uploads, setUploads] = useState([]);
   const [saving, setSaving] = useState(false);
   const MAX_SIZE_MB = 50;
+  const existingFiles = credit.evidenceFiles || credit.evidence || [];
 
   useEffect(() => {
     if (!projectRoot) return;
     (async () => {
-      const folder = await getCreditFolder(projectRoot, projectSlug, credit);
+      const folder = await getCreditFolder(projectRoot, projectSlug, credit.code, credit.part);
       if (!folder) return;
-      const entries = await listDir(folder);
-      const files = entries.filter(e => e.isFile);
+      const files = await listEvidence(folder);
       setUploads(files.map(f => ({ name: f.name, size: 0 })));
     })();
-  }, [projectRoot]);
+  }, [projectRoot, projectSlug, credit.code, credit.part]);
 
   const handleFiles = async (fileList) => {
+    if (!projectRoot) {
+      alert("Connect a project folder before uploading evidence files.");
+      return;
+    }
     setSaving(true);
     const arr = Array.from(fileList);
     const valid = arr.filter(f => {
@@ -1136,28 +1178,24 @@ function EvidenceModal({ credit, projectRoot, projectSlug, onClose, onSave }) {
       return true;
     });
     const newFiles = [];
+    const folder = await getCreditFolder(projectRoot, projectSlug, credit.code, credit.part);
+    if (!folder) {
+      setSaving(false);
+      alert("Unable to access the credit folder.");
+      return;
+    }
     for (const file of valid) {
-      const folder = await getCreditFolder(projectRoot, projectSlug, credit);
-      if (!folder) continue;
-      const ext = file.name.split(".").pop();
-      const safeName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
       try {
-        const buffer = await file.arrayBuffer();
-        const writable = await folder.createWritable();
-        await writable.write(buffer);
-        await writable.close();
-        newFiles.push({ name: safeName, type: file.type, size: file.size });
+        const saved = await saveEvidenceFile(folder, file);
+        if (saved) newFiles.push({ name: file.name, type: file.type, size: file.size });
       } catch (e) { console.error("Upload failed:", e); }
     }
-    setUploads(prev => {
-      const filtered = prev.filter(f => typeof f === "string");
-      return [...filtered, ...newFiles];
-    });
+    setUploads(prev => [...prev, ...newFiles]);
     setSaving(false);
   };
 
   const handleSave = () => {
-    onSave({ ...credit, evidence: uploads });
+    onSave({ ...credit, evidenceFiles: uploads, evidence: uploads });
   };
 
   return (
@@ -1192,10 +1230,10 @@ function EvidenceModal({ credit, projectRoot, projectSlug, onClose, onSave }) {
           </div>
         )}
 
-        {credit.evidence && credit.evidence.length > 0 && (
+        {existingFiles.length > 0 && (
           <div style={{ marginBottom: 16 }}>
             <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>Previously Saved</div>
-            {credit.evidence.map((f, i) => (
+            {existingFiles.map((f, i) => (
               <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 12px", background: "rgba(0,0,0,0.02)", borderRadius: 7, marginBottom: 4, border: "1px solid rgba(0,0,0,0.05)" }}>
                 <span style={{ fontSize: 14 }}>📄</span>
                 <span style={{ fontSize: 12, color: "#64748b", flex: 1 }}>{typeof f === "string" ? f : f.name}</span>
