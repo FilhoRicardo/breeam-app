@@ -267,6 +267,8 @@ const initProject = (data) => ({
   }),
 });
 
+const getDisplayCredit = (template, projectCredit) => normalizeCredit(template, projectCredit || {});
+
 // ── Category colours ────────────────────────────────────────────────────────
 const CATEGORY_COLORS = {
   Transport:     { bg: "rgba(245,158,11,0.08)",   border: "rgba(245,158,11,0.20)",  color: "#d97706" },
@@ -510,7 +512,7 @@ function PreAssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
                         const sc = pc?.status || "not_pursuing";
                         return (
                           <div key={c.code}
-                            onClick={() => setSelectedCredit({ ...c, ...pc })}
+                            onClick={() => setSelectedCredit(getDisplayCredit(c, pc))}
                             style={{
                               padding: "9px 12px", borderRadius: 8, marginBottom: 3, cursor: "pointer",
                               background: selectedCredit?.code === c.code ? "rgba(124,58,237,0.12)" : pursued ? "rgba(255,255,255,0.04)" : "transparent",
@@ -712,7 +714,7 @@ function AssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
                       const sc = pc?.status || "not_pursuing";
                       return (
                         <div key={c.code}
-                          onClick={() => setSelectedCredit({ ...c, ...pc })}
+                          onClick={() => setSelectedCredit(getDisplayCredit(c, pc))}
                           style={{
                             padding: "10px 12px", borderRadius: 9, marginBottom: 4, cursor: "pointer",
                             background: selectedCredit?.code === c.code ? "rgba(124,58,237,0.12)" : "transparent",
