@@ -1391,6 +1391,7 @@ export default function App() {
   const [folderStatus, setFolderStatus] = useState({});
   const [folderBusy, setFolderBusy] = useState(false);
   const [projectRoot, setProjectRoot] = useState(null);
+  const mainRef = useRef(null);
 
   const activeProject = projects.find(p => p.id === activeProjectId) || projects[0];
 
@@ -1465,6 +1466,10 @@ export default function App() {
     })();
   }, [projects, projectRoot]);
 
+  useEffect(() => {
+    if (mainRef.current) mainRef.current.scrollTo({ top: 0, behavior: "auto" });
+  }, [page, activeProjectId]);
+
   const updateCredit = (updated) => {
     setProjects(prev => prev.map(p => {
       if (p.id !== activeProjectId) return p;
@@ -1512,7 +1517,7 @@ export default function App() {
   };
 
   return (
-    <>
+    <div style={{ display: "flex", minHeight: "100vh", alignItems: "stretch" }}>
       <nav style={{ width: 220, minHeight: "100vh", borderRight: "1px solid rgba(0,0,0,0.06)", padding: "24px 16px", display: "flex", flexDirection: "column", gap: 4, flexShrink: 0, background: "#ffffff", position: "sticky", top: 0, alignSelf: "flex-start" }}>
         <div style={{ padding: "0 12px 20px", borderBottom: "1px solid rgba(0,0,0,0.06)", marginBottom: 12 }}>
           <div style={{ fontSize: 10, color: "#7c3aed", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.15em", marginBottom: 4 }}>BREEAM In Use</div>
@@ -1541,7 +1546,7 @@ export default function App() {
         </div>
       </nav>
 
-      <main style={{ flex: 1, overflowY: "auto" }}>
+      <main ref={mainRef} style={{ flex: 1, minWidth: 0, overflowY: "auto" }}>
         {pages[page] || pages.home}
         {showFolderSetup && (
           <FolderSetupScreen folderStatus={folderStatus} onPick={pickProjectsFolder} onClose={() => setShowFolderSetup(false)} />
@@ -1550,6 +1555,6 @@ export default function App() {
           <NewProjectModal onClose={() => setShowNewProject(false)} onCreate={createProject} />
         )}
       </main>
-    </>
+    </div>
   );
 }
