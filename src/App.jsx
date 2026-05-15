@@ -194,6 +194,8 @@ const buildUpdatedCreditSelection = (credit, nextSelectedAnswers) => {
   };
 };
 
+const formatOptionLabel = (option) => option?.id ? `${option.id}. ${option.label}` : option?.label || "";
+
 const preferNonEmptyArray = (...values) => {
   for (const value of values) {
     if (Array.isArray(value) && value.length > 0) return value;
@@ -556,12 +558,21 @@ function PreAssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
 
                 <div style={{ fontSize: 12, color: "#334155", marginBottom: 14, lineHeight: 1.6 }}>{c.description}</div>
 
-                {c.methodology && c.methodology.length > 0 && (
+                {c.criteria && c.criteria.length > 0 && (
                   <div style={{ marginBottom: 14 }}>
-                    <div style={{ fontSize: 11, color: "#2563eb", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>Methodology</div>
+                    <div style={{ fontSize: 11, color: "#2563eb", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>Assessment Criteria</div>
                     <div style={{ background: "rgba(59,130,246,0.05)", border: "1px solid rgba(59,130,246,0.15)", borderRadius: 8, padding: "12px 16px" }}>
-                      {c.methodology.filter(Boolean).map((line, i) => (
-                        <div key={i} style={{ fontSize: 11, color: line.startsWith(" ") ? "#475569" : "#334155", lineHeight: 1.6, whiteSpace: "pre-wrap", fontWeight: line.startsWith(" ") ? 400 : 500 }}>{line}</div>
+                      {c.criteria.map((criterion) => (
+                        <div key={criterion.id} style={{ marginBottom: 10 }}>
+                          <div style={{ fontSize: 11, color: "#334155", lineHeight: 1.6, fontWeight: 600 }}>
+                            {criterion.id}. {criterion.text}
+                          </div>
+                          {criterion.details?.map((detail, index) => (
+                            <div key={index} style={{ fontSize: 11, color: "#475569", lineHeight: 1.5, marginTop: 4, paddingLeft: 12 }}>
+                              - {detail}
+                            </div>
+                          ))}
+                        </div>
                       ))}
                     </div>
                   </div>
@@ -620,7 +631,7 @@ function PreAssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
                                     border: `1px solid ${selected ? "rgba(124,58,237,0.3)" : "rgba(0,0,0,0.07)"}`,
                                     fontSize: 12, color: selected ? "#6d28d9" : "#334155",
                                   }}>
-                                  <span style={{ fontWeight: 600 }}>{opt.label}</span>
+                                  <span style={{ fontWeight: 600 }}>{formatOptionLabel(opt)}</span>
                                   <span style={{ marginLeft: 6, color: "#475569" }}>- {opt.points} credit{opt.points !== 1 ? "s" : ""}</span>
                                   {opt.sub && (
                                     <div style={{ marginTop: 5, fontSize: 11, color: "#475569", lineHeight: 1.5 }}>
@@ -902,6 +913,10 @@ function AssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
           projectRoot={projectRoot}
           projectSlug={projectSlug}
           onClose={() => setEvidenceModalCredit(null)}
+          onPersist={updated => {
+            onUpdate(updated);
+            if (selectedCredit?.code === updated.code) setSelectedCredit(updated);
+          }}
           onSave={updated => {
             onUpdate(updated);
             if (selectedCredit?.code === updated.code) setSelectedCredit(updated);
@@ -1273,7 +1288,7 @@ function MeetingsPage({ project, meetings, onMeetingsChange, projectRoot, projec
 }
 
 // ── EvidenceModal ────────────────────────────────────────────────────────────
-function EvidenceModal({ credit, projectRoot, projectSlug, onClose, onSave }) {
+function EvidenceModal({ credit, projectRoot, projectSlug, onClose, onSave, onPersist }) {
   const [uploads, setUploads] = useState([]);
   const [saving, setSaving] = useState(false);
   const MAX_SIZE_MB = 50;
@@ -1313,7 +1328,11 @@ function EvidenceModal({ credit, projectRoot, projectSlug, onClose, onSave }) {
         if (saved) newFiles.push({ name: file.name, type: file.type, size: file.size });
       } catch (e) { console.error("Upload failed:", e); }
     }
-    setUploads(prev => [...prev, ...newFiles]);
+    const nextUploads = [...uploads, ...newFiles];
+    setUploads(nextUploads);
+    if (newFiles.length > 0) {
+      onPersist({ ...credit, evidenceFiles: nextUploads, evidence: nextUploads });
+    }
     setSaving(false);
   };
 
