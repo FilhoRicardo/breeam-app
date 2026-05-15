@@ -154,7 +154,72 @@ export const CREDITS = [
   { code: "Pol 1", category: "Pollution", title: "Nitrogen Dioxide", available: 2, part: 1 },
   { code: "Pol 2", category: "Pollution", title: "Flooding", available: 2, part: 1 },
   { code: "Pol 3", category: "Pollution", title: "Surface Water Runoff", available: 1, part: 1 },
-  { code: "Tra 2", category: "Transport", title: "Public Transport Access", available: 4, part: 1 },
+  {
+    code: "Tra 2", category: "Transport", title: "Public Transport Access", available: 4, part: 1,
+    aim: "To ensure appropriate public transport provision is available to building users, thereby helping to reduce transport-related pollution and congestion.",
+    question: "Is the asset within walking distance of public transport nodes which operate a frequent service?",
+    instruction: "Select a single answer option based on the nearest compliant public transport node or dedicated bus provision.",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 1, label: "Public transport node over 1km away via a safe pedestrian route, with a 30 minute peak-time service frequency" },
+      { id: "C", credits: 2, label: "Public transport node over 1km away via a safe pedestrian route, with a 15 minute peak-time service frequency" },
+      { id: "D", credits: 3, label: "Public transport node within 1km via a safe pedestrian route, with a 30 minute peak-time service frequency" },
+      { id: "E", credits: 4, label: "A dedicated bus service is provided", sub: "The service must operate at the beginning and end of the working day and transfer users to a population centre, public transport interchange, or provide a door-to-door service." },
+      { id: "F", credits: 4, label: "Public transport node within 500m via a safe pedestrian route, with a 30 minute peak-time service frequency" },
+      { id: "G", credits: 6, label: "Public transport node within 1km via a safe pedestrian route, with a 15 minute peak-time service frequency" },
+      { id: "H", credits: 8, label: "Public transport node within 500m via a safe pedestrian route, with a 15 minute peak-time service frequency" },
+      { id: "I", credits: 0, label: "No public transport node in place that meets the above criteria" },
+    ],
+    criteria: [
+      {
+        id: 1,
+        answer: "B,C,D,E,F,G,H",
+        text: "Distance must be measured via safe pedestrian routes and not in a straight line.",
+        details: []
+      },
+      {
+        id: 2,
+        answer: "B,C,D,E,F,G,H",
+        text: "Services operating from more than one stop within proximity of the building must only be counted once at the closest stop. Different services at the same stop may be considered separately.",
+        details: []
+      },
+      {
+        id: 3,
+        answer: "E",
+        text: "Dedicated bus service criteria:",
+        details: [
+          "Service provided at the beginning and end of the working day",
+          "Transfers users to the local population centre, public transport interchange, or provides a door-to-door service"
+        ]
+      }
+    ],
+    methodology: [
+      "Measure distance using the actual safe pedestrian route from the building to the nearest compliant public transport node.",
+      "Do not use straight-line distance.",
+      "",
+      "Where the same transport service operates from more than one nearby stop, count that service only once using the closest stop.",
+      "Different services at the same stop can be treated as separate services.",
+      "",
+      "Dedicated bus service option:",
+      "  Service must operate at the beginning and end of the working day.",
+      "  Service must transfer users to a local population centre, public transport interchange, or provide a door-to-door service.",
+      "",
+      "Peak times should reflect when over 80% of building users arrive or leave, based on the building's normal shift pattern.",
+    ],
+    evidence: [
+      "Annotated map showing the pedestrian route and measured distance to compliant public transport nodes",
+      "Photographic evidence of the public transport network and safe pedestrian route(s)",
+      "Copies of public transport timetables confirming service frequency at peak times",
+      "Where applicable, a letter confirming the provision and operating details of the dedicated bus service"
+    ],
+    notes: [
+      "Compliant transport nodes include bus services, tram stops, and railway stations.",
+      "The service at each node must provide travel to or from an urban centre, major transport node, or community focal point such as a school, library, village centre, or doctor's surgery.",
+      "Assess local services only. Exclude national transport services unless they clearly operate as a local commuter service.",
+      "Safe pedestrian routes include pavements, safe crossing points, and dedicated pedestrian crossing points where provided.",
+      "Assessor judgement is required where route safety is unclear, and the justification should be recorded."
+    ]
+  },
   { code: "Tra 3", category: "Transport", title: "Travel Plan", available: 1, part: 1 },
   { code: "Lea 1", category: "Ecology", title: "Life Cycle Impacts", available: 4, part: 1 },
   { code: "Lea 2", category: "Ecology", title: "Ecology", available: 2, part: 1 },
