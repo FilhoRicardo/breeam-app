@@ -135,8 +135,11 @@ const CREDIT_PDF_MAP = {
 
 // ── Storage helpers (localStorage with error handling) ──────────────────────
 const loadProjects = () => {
-  try { return lsGet("biu:projects") || [DEMO_PROJECT]; }
-  catch { return [DEMO_PROJECT]; }
+  try {
+    const stored = lsGet("biu:projects") || [DEMO_PROJECT];
+    return stored.map(initProject);
+  }
+  catch { return [initProject(DEMO_PROJECT)]; }
 };
 const saveProjects = (ps) => { try { lsSet("biu:projects", ps); } catch { /* quota */ } };
 const loadMeetings = () => {
@@ -158,31 +161,50 @@ const normalizeAnswerOptions = (answers = []) =>
     points: answer.points ?? answer.credits ?? 0,
   }));
 
+const preferNonEmptyArray = (...values) => {
+  for (const value of values) {
+    if (Array.isArray(value) && value.length > 0) return value;
+  }
+  return [];
+};
+
 const normalizeCredit = (template, existing = {}) => {
   const answers = normalizeAnswerOptions(existing.answers || template.answers || []);
   const legacyEvidence = existing.evidenceFiles ?? existing.evidence ?? [];
   const evidenceFiles = Array.isArray(legacyEvidence)
     ? legacyEvidence.filter(isLikelyEvidenceFile)
     : [];
+  const fallbackQuestions = answers.length
+    ? [{
+        question: template.question || "Select the applicable answer",
+        options: answers,
+      }]
+    : [];
+  const guidance = preferNonEmptyArray(
+    existing.guidance,
+    template.guidance,
+    [
+      template.question ? `Question: ${template.question}` : null,
+      template.instruction || null,
+    ].filter(Boolean),
+  );
+  const questions = preferNonEmptyArray(existing.questions, template.questions, fallbackQuestions);
+  const methodology = preferNonEmptyArray(existing.methodology, template.methodology);
+  const evidenceRequirements = preferNonEmptyArray(
+    existing.evidenceRequirements,
+    template.evidenceRequirements,
+    template.evidence,
+  );
 
   return {
     ...template,
     ...existing,
     answers,
     description: existing.description ?? template.description ?? template.aim ?? "",
-    guidance: existing.guidance ?? template.guidance ?? [
-      template.question ? `Question: ${template.question}` : null,
-      template.instruction || null,
-    ].filter(Boolean),
-    questions: existing.questions ?? template.questions ?? (
-      answers.length
-        ? [{
-            question: template.question || "Select the applicable answer",
-            options: answers,
-          }]
-        : []
-    ),
-    evidenceRequirements: existing.evidenceRequirements ?? template.evidenceRequirements ?? template.evidence ?? [],
+    guidance,
+    questions,
+    methodology,
+    evidenceRequirements,
     evidenceFiles,
     evidence: evidenceFiles,
   };
@@ -240,7 +262,7 @@ const generatePDF = (project) => {
     .code{font-weight:800;color:#7c3aed;font-size:13px}
     .score{font-size:13px;color:#64748b}
     .narrative{font-size:13px;color:#475569;margin-top:8px;line-height:1.6}
-    .evidence{font-size:12px;color:#94a3b8;margin-top:6px}
+    .evidence{font-size:12px;color:#64748b;margin-top:6px}
     </style></head><body>`);
   w.document.write(`<h1>${project.name} — BREEAM Evidence Package</h1>`);
   w.document.write(`<p style="color:#64748b;font-size:13px">Generated: ${tod()} | ${project.credits.filter(c=>c.pursuing).length} credits pursued</p>`);
@@ -353,8 +375,8 @@ function HomePage({ project, onNavigate }) {
                         background: pursued ? cc.bg : "rgba(0,0,0,0.02)",
                         cursor: "pointer", fontSize: 12, fontFamily: "monospace",
                       }}>
-                      <span style={{ fontWeight: 700, color: pursued ? cc.color : "#94a3b8" }}>{c.code}</span>
-                      <span style={{ marginLeft: 5, color: pursued ? "#475569" : "#cbd5e1" }}>{c.title}</span>
+                      <span style={{ fontWeight: 700, color: pursued ? cc.color : "#64748b" }}>{c.code}</span>
+                      <span style={{ marginLeft: 5, color: "#475569" }}>{c.title}</span>
                       {pursued && sc === "complete" && <span style={{ marginLeft: 6, color: "#059669" }}>✓</span>}
                     </div>
                   );
@@ -445,10 +467,10 @@ function PreAssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
                               border: `1px solid ${selectedCredit?.code === c.code ? "rgba(124,58,237,0.3)" : pursued ? cc.border : "rgba(0,0,0,0.06)"}`,
                             }}>
                             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                              <span style={{ fontSize: 12, fontWeight: 800, color: pursued ? cc.color : "#94a3b8" }}>{c.code}</span>
+                              <span style={{ fontSize: 12, fontWeight: 800, color: pursued ? cc.color : "#64748b" }}>{c.code}</span>
                               <span style={{ fontSize: 10, color: "#475569" }}>{pursued ? `${pc.score || 0}/${c.available}` : "—"}</span>
                             </div>
-                            <div style={{ fontSize: 11, color: pursued ? "#475569" : "#cbd5e1", marginTop: 2 }}>{c.title}</div>
+                            <div style={{ fontSize: 11, color: "#475569", marginTop: 2 }}>{c.title}</div>
                             {pursued && <div style={{ fontSize: 9, color: STATUS_COLORS[sc]?.color || "#64748b", marginTop: 2, textTransform: "uppercase", letterSpacing: "0.05em" }}>{sc.replace("_", " ")}</div>}
                           </div>
                         );
@@ -464,7 +486,7 @@ function PreAssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
         {/* Credit detail */}
         <div style={{ background: "#ffffff", border: "1px solid rgba(0,0,0,0.08)", borderRadius: 14, padding: "22px 24px", position: "sticky", top: 12, alignSelf: "start" }}>
           {!selectedCredit ? (
-            <div style={{ color: "#94a3b8", fontSize: 14, textAlign: "center", padding: "40px 20px" }}>
+            <div style={{ color: "#64748b", fontSize: 14, textAlign: "center", padding: "40px 20px" }}>
               Select a credit from the list to view its details
             </div>
           ) : (() => {
@@ -480,11 +502,36 @@ function PreAssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
                   <h2 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: "#1e293b" }}>{c.title}</h2>
                 </div>
 
-                <div style={{ fontSize: 12, color: "#475569", marginBottom: 14, lineHeight: 1.6 }}>{c.description}</div>
+                <div style={{ fontSize: 12, color: "#334155", marginBottom: 14, lineHeight: 1.6 }}>{c.description}</div>
+
+                {c.methodology && c.methodology.length > 0 && (
+                  <div style={{ marginBottom: 14 }}>
+                    <div style={{ fontSize: 11, color: "#2563eb", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>Methodology</div>
+                    <div style={{ background: "rgba(59,130,246,0.05)", border: "1px solid rgba(59,130,246,0.15)", borderRadius: 8, padding: "12px 16px" }}>
+                      {c.methodology.filter(Boolean).map((line, i) => (
+                        <div key={i} style={{ fontSize: 11, color: line.startsWith(" ") ? "#475569" : "#334155", lineHeight: 1.6, whiteSpace: "pre-wrap", fontWeight: line.startsWith(" ") ? 400 : 500 }}>{line}</div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {c.evidenceRequirements && c.evidenceRequirements.length > 0 && (
+                  <div style={{ marginBottom: 14 }}>
+                    <div style={{ fontSize: 11, color: "#059669", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>Requirements / Evidence Needed</div>
+                    <div style={{ background: "rgba(16,185,129,0.05)", border: "1px solid rgba(16,185,129,0.15)", borderRadius: 8, padding: "12px 16px" }}>
+                      {c.evidenceRequirements.map((ev, i) => (
+                        <div key={i} style={{ fontSize: 11, color: "#334155", lineHeight: 1.5, marginBottom: 5, display: "flex", gap: 6 }}>
+                          <span style={{ color: "#059669", fontWeight: 700, flexShrink: 0 }}>•</span>
+                          {ev}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {c.questions && c.questions.length > 0 && (
                   <div style={{ marginBottom: 16 }}>
-                    <div style={{ fontSize: 11, color: "#7c3aed", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>Questions</div>
+                    <div style={{ fontSize: 11, color: "#7c3aed", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>Options</div>
                     {c.questions.map((q, i) => (
                       <div key={i} style={{ marginBottom: 10, padding: "10px 14px", background: "rgba(124,58,237,0.04)", border: "1px solid rgba(124,58,237,0.10)", borderRadius: 8 }}>
                         <div style={{ fontSize: 12, fontWeight: 600, color: "#1e293b", marginBottom: 6 }}>Q{i + 1}: {q.question}</div>
@@ -503,10 +550,10 @@ function PreAssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
                                     padding: "7px 10px", borderRadius: 6, cursor: "pointer",
                                     background: selected ? "rgba(124,58,237,0.10)" : "rgba(0,0,0,0.02)",
                                     border: `1px solid ${selected ? "rgba(124,58,237,0.3)" : "rgba(0,0,0,0.07)"}`,
-                                    fontSize: 12, color: selected ? "#7c3aed" : "#334155",
+                                    fontSize: 12, color: selected ? "#6d28d9" : "#334155",
                                   }}>
                                   <span style={{ fontWeight: 600 }}>{opt.label}</span>
-                                  <span style={{ marginLeft: 6, color: "#64748b" }}>— {opt.points} credit{opt.points !== 1 ? "s" : ""}</span>
+                                  <span style={{ marginLeft: 6, color: "#475569" }}>- {opt.points} credit{opt.points !== 1 ? "s" : ""}</span>
                                 </div>
                               );
                             })}
@@ -601,13 +648,13 @@ function AssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
                             border: `1px solid ${selectedCredit?.code === c.code ? "rgba(124,58,237,0.35)" : pursued ? cc.border : "rgba(0,0,0,0.06)"}`,
                           }}>
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 2 }}>
-                            <span style={{ fontSize: 13, fontWeight: 800, color: pursued ? cc.color : "#94a3b8" }}>{c.code}</span>
+                            <span style={{ fontSize: 13, fontWeight: 800, color: pursued ? cc.color : "#64748b" }}>{c.code}</span>
                             <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
                               {pursued && <div style={{ width: 7, height: 7, borderRadius: "50%", background: STATUS_COLORS[sc]?.color || "#64748b" }} />}
-                              {pursued ? <span style={{ fontSize: 10, color: "#64748b" }}>{pc.score || 0}/{c.available}</span> : null}
+                              {pursued ? <span style={{ fontSize: 10, color: "#475569" }}>{pc.score || 0}/{c.available}</span> : null}
                             </div>
                           </div>
-                          <div style={{ fontSize: 11, color: pursued ? "#475569" : "#cbd5e1" }}>{c.title}</div>
+                          <div style={{ fontSize: 11, color: pursued ? "#475569" : "#64748b" }}>{c.title}</div>
                           {pursued && pc.completion > 0 && (
                             <div style={{ marginTop: 5, height: 3, borderRadius: 2, background: "rgba(0,0,0,0.06)" }}>
                               <div style={{ width: `${pc.completion}%`, height: "100%", borderRadius: 2, background: cc.color }} />
@@ -627,7 +674,7 @@ function AssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
       {/* Right: credit detail */}
       <div style={{ flex: 1, overflowY: "auto", padding: "24px 28px" }}>
         {!selectedCredit ? (
-          <div style={{ color: "#94a3b8", fontSize: 15, textAlign: "center", padding: "80px 20px" }}>
+          <div style={{ color: "#64748b", fontSize: 15, textAlign: "center", padding: "80px 20px" }}>
             Click a credit to view and edit its details
           </div>
         ) : (() => {
@@ -650,24 +697,17 @@ function AssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
                 <h2 style={{ margin: 0, fontSize: 20, fontWeight: 800, color: "#1e293b" }}>{displayCredit.title}</h2>
               </div>
 
-              {/* Description */}
-              {displayCredit.description && (
-                <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.6, marginBottom: 16, padding: "12px 16px", background: "rgba(0,0,0,0.03)", borderRadius: 9 }}>
-                  {displayCredit.description}
+              <div style={{ marginBottom: 16, padding: "14px 16px", background: "rgba(124,58,237,0.05)", border: "1px solid rgba(124,58,237,0.14)", borderRadius: 10 }}>
+                <div style={{ fontSize: 11, color: "#7c3aed", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 6 }}>Selected Answer From Pre-Assessment</div>
+                <div style={{ fontSize: 14, color: "#1e293b", fontWeight: 700, marginBottom: 4 }}>
+                  {displayCredit.selectedAnswer || "No option selected yet"}
                 </div>
-              )}
-
-              {/* Credit-specific guidance */}
-              {displayCredit.guidance && displayCredit.guidance.length > 0 && (
-                <div style={{ marginBottom: 14 }}>
-                  <div style={{ fontSize: 11, color: "#d97706", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>Assessor Guidance</div>
-                  <div style={{ background: "rgba(245,158,11,0.05)", border: "1px solid rgba(245,158,11,0.15)", borderRadius: 8, padding: "12px 16px" }}>
-                    {displayCredit.guidance.map((line, i) => (
-                      <div key={i} style={{ fontSize: 12, color: "#475569", lineHeight: 1.6, marginBottom: 4, fontWeight: line.startsWith(" ") ? 400 : 500 }}>{line}</div>
-                    ))}
-                  </div>
+                <div style={{ fontSize: 12, color: "#475569", lineHeight: 1.5 }}>
+                  Score: {displayCredit.score || 0} / {displayCredit.available || 0} credits
+                  {" | "}
+                  Status: {(displayCredit.status || "in_progress").replace("_", " ")}
                 </div>
-              )}
+              </div>
 
               {/* Methodology */}
               {displayCredit.methodology && displayCredit.methodology.length > 0 && (
@@ -701,7 +741,7 @@ function AssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
                 <div style={{ marginBottom: 14 }}>
                   <div style={{ fontSize: 11, color: "#d97706", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>Asset-Specific Notes</div>
                   {displayCredit.notes.map((note, i) => (
-                    <div key={i} style={{ fontSize: 11, color: "#475569", lineHeight: 1.5, marginBottom: 6, padding: "8px 12px", background: "rgba(245,158,11,0.05)", border: "1px solid rgba(245,158,11,0.10)", borderRadius: 7 }}>{note}</div>
+                    <div key={i} style={{ fontSize: 11, color: "#334155", lineHeight: 1.5, marginBottom: 6, padding: "8px 12px", background: "rgba(245,158,11,0.05)", border: "1px solid rgba(245,158,11,0.10)", borderRadius: 7 }}>{note}</div>
                   ))}
                 </div>
               )}
