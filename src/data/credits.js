@@ -4,6 +4,7 @@ export const CREDITS = [
     aim: "To maximise the potential for alternative local public, private and active transport modes through provision of sustainable transport measures appropriate to the site.",
     question: "What provisions are available for alternative modes of transport?",
     instruction: "Select all answers from A – G that apply. Where B applies select either C or D.",
+    selectionMode: "multiple",
     answers: [
       { id: "A", credits: 0, label: "Question not answered" },
       { id: "B", credits: 2, label: "Minimum number of compliant cycle storage spaces", sub: null },
@@ -155,10 +156,11 @@ export const CREDITS = [
   { code: "Pol 2", category: "Pollution", title: "Flooding", available: 2, part: 1 },
   { code: "Pol 3", category: "Pollution", title: "Surface Water Runoff", available: 1, part: 1 },
   {
-    code: "Tra 2", category: "Transport", title: "Public Transport Access", available: 4, part: 1,
+    code: "Tra 2", category: "Transport", title: "Public Transport Access", available: 8, part: 1,
     aim: "To ensure appropriate public transport provision is available to building users, thereby helping to reduce transport-related pollution and congestion.",
     question: "Is the asset within walking distance of public transport nodes which operate a frequent service?",
     instruction: "Select a single answer option based on the nearest compliant public transport node or dedicated bus provision.",
+    selectionMode: "single",
     answers: [
       { id: "A", credits: 0, label: "Question not answered" },
       { id: "B", credits: 1, label: "Public transport node over 1km away via a safe pedestrian route, with a 30 minute peak-time service frequency" },

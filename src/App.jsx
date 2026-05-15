@@ -161,6 +161,39 @@ const normalizeAnswerOptions = (answers = []) =>
     points: answer.points ?? answer.credits ?? 0,
   }));
 
+const inferSelectionMode = (credit, question) => {
+  const mode = question?.selectionMode || credit?.selectionMode;
+  if (mode === "single" || mode === "multiple") return mode;
+  const instruction = `${question?.instruction || ""} ${credit?.instruction || ""}`.toLowerCase();
+  if (instruction.includes("select all")) return "multiple";
+  if (instruction.includes("single answer")) return "single";
+  return "single";
+};
+
+const summarizeSelectedAnswers = (selectedAnswers = []) =>
+  Array.isArray(selectedAnswers) && selectedAnswers.length ? selectedAnswers.join(", ") : "";
+
+const getCreditQuestionOptions = (credit) =>
+  (credit.questions || []).flatMap((question) => question.options || []);
+
+const buildUpdatedCreditSelection = (credit, nextSelectedAnswers) => {
+  const options = getCreditQuestionOptions(credit);
+  const selected = options.filter((opt) => nextSelectedAnswers.includes(opt.label));
+  const score = Math.min(
+    credit.available || Infinity,
+    selected.reduce((sum, opt) => sum + (opt.points || 0), 0),
+  );
+  const selectedAnswer = summarizeSelectedAnswers(nextSelectedAnswers);
+
+  return {
+    ...credit,
+    selectedAnswers: nextSelectedAnswers,
+    selectedAnswer,
+    score,
+    status: nextSelectedAnswers.length ? (score > 0 ? "complete" : "in_progress") : (credit.pursuing ? "in_progress" : "not_pursuing"),
+  };
+};
+
 const preferNonEmptyArray = (...values) => {
   for (const value of values) {
     if (Array.isArray(value) && value.length > 0) return value;
@@ -195,6 +228,18 @@ const normalizeCredit = (template, existing = {}) => {
     template.evidenceRequirements,
     template.evidence,
   );
+  const selectedAnswers = Array.isArray(existing.selectedAnswers)
+    ? existing.selectedAnswers.filter(Boolean)
+    : existing.selectedAnswer
+      ? [existing.selectedAnswer]
+      : [];
+  const selectedAnswer = existing.selectedAnswer ?? summarizeSelectedAnswers(selectedAnswers);
+  const normalizedQuestions = questions.map((question) => ({
+    ...question,
+    instruction: question.instruction ?? template.instruction ?? "",
+    selectionMode: inferSelectionMode(template, question),
+    options: normalizeAnswerOptions(question.options || []),
+  }));
 
   return {
     ...template,
@@ -202,9 +247,12 @@ const normalizeCredit = (template, existing = {}) => {
     answers,
     description: existing.description ?? template.description ?? template.aim ?? "",
     guidance,
-    questions,
+    questions: normalizedQuestions,
     methodology,
     evidenceRequirements,
+    selectionMode: inferSelectionMode(template),
+    selectedAnswers,
+    selectedAnswer,
     evidenceFiles,
     evidence: evidenceFiles,
   };
@@ -398,14 +446,15 @@ function PreAssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
     if (!projectRoot || !projectSlug) return;
     const credit = selectedCredit;
     if (!credit || !credit.pursuing) return;
-    const label = credit.selectedAnswer
-      ? `${credit.answers?.find(a => a.label === credit.selectedAnswer)?.points || 0} credits`
+    const label = credit.selectedAnswers?.length
+      ? `${credit.score || 0} credits`
       : "not assessed";
     const body = [
       `---`,
       `code: "${credit.code}"`,
       `title: "${credit.title}"`,
       `selectedAnswer: "${credit.selectedAnswer || ""}"`,
+      `selectedAnswers: [${(credit.selectedAnswers || []).map(answer => `"${String(answer).replace(/"/g, '\\"')}"`).join(", ")}]`,
       `score: ${credit.score || 0}`,
       `available: ${credit.available || 0}`,
       `narrative: "${(credit.narrative || "").replace(/"/g, '\\"')}"`,
@@ -425,7 +474,8 @@ function PreAssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
       if (folder) await saveTextFile(folder, "assessment.md", body);
     })();
   }, [selectedCredit?.code, selectedCredit?.pursuing, selectedCredit?.selectedAnswer,
-      selectedCredit?.score, selectedCredit?.narrative, selectedCredit?.status]);
+      JSON.stringify(selectedCredit?.selectedAnswers || []), selectedCredit?.score,
+      selectedCredit?.narrative, selectedCredit?.status]);
 
   const byCat = (c) => [...new Set(CREDITS.map(x => x.category))].indexOf(c.category);
 
@@ -535,16 +585,32 @@ function PreAssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
                     {c.questions.map((q, i) => (
                       <div key={i} style={{ marginBottom: 10, padding: "10px 14px", background: "rgba(124,58,237,0.04)", border: "1px solid rgba(124,58,237,0.10)", borderRadius: 8 }}>
                         <div style={{ fontSize: 12, fontWeight: 600, color: "#1e293b", marginBottom: 6 }}>Q{i + 1}: {q.question}</div>
+                        {q.instruction && (
+                          <div style={{ fontSize: 11, color: "#475569", lineHeight: 1.5, marginBottom: 8 }}>
+                            {q.instruction}
+                          </div>
+                        )}
                         {q.options && (
                           <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                             {q.options.map((opt, oi) => {
-                              const selected = c.selectedAnswer === opt.label;
+                              const isMultiple = q.selectionMode === "multiple";
+                              const selected = (c.selectedAnswers || []).includes(opt.label);
                               return (
                                 <div key={oi}
                                   onClick={() => {
-                                    const updated = { ...c, selectedAnswer: opt.label, score: opt.points, status: opt.points > 0 ? "complete" : "in_progress" };
-                                    setSelectedCredit(updated);
-                                    onUpdate(updated);
+                                    setSelectedCredit((prev) => {
+                                      const baseCredit = prev?.code === c.code ? prev : c;
+                                      const baseSelectedAnswers = baseCredit.selectedAnswers || [];
+                                      const isAlreadySelected = baseSelectedAnswers.includes(opt.label);
+                                      const nextSelectedAnswers = isMultiple
+                                        ? (isAlreadySelected
+                                            ? baseSelectedAnswers.filter((answer) => answer !== opt.label)
+                                            : [...baseSelectedAnswers, opt.label])
+                                        : [opt.label];
+                                      const updated = buildUpdatedCreditSelection(baseCredit, nextSelectedAnswers);
+                                      onUpdate(updated);
+                                      return updated;
+                                    });
                                   }}
                                   style={{
                                     padding: "7px 10px", borderRadius: 6, cursor: "pointer",
@@ -554,6 +620,11 @@ function PreAssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
                                   }}>
                                   <span style={{ fontWeight: 600 }}>{opt.label}</span>
                                   <span style={{ marginLeft: 6, color: "#475569" }}>- {opt.points} credit{opt.points !== 1 ? "s" : ""}</span>
+                                  {opt.sub && (
+                                    <div style={{ marginTop: 5, fontSize: 11, color: "#475569", lineHeight: 1.5 }}>
+                                      {opt.sub}
+                                    </div>
+                                  )}
                                 </div>
                               );
                             })}
@@ -577,7 +648,7 @@ function PreAssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
                   </button>
                   <button
                     onClick={() => {
-                      const updated = { ...c, pursuing: false, status: "not_pursuing", score: 0, selectedAnswer: "" };
+                      const updated = { ...c, pursuing: false, status: "not_pursuing", score: 0, selectedAnswer: "", selectedAnswers: [] };
                       setSelectedCredit(updated);
                       onUpdate(updated);
                     }}
@@ -699,9 +770,19 @@ function AssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
 
               <div style={{ marginBottom: 16, padding: "14px 16px", background: "rgba(124,58,237,0.05)", border: "1px solid rgba(124,58,237,0.14)", borderRadius: 10 }}>
                 <div style={{ fontSize: 11, color: "#7c3aed", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 6 }}>Selected Answer From Pre-Assessment</div>
-                <div style={{ fontSize: 14, color: "#1e293b", fontWeight: 700, marginBottom: 4 }}>
-                  {displayCredit.selectedAnswer || "No option selected yet"}
-                </div>
+                {displayCredit.selectedAnswers?.length ? (
+                  <div style={{ marginBottom: 4 }}>
+                    {displayCredit.selectedAnswers.map((answer) => (
+                      <div key={answer} style={{ fontSize: 14, color: "#1e293b", fontWeight: 700, marginBottom: 4 }}>
+                        {answer}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ fontSize: 14, color: "#1e293b", fontWeight: 700, marginBottom: 4 }}>
+                    {displayCredit.selectedAnswer || "No option selected yet"}
+                  </div>
+                )}
                 <div style={{ fontSize: 12, color: "#475569", lineHeight: 1.5 }}>
                   Score: {displayCredit.score || 0} / {displayCredit.available || 0} credits
                   {" | "}
@@ -1530,7 +1611,7 @@ export default function App() {
       status: "pre-assessment",
       credits: CREDITS.map(c => ({
         code: c.code, pursuing: false, status: "not_pursuing",
-        score: 0, completion: 0, narrative: "", evidence: [],
+        score: 0, completion: 0, narrative: "", evidence: [], selectedAnswer: "", selectedAnswers: [],
       })),
     };
     const initialized = initProject(newProject);
