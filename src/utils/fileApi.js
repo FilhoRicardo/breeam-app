@@ -19,8 +19,6 @@
 
 import { CREDITS } from '../data/credits.js';
 
-const PROJECT_ROOT_KEY = 'biu_project_root';
-
 // ── Browser compatibility ─────────────────────────────────────────────────────
 export function isFileSystemAccessSupported() {
   return 'showDirectoryPicker' in window;

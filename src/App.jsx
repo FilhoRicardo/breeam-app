@@ -13,7 +13,6 @@ const PROJECT_ROOT_KEY = "biu:projectRoot";
 // ── Helpers ──────────────────────────────────────────────────────────────────
 const tod = () => new Date().toISOString().slice(0, 10);
 const slugify = (s) => String(s || "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-const PROJECT_ROOT_KEY_FN = "biu:projectRoot";
 
 // ── BREEAM Manual PDF map ────────────────────────────────────────────────────
 // Maps credit code (e.g. "Tra 1") → public URL of the BREEAM manual PDF.
