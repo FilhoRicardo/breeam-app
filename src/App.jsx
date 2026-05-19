@@ -11,7 +11,13 @@ import {
 const PROJECT_ROOT_KEY = "biu:projectRoot";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
-const tod = () => new Date().toISOString().slice(0, 10);
+const tod = () => {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+};
 const slugify = (s) => String(s || "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 // ── BREEAM Manual PDF map ────────────────────────────────────────────────────
