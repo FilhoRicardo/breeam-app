@@ -315,13 +315,17 @@ const exportMeetingMd = (meeting) => {
 };
 
 // ── Utility: generate PDF (stub using browser print) ─────────────────────────
+const escapeHtml = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({
+  "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+}[c]));
+
 const generatePDF = (project) => {
   const w = window.open("", "_blank");
   if (!w) {
     alert("Could not open the PDF preview window. Please allow popups for this site and try again.");
     return;
   }
-  w.document.write(`<html><head><title>${project.name} — Evidence Package</title>`);
+  w.document.write(`<html><head><title>${escapeHtml(project.name)} — Evidence Package</title>`);
   w.document.write(`<style>body{font-family:sans-serif;padding:40px;max-width:800px;margin:0 auto}
     h1{font-size:22px;border-bottom:2px solid #7c3aed;padding-bottom:10px}
     h2{font-size:16px;color:#7c3aed;margin-top:30px}
@@ -329,21 +333,22 @@ const generatePDF = (project) => {
     .credit-header{display:flex;justify-content:space-between}
     .code{font-weight:800;color:#7c3aed;font-size:13px}
     .score{font-size:13px;color:#64748b}
-    .narrative{font-size:13px;color:#475569;margin-top:8px;line-height:1.6}
+    .narrative{font-size:13px;color:#475569;margin-top:8px;line-height:1.6;white-space:pre-wrap}
     .evidence{font-size:12px;color:#64748b;margin-top:6px}
     </style></head><body>`);
-  w.document.write(`<h1>${project.name} — BREEAM Evidence Package</h1>`);
-  w.document.write(`<p style="color:#64748b;font-size:13px">Generated: ${tod()} | ${project.credits.filter(c=>c.pursuing).length} credits pursued</p>`);
+  w.document.write(`<h1>${escapeHtml(project.name)} — BREEAM Evidence Package</h1>`);
+  w.document.write(`<p style="color:#64748b;font-size:13px">Generated: ${escapeHtml(tod())} | ${project.credits.filter(c=>c.pursuing).length} credits pursued</p>`);
   project.credits.filter(c => c.pursuing).forEach(c => {
     const evidenceFiles = c.evidenceFiles || c.evidence || [];
+    const evidenceNames = evidenceFiles.map(e => escapeHtml(typeof e === "string" ? e : e.name)).join(", ");
     w.document.write(`<div class="credit">
       <div class="credit-header">
-        <span class="code">${c.code}</span>
+        <span class="code">${escapeHtml(c.code)}</span>
         <span class="score">${c.score || 0} / ${c.available || 0} credits</span>
       </div>
-      <div style="font-size:12px;color:#475569;margin-top:4px">${c.title}</div>
-      ${c.narrative ? `<div class="narrative">${c.narrative}</div>` : ""}
-      ${evidenceFiles.length ? `<div class="evidence">📎 ${evidenceFiles.map(e=>typeof e==="string"?e:e.name).join(", ")}</div>` : ""}
+      <div style="font-size:12px;color:#475569;margin-top:4px">${escapeHtml(c.title)}</div>
+      ${c.narrative ? `<div class="narrative">${escapeHtml(c.narrative)}</div>` : ""}
+      ${evidenceFiles.length ? `<div class="evidence">📎 ${evidenceNames}</div>` : ""}
     </div>`);
   });
   w.document.write(`</body></html>`);
