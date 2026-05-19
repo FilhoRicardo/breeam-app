@@ -1001,6 +1001,16 @@ function EvidencePackagePage({ project }) {
   const [selected, setSelected] = useState(() => new Set(project.credits.filter(c => c.pursuing).map(c => c.code)));
   const [onlyComplete, setOnlyComplete] = useState(false);
 
+  useEffect(() => {
+    const pursuingCodes = new Set(project.credits.filter(c => c.pursuing).map(c => c.code));
+    setSelected(prev => {
+      const next = new Set();
+      for (const code of prev) if (pursuingCodes.has(code)) next.add(code);
+      for (const code of pursuingCodes) if (!prev.has(code)) next.add(code);
+      return next;
+    });
+  }, [project.id, project.credits]);
+
   const credits = project.credits.filter(c => c.pursuing && selected.has(c.code) && (!onlyComplete || c.status === "complete"));
   const part1 = credits.filter(c => c.part === 1);
   const part2 = credits.filter(c => c.part === 2);
