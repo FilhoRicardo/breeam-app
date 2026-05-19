@@ -189,12 +189,15 @@ const buildUpdatedCreditSelection = (credit, nextSelectedAnswers) => {
   const score = Math.min(cap, sum);
   const selectedAnswer = summarizeSelectedAnswers(nextSelectedAnswers);
 
+  const hasFullCredit = cap > 0 && score === cap;
   return {
     ...credit,
     selectedAnswers: nextSelectedAnswers,
     selectedAnswer,
     score,
-    status: nextSelectedAnswers.length ? (score > 0 ? "complete" : "in_progress") : (credit.pursuing ? "in_progress" : "not_pursuing"),
+    status: nextSelectedAnswers.length
+      ? (hasFullCredit ? "complete" : "in_progress")
+      : (credit.pursuing ? "in_progress" : "not_pursuing"),
   };
 };
 
