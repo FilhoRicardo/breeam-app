@@ -1503,6 +1503,7 @@ function NewProjectModal({ onClose, onCreate }) {
 function FolderSetupScreen({ folderStatus, onPick, onClose }) {
   const isConnected = folderStatus.projects === "connected";
   const isSaved = folderStatus.projects === "saved";
+  const isUnsupported = !isFileSystemAccessSupported();
 
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 200, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", backdropFilter: "blur(4px)" }}>
@@ -1515,18 +1516,31 @@ function FolderSetupScreen({ folderStatus, onPick, onClose }) {
           <button onClick={onClose} style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", fontSize: 20, lineHeight: 1, padding: 4 }}>✕</button>
         </div>
 
-        <div style={{ background: isConnected ? "rgba(5,150,105,0.06)" : isSaved ? "rgba(245,158,11,0.08)" : "rgba(220,38,38,0.06)", border: `1px solid ${isConnected ? "rgba(5,150,105,0.2)" : isSaved ? "rgba(245,158,11,0.2)" : "rgba(220,38,38,0.2)"}`, borderRadius: 12, padding: "14px 18px", marginBottom: 20 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 6, color: isConnected ? "#059669" : isSaved ? "#d97706" : "#dc2626" }}>
-            {isConnected ? "Connected" : isSaved ? "Access lost — reconnect" : "Not connected"}
+        {isUnsupported ? (
+          <div style={{ background: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.2)", borderRadius: 12, padding: "14px 18px", marginBottom: 20 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 6, color: "#d97706" }}>
+              Browser not supported
+            </div>
+            <div style={{ fontSize: 12, color: "#475569", lineHeight: 1.5 }}>
+              Folder storage requires Chrome, Edge, or another Chromium-based browser. Safari and Firefox don't yet support the File System Access API. Your data is still saved in this browser's local storage, but you won't be able to write Markdown files or evidence uploads to disk.
+            </div>
           </div>
-          <div style={{ fontSize: 12, color: "#475569", lineHeight: 1.5 }}>
-            {isConnected ? "Projects are saved to and loaded from your selected folder." : isSaved ? "Browser permissions were revoked. Reconnect to restore folder access." : "Select a folder on your device to store project files."}
+        ) : (
+          <div style={{ background: isConnected ? "rgba(5,150,105,0.06)" : isSaved ? "rgba(245,158,11,0.08)" : "rgba(220,38,38,0.06)", border: `1px solid ${isConnected ? "rgba(5,150,105,0.2)" : isSaved ? "rgba(245,158,11,0.2)" : "rgba(220,38,38,0.2)"}`, borderRadius: 12, padding: "14px 18px", marginBottom: 20 }}>
+            <div style={{ fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 6, color: isConnected ? "#059669" : isSaved ? "#d97706" : "#dc2626" }}>
+              {isConnected ? "Connected" : isSaved ? "Access lost — reconnect" : "Not connected"}
+            </div>
+            <div style={{ fontSize: 12, color: "#475569", lineHeight: 1.5 }}>
+              {isConnected ? "Projects are saved to and loaded from your selected folder." : isSaved ? "Browser permissions were revoked. Reconnect to restore folder access." : "Select a folder on your device to store project files."}
+            </div>
           </div>
-        </div>
+        )}
 
-        <button onClick={onPick} style={{ width: "100%", padding: "12px 20px", borderRadius: 10, border: "none", background: "rgba(124,58,237,0.1)", color: "#7c3aed", cursor: "pointer", fontWeight: 700, fontSize: 14, fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
-          📂 {isConnected ? "Change Folder" : isSaved ? "Reconnect Folder" : "Select Folder"}
-        </button>
+        {!isUnsupported && (
+          <button onClick={onPick} style={{ width: "100%", padding: "12px 20px", borderRadius: 10, border: "none", background: "rgba(124,58,237,0.1)", color: "#7c3aed", cursor: "pointer", fontWeight: 700, fontSize: 14, fontFamily: "inherit", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+            📂 {isConnected ? "Change Folder" : isSaved ? "Reconnect Folder" : "Select Folder"}
+          </button>
+        )}
 
         <div style={{ marginTop: 14, fontSize: 11, color: "#64748b", textAlign: "center", lineHeight: 1.5 }}>
           Uses the browser's native File System Access API.<br />Your data stays on your device.
@@ -1538,12 +1552,13 @@ function FolderSetupScreen({ folderStatus, onPick, onClose }) {
 
 // ── Folder Status Pill ─────────────────────────────────────────────────────────
 function FolderStatusPill({ folderStatus, onClick }) {
+  const isUnsupported = !isFileSystemAccessSupported();
   const isConnected = folderStatus.projects === "connected";
   const isSaved = folderStatus.projects === "saved";
-  const bg = isConnected ? "rgba(16,185,129,0.1)" : isSaved ? "rgba(245,158,11,0.1)" : "rgba(100,116,139,0.1)";
-  const color = isConnected ? "#059669" : isSaved ? "#f59e0b" : "#64748b";
-  const icon = isConnected ? "✅" : isSaved ? "⚠️" : "📁";
-  const label = isConnected ? "Folder connected" : isSaved ? "Folder — reconnect" : "Folder not set";
+  const bg = isUnsupported ? "rgba(245,158,11,0.1)" : isConnected ? "rgba(16,185,129,0.1)" : isSaved ? "rgba(245,158,11,0.1)" : "rgba(100,116,139,0.1)";
+  const color = isUnsupported ? "#d97706" : isConnected ? "#059669" : isSaved ? "#f59e0b" : "#64748b";
+  const icon = isUnsupported ? "⚠️" : isConnected ? "✅" : isSaved ? "⚠️" : "📁";
+  const label = isUnsupported ? "Browser not supported" : isConnected ? "Folder connected" : isSaved ? "Folder — reconnect" : "Folder not set";
 
   return (
     <button onClick={onClick} style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", padding: "9px 12px", borderRadius: 8, border: "none", cursor: "pointer", background: bg, color, fontSize: 11, fontWeight: 600, fontFamily: "inherit", textAlign: "left" }}>
