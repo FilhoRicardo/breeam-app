@@ -1551,7 +1551,10 @@ function FolderStatusPill({ folderStatus, onClick }) {
 // ── Main App ─────────────────────────────────────────────────────────────────
 export default function App() {
   const [projects, setProjects] = useState(loadProjects);
-  const [activeProjectId, setActiveProjectId] = useState(DEMO_PROJECT.id);
+  const [activeProjectId, setActiveProjectId] = useState(() => {
+    const initial = loadProjects();
+    return initial[0]?.id ?? DEMO_PROJECT.id;
+  });
   const [page, setPage] = useState("home");
   const [meetings, setMeetings] = useState(loadMeetings);
   const [showNewProject, setShowNewProject] = useState(false);
@@ -1703,7 +1706,11 @@ export default function App() {
           <FolderStatusPill folderStatus={folderStatus} onClick={() => setShowFolderSetup(true)} />
 
           <div style={{ marginTop: 10, marginBottom: 6, fontSize: 10, color: "#475569" }}>Active project</div>
-          <select value={activeProjectId} onChange={e => setActiveProjectId(parseInt(e.target.value))}
+          <select value={String(activeProjectId)} onChange={e => {
+              const raw = e.target.value;
+              const match = projects.find(p => String(p.id) === raw);
+              setActiveProjectId(match ? match.id : raw);
+            }}
             style={{ width: "100%", padding: "7px 10px", borderRadius: 8, background: "rgba(0,0,0,0.05)", border: "1px solid rgba(0,0,0,0.10)", color: "#1e293b", fontSize: 12, fontFamily: "inherit" }}>
             {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
           </select>
