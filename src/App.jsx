@@ -1124,11 +1124,7 @@ function MeetingsPage({ project, meetings, onMeetingsChange, projectRoot, projec
           attendees: [],
           notes: dm._diskContent || "",
         }));
-        onMeetingsChange(prev => {
-          const merged = [...prev, ...newMeetings];
-          saveMeetings(merged);
-          return merged;
-        });
+        onMeetingsChange(prev => [...prev, ...newMeetings]);
       }
     })();
   }, [projectRoot]);
