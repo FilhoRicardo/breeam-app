@@ -1302,7 +1302,13 @@ function EvidenceModal({ credit, projectRoot, projectSlug, onClose, onSave, onPe
   const [uploads, setUploads] = useState([]);
   const [saving, setSaving] = useState(false);
   const MAX_SIZE_MB = 50;
-  const existingFiles = credit.evidenceFiles || credit.evidence || [];
+  const fileName = (f) => typeof f === "string" ? f : f?.name;
+  const uploadNames = new Set(uploads.map(fileName).filter(Boolean));
+  const existingFiles = (credit.evidenceFiles || credit.evidence || [])
+    .filter(f => {
+      const n = fileName(f);
+      return n && !uploadNames.has(n);
+    });
 
   useEffect(() => {
     if (!projectRoot) return;
