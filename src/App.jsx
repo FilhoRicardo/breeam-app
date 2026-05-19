@@ -1181,8 +1181,14 @@ function MeetingsPage({ project, meetings, onMeetingsChange, projectRoot, projec
     selectMeeting(m);
   };
 
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
   const deleteMeeting = (id) => {
-    if (!confirm("Delete this meeting?")) return;
+    if (pendingDeleteId !== id) {
+      setPendingDeleteId(id);
+      setTimeout(() => setPendingDeleteId(curr => curr === id ? null : curr), 3000);
+      return;
+    }
+    setPendingDeleteId(null);
     const updated = meetings.filter(m => m.id !== id);
     onMeetingsChange(updated);
     if (selected?.id === id) setSelected(null);
@@ -1305,7 +1311,9 @@ function MeetingsPage({ project, meetings, onMeetingsChange, projectRoot, projec
               <button onClick={() => { const m = meetings.find(m => m.id === selected.id); if (m) exportMeetingMd(m); }}
                 style={{ padding: "9px 18px", borderRadius: 9, border: "1px solid rgba(0,0,0,0.08)", background: "rgba(0,0,0,0.03)", color: "#475569", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>📥 Export .md</button>
               <button onClick={() => deleteMeeting(selected.id)}
-                style={{ padding: "9px 18px", borderRadius: 9, border: "1px solid rgba(239,68,68,0.15)", background: "rgba(239,68,68,0.05)", color: "#dc2626", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>🗑 Delete</button>
+                style={{ padding: "9px 18px", borderRadius: 9, border: `1px solid ${pendingDeleteId === selected.id ? "rgba(239,68,68,0.5)" : "rgba(239,68,68,0.15)"}`, background: pendingDeleteId === selected.id ? "rgba(239,68,68,0.15)" : "rgba(239,68,68,0.05)", color: "#dc2626", cursor: "pointer", fontWeight: 700, fontSize: 13, fontFamily: "inherit" }}>
+                {pendingDeleteId === selected.id ? "🗑 Click again to confirm" : "🗑 Delete"}
+              </button>
               <div style={{ marginLeft: "auto", fontSize: 11, color: "#475569" }}>
                 {selected.date}_{slugify(selected.title || "untitled")}.md
               </div>
@@ -1321,6 +1329,7 @@ function MeetingsPage({ project, meetings, onMeetingsChange, projectRoot, projec
 function EvidenceModal({ credit, projectRoot, projectSlug, onClose, onSave, onPersist }) {
   const [uploads, setUploads] = useState([]);
   const [saving, setSaving] = useState(false);
+  const [error, setError] = useState(null);
   const MAX_SIZE_MB = 50;
   const fileName = (f) => typeof f === "string" ? f : f?.name;
   const uploadNames = new Set(uploads.map(fileName).filter(Boolean));
@@ -1341,21 +1350,23 @@ function EvidenceModal({ credit, projectRoot, projectSlug, onClose, onSave, onPe
   }, [projectRoot, projectSlug, credit.code, credit.part]);
 
   const handleFiles = async (fileList) => {
+    setError(null);
     if (!projectRoot) {
-      alert("Connect a project folder before uploading evidence files.");
+      setError("Connect a project folder before uploading evidence files.");
       return;
     }
     setSaving(true);
     const arr = Array.from(fileList);
-    const valid = arr.filter(f => {
-      if (f.size > MAX_SIZE_MB * 1024 * 1024) { alert(`${f.name} exceeds ${MAX_SIZE_MB}MB limit`); return false; }
-      return true;
-    });
+    const oversized = arr.filter(f => f.size > MAX_SIZE_MB * 1024 * 1024).map(f => f.name);
+    const valid = arr.filter(f => f.size <= MAX_SIZE_MB * 1024 * 1024);
+    if (oversized.length) {
+      setError(`Skipped (over ${MAX_SIZE_MB}MB): ${oversized.join(", ")}`);
+    }
     const newFiles = [];
     const folder = await getCreditFolder(projectRoot, projectSlug, credit.code, credit.part);
     if (!folder) {
       setSaving(false);
-      alert("Unable to access the credit folder.");
+      setError("Unable to access the credit folder.");
       return;
     }
     for (const file of valid) {
@@ -1386,6 +1397,12 @@ function EvidenceModal({ credit, projectRoot, projectSlug, onClose, onSave, onPe
           </div>
           <button onClick={onClose} style={{ background: "none", border: "none", color: "#64748b", cursor: "pointer", fontSize: 20, lineHeight: 1, padding: 4 }}>✕</button>
         </div>
+
+        {error && (
+          <div style={{ background: "rgba(220,38,38,0.06)", border: "1px solid rgba(220,38,38,0.2)", borderRadius: 8, padding: "10px 12px", marginBottom: 12, fontSize: 12, color: "#dc2626" }}>
+            {error}
+          </div>
+        )}
 
         <div style={{ marginBottom: 16 }}>
           <label style={{ display: "block", padding: "16px 20px", borderRadius: 10, border: "2px dashed rgba(124,58,237,0.25)", background: "rgba(124,58,237,0.04)", cursor: "pointer", textAlign: "center" }}>
@@ -1455,10 +1472,12 @@ function NavPill({ label, icon, active, onClick }) {
 // ── New Project Modal ─────────────────────────────────────────────────────────
 function NewProjectModal({ onClose, onCreate }) {
   const [form, setForm] = useState({ name: "", location: "", assessment_date: tod(), target_date: "", assessment_type: "BREEAM In Use" });
+  const [nameError, setNameError] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!form.name.trim()) { alert("Project name is required"); return; }
+    if (!form.name.trim()) { setNameError("Project name is required"); return; }
+    setNameError("");
     onCreate(form);
     onClose();
   };
@@ -1483,8 +1502,11 @@ function NewProjectModal({ onClose, onCreate }) {
           ].map(({ label, key, placeholder, type }) => (
             <div key={key}>
               <div style={{ fontSize: 11, color: "#64748b", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 5 }}>{label}</div>
-              <input type={type} value={form[key]} onChange={e => setForm(prev => ({ ...prev, [key]: e.target.value }))} placeholder={placeholder}
-                style={{ width: "100%", padding: "9px 12px", boxSizing: "border-box", borderRadius: 8, border: "1px solid rgba(0,0,0,0.10)", background: "rgba(0,0,0,0.03)", color: "#1e293b", fontSize: 14, fontFamily: "inherit" }} />
+              <input type={type} value={form[key]} onChange={e => { setForm(prev => ({ ...prev, [key]: e.target.value })); if (key === "name") setNameError(""); }} placeholder={placeholder}
+                style={{ width: "100%", padding: "9px 12px", boxSizing: "border-box", borderRadius: 8, border: `1px solid ${key === "name" && nameError ? "#dc2626" : "rgba(0,0,0,0.10)"}`, background: "rgba(0,0,0,0.03)", color: "#1e293b", fontSize: 14, fontFamily: "inherit" }} />
+              {key === "name" && nameError && (
+                <div style={{ fontSize: 11, color: "#dc2626", marginTop: 4 }}>{nameError}</div>
+              )}
             </div>
           ))}
 
@@ -1505,7 +1527,7 @@ function NewProjectModal({ onClose, onCreate }) {
 }
 
 // ── Folder Setup Screen ─────────────────────────────────────────────────────────
-function FolderSetupScreen({ folderStatus, onPick, onClose }) {
+function FolderSetupScreen({ folderStatus, folderError, onPick, onClose }) {
   const isConnected = folderStatus.projects === "connected";
   const isSaved = folderStatus.projects === "saved";
   const isUnsupported = !isFileSystemAccessSupported();
@@ -1547,6 +1569,12 @@ function FolderSetupScreen({ folderStatus, onPick, onClose }) {
           </button>
         )}
 
+        {folderError && (
+          <div style={{ marginTop: 14, background: "rgba(220,38,38,0.06)", border: "1px solid rgba(220,38,38,0.2)", borderRadius: 8, padding: "10px 12px", fontSize: 12, color: "#dc2626" }}>
+            {folderError}
+          </div>
+        )}
+
         <div style={{ marginTop: 14, fontSize: 11, color: "#64748b", textAlign: "center", lineHeight: 1.5 }}>
           Uses the browser's native File System Access API.<br />Your data stays on your device.
         </div>
@@ -1586,6 +1614,7 @@ export default function App() {
   const [showFolderSetup, setShowFolderSetup] = useState(false);
   const [folderStatus, setFolderStatus] = useState({});
   const [folderBusy, setFolderBusy] = useState(false);
+  const [folderError, setFolderError] = useState("");
   const [projectRoot, setProjectRoot] = useState(null);
   const mainRef = useRef(null);
 
@@ -1631,6 +1660,7 @@ export default function App() {
 
   const pickProjectsFolder = async () => {
     setFolderBusy(true);
+    setFolderError("");
     try {
       const dir = await window.showDirectoryPicker({ mode: "readwrite" });
       await idbSet(PROJECT_ROOT_KEY, dir);
@@ -1648,7 +1678,7 @@ export default function App() {
           setActiveProjectId(loadedProjects[0].id);
         }
       }
-    } catch (e) { if (e.name !== "AbortError") alert("Error: " + e.message); }
+    } catch (e) { if (e.name !== "AbortError") setFolderError(e.message || String(e)); }
     setFolderBusy(false);
   };
 
@@ -1755,7 +1785,7 @@ export default function App() {
       <main ref={mainRef} style={{ flex: 1, minWidth: 0, overflowY: "auto" }}>
         {pages[page] || pages.home}
         {showFolderSetup && (
-          <FolderSetupScreen folderStatus={folderStatus} onPick={pickProjectsFolder} onClose={() => setShowFolderSetup(false)} />
+          <FolderSetupScreen folderStatus={folderStatus} folderError={folderError} onPick={pickProjectsFolder} onClose={() => { setShowFolderSetup(false); setFolderError(""); }} />
         )}
         {showNewProject && (
           <NewProjectModal onClose={() => setShowNewProject(false)} onCreate={createProject} />
