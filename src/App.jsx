@@ -624,19 +624,17 @@ function PreAssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
                               return (
                                 <div key={oi}
                                   onClick={() => {
-                                    setSelectedCredit((prev) => {
-                                      const baseCredit = prev?.code === c.code ? prev : c;
-                                      const baseSelectedAnswers = baseCredit.selectedAnswers || [];
-                                      const isAlreadySelected = baseSelectedAnswers.includes(opt.label);
-                                      const nextSelectedAnswers = isMultiple
-                                        ? (isAlreadySelected
-                                            ? baseSelectedAnswers.filter((answer) => answer !== opt.label)
-                                            : [...baseSelectedAnswers, opt.label])
-                                        : [opt.label];
-                                      const updated = buildUpdatedCreditSelection(baseCredit, nextSelectedAnswers);
-                                      onUpdate(updated);
-                                      return updated;
-                                    });
+                                    const baseCredit = selectedCredit?.code === c.code ? selectedCredit : c;
+                                    const baseSelectedAnswers = baseCredit.selectedAnswers || [];
+                                    const isAlreadySelected = baseSelectedAnswers.includes(opt.label);
+                                    const nextSelectedAnswers = isMultiple
+                                      ? (isAlreadySelected
+                                          ? baseSelectedAnswers.filter((answer) => answer !== opt.label)
+                                          : [...baseSelectedAnswers, opt.label])
+                                      : [opt.label];
+                                    const updated = buildUpdatedCreditSelection(baseCredit, nextSelectedAnswers);
+                                    setSelectedCredit(updated);
+                                    onUpdate(updated);
                                   }}
                                   style={{
                                     padding: "7px 10px", borderRadius: 6, cursor: "pointer",
