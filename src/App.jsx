@@ -494,10 +494,11 @@ function PreAssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
       ``,
       credit.narrative ? `## Assessor Narrative\n\n${credit.narrative}` : "_No narrative recorded._",
     ].join("\n");
-    (async () => {
+    const handle = setTimeout(async () => {
       const folder = await getCreditFolder(projectRoot, projectSlug, credit.code, credit.part);
       if (folder) await saveTextFile(folder, "assessment.md", body);
-    })();
+    }, 500);
+    return () => clearTimeout(handle);
   }, [selectedCredit?.code, selectedCredit?.pursuing, selectedCredit?.selectedAnswer,
       JSON.stringify(selectedCredit?.selectedAnswers || []), selectedCredit?.score,
       selectedCredit?.narrative, selectedCredit?.status]);
@@ -1112,6 +1113,19 @@ function EvidencePackagePage({ project }) {
 function MeetingsPage({ project, meetings, onMeetingsChange, projectRoot, projectSlug }) {
   const [selected, setSelected] = useState(null);
   const [form, setForm] = useState({ title: "", date: tod(), attendees: "", notes: "" });
+  const diskWriteHandle = useRef(null);
+  const scheduleDiskWrite = (saved) => {
+    if (!projectRoot || !saved) return;
+    if (diskWriteHandle.current) clearTimeout(diskWriteHandle.current);
+    diskWriteHandle.current = setTimeout(() => {
+      getMeetingsFolder(projectRoot, projectSlug).then(meetingsDir => {
+        if (!meetingsDir) return;
+        const filename = `${saved.date}_${slugify(saved.title || "untitled")}.md`;
+        const content = ["---", `title: "${saved.title}"`, `date: "${saved.date}"`, `attendees: "${(saved.attendees || []).join(", ")}"`, `project: "${project.name}"`, `tags: ["meeting", "breeam"]`, "---", "", `# ${saved.title}`, "", `**Date:** ${saved.date}`, saved.attendees?.length ? `\n**Attendees:** ${saved.attendees.join(", ")}` : "", "", "## Notes", "", saved.notes || "_No notes recorded._"].filter(Boolean).join("\n");
+        saveTextFile(meetingsDir, filename, content);
+      });
+    }, 500);
+  };
 
   // Fix 2: Load existing .md files from disk on mount
   useEffect(() => {
@@ -1180,6 +1194,7 @@ function MeetingsPage({ project, meetings, onMeetingsChange, projectRoot, projec
       if (m.id !== selected.id) return m;
       return { ...m, title: form.title, date: form.date, attendees: form.attendees.split(",").map(s => s.trim()).filter(Boolean), notes: form.notes };
     });
+    if (diskWriteHandle.current) clearTimeout(diskWriteHandle.current);
     if (projectRoot) {
       const saved = updated.find(m => m.id === selected.id);
       if (saved) {
@@ -1204,17 +1219,7 @@ function MeetingsPage({ project, meetings, onMeetingsChange, projectRoot, projec
       if (field === "attendees") updatedMeeting.attendees = value.split(",").map(s => s.trim()).filter(Boolean);
       return updatedMeeting;
     });
-    if (projectRoot) {
-      const saved = updated.find(m => m.id === selected.id);
-      if (saved) {
-        getMeetingsFolder(projectRoot, projectSlug).then(meetingsDir => {
-          if (!meetingsDir) return;
-          const filename = `${saved.date}_${slugify(saved.title || "untitled")}.md`;
-          const content = ["---", `title: "${saved.title}"`, `date: "${saved.date}"`, `attendees: "${(saved.attendees || []).join(", ")}"`, `project: "${project.name}"`, `tags: ["meeting", "breeam"]`, "---", "", `# ${saved.title}`, "", `**Date:** ${saved.date}`, saved.attendees?.length ? `\n**Attendees:** ${saved.attendees.join(", ")}` : "", "", "## Notes", "", saved.notes || "_No notes recorded._"].filter(Boolean).join("\n");
-          saveTextFile(meetingsDir, filename, content);
-        });
-      }
-    }
+    scheduleDiskWrite(updated.find(m => m.id === selected.id));
     onMeetingsChange(updated);
   };
 
