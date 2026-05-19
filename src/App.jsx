@@ -315,6 +315,10 @@ const exportMeetingMd = (meeting) => {
 // ── Utility: generate PDF (stub using browser print) ─────────────────────────
 const generatePDF = (project) => {
   const w = window.open("", "_blank");
+  if (!w) {
+    alert("Could not open the PDF preview window. Please allow popups for this site and try again.");
+    return;
+  }
   w.document.write(`<html><head><title>${project.name} — Evidence Package</title>`);
   w.document.write(`<style>body{font-family:sans-serif;padding:40px;max-width:800px;margin:0 auto}
     h1{font-size:22px;border-bottom:2px solid #7c3aed;padding-bottom:10px}
