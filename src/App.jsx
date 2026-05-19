@@ -1650,7 +1650,13 @@ export default function App() {
 
   const createProject = (formData) => {
     const id = Date.now();
-    const slug = slugify(formData.name);
+    const baseSlug = slugify(formData.name) || `project-${id}`;
+    const existingSlugs = new Set(projects.map(p => p.slug));
+    let slug = baseSlug;
+    let suffix = 2;
+    while (existingSlugs.has(slug)) {
+      slug = `${baseSlug}-${suffix++}`;
+    }
     const newProject = {
       id, slug,
       ...formData,
