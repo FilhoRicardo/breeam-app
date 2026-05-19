@@ -309,10 +309,10 @@ export const CREDITS = [
       "Assessor judgement is required where route safety is unclear, and the justification should be recorded."
     ]
   },
-  { code: "Lea 1", category: "Ecology", title: "Life Cycle Impacts", available: 4, part: 1 },
-  { code: "Lea 2", category: "Ecology", title: "Ecology", available: 2, part: 1 },
-  { code: "Lea 3", category: "Ecology", title: "Ecology", available: 2, part: 1 },
-  { code: "Lea 4", category: "Ecology", title: "Ecology", available: 2, part: 1 },
+  { code: "Lea 1", category: "Ecology", title: "Planted Area", available: 4, part: 1 },
+  { code: "Lea 2", category: "Ecology", title: "Ecology Features", available: 2, part: 1 },
+  { code: "Lea 3", category: "Ecology", title: "Ecology Report", available: 2, part: 1 },
+  { code: "Lea 4", category: "Ecology", title: "Biodiversity Plan", available: 2, part: 1 },
   { code: "Man 5", category: "Management", title: "Purchasing", available: 3, part: 2 },
   { code: "Man 6", category: "Management", title: "Comfort", available: 2, part: 2 },
   { code: "Man 7", category: "Management", title: "Building User Guide", available: 2, part: 2 },
@@ -456,8 +456,8 @@ export const CREDITS = [
       "The strongest evidence is a current plan with named actions, ownership, and periodic review rather than a historic one-off survey."
     ]
   },
-  { code: "Lea 5", category: "Ecology", title: "Life Cycle Impacts", available: 4, part: 2 },
-  { code: "Lea 6", category: "Ecology", title: "Ecology", available: 2, part: 2 },
+  { code: "Lea 5", category: "Ecology", title: "Ecology Strategy", available: 4, part: 2 },
+  { code: "Lea 6", category: "Ecology", title: "Ecological Enhancement", available: 2, part: 2 },
   { code: "Lea 7", category: "Ecology", title: "Space Versatility", available: 2, part: 2 },
   { code: "Lea 8", category: "Ecology", title: "Healthy Buildings", available: 2, part: 2 },
 ];
