@@ -298,8 +298,12 @@ const exportMeetingMd = (meeting) => {
     meeting.attendees?.length ? `\n**Attendees:** ${meeting.attendees.join(", ")}` : "",
     "", "## Notes", "", meeting.notes || "_No notes recorded._"].filter(Boolean).join("\n");
   const blob = new Blob([front + body], { type: "text/markdown" });
-  const a = document.createElement("a"); a.href = URL.createObjectURL(blob);
-  a.download = `${meeting.date}_${slugify(meeting.title || "untitled")}.md`; a.click();
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${meeting.date}_${slugify(meeting.title || "untitled")}.md`;
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 };
 
 // ── Utility: generate PDF (stub using browser print) ─────────────────────────
