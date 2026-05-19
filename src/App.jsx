@@ -20,6 +20,19 @@ const tod = () => {
 };
 const slugify = (s) => String(s || "").toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
+// ── A11y helper: make any element behave like a button for keyboard users ────
+const buttonish = (handler) => ({
+  role: "button",
+  tabIndex: 0,
+  onClick: handler,
+  onKeyDown: (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      handler(e);
+    }
+  },
+});
+
 // ── BREEAM Manual PDF map ────────────────────────────────────────────────────
 // Maps credit code (e.g. "Tra 1") → public URL of the BREEAM manual PDF.
 // 104 PDFs bundled in public/breeam-pdfs/ organized by category/credit-code/.
@@ -442,7 +455,8 @@ function HomePage({ project, onNavigate }) {
                   const sc = pc?.status || "not_pursuing";
                   return (
                     <div key={c.code}
-                      onClick={() => onNavigate("assessment")}
+                      {...buttonish(() => onNavigate("assessment"))}
+                      aria-label={`${c.code} ${c.title}`}
                       style={{
                         padding: "5px 10px", borderRadius: 7, border: `1px solid ${pursued ? cc.border : "rgba(0,0,0,0.08)"}`,
                         background: pursued ? cc.bg : "rgba(0,0,0,0.02)",
@@ -536,7 +550,8 @@ function PreAssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
                         const sc = pc?.status || "not_pursuing";
                         return (
                           <div key={c.code}
-                            onClick={() => setSelectedCredit(getDisplayCredit(c, pc))}
+                            {...buttonish(() => setSelectedCredit(getDisplayCredit(c, pc)))}
+                            aria-label={`${c.code} ${c.title}`}
                             style={{
                               padding: "9px 12px", borderRadius: 8, marginBottom: 3, cursor: "pointer",
                               background: selectedCredit?.code === c.code ? "rgba(124,58,237,0.12)" : pursued ? "rgba(255,255,255,0.04)" : "transparent",
@@ -630,21 +645,25 @@ function PreAssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
                             {q.options.map((opt, oi) => {
                               const isMultiple = q.selectionMode === "multiple";
                               const selected = (c.selectedAnswers || []).includes(opt.label);
+                              const handleSelect = () => {
+                                const baseCredit = selectedCredit?.code === c.code ? selectedCredit : c;
+                                const baseSelectedAnswers = baseCredit.selectedAnswers || [];
+                                const isAlreadySelected = baseSelectedAnswers.includes(opt.label);
+                                const nextSelectedAnswers = isMultiple
+                                  ? (isAlreadySelected
+                                      ? baseSelectedAnswers.filter((answer) => answer !== opt.label)
+                                      : [...baseSelectedAnswers, opt.label])
+                                  : [opt.label];
+                                const updated = buildUpdatedCreditSelection(baseCredit, nextSelectedAnswers);
+                                setSelectedCredit(updated);
+                                onUpdate(updated);
+                              };
                               return (
                                 <div key={oi}
-                                  onClick={() => {
-                                    const baseCredit = selectedCredit?.code === c.code ? selectedCredit : c;
-                                    const baseSelectedAnswers = baseCredit.selectedAnswers || [];
-                                    const isAlreadySelected = baseSelectedAnswers.includes(opt.label);
-                                    const nextSelectedAnswers = isMultiple
-                                      ? (isAlreadySelected
-                                          ? baseSelectedAnswers.filter((answer) => answer !== opt.label)
-                                          : [...baseSelectedAnswers, opt.label])
-                                      : [opt.label];
-                                    const updated = buildUpdatedCreditSelection(baseCredit, nextSelectedAnswers);
-                                    setSelectedCredit(updated);
-                                    onUpdate(updated);
-                                  }}
+                                  {...buttonish(handleSelect)}
+                                  role={isMultiple ? "checkbox" : "radio"}
+                                  aria-checked={selected}
+                                  aria-label={opt.label}
                                   style={{
                                     padding: "7px 10px", borderRadius: 6, cursor: "pointer",
                                     background: selected ? "rgba(124,58,237,0.10)" : "rgba(0,0,0,0.02)",
@@ -745,7 +764,8 @@ function AssessmentPage({ project, onUpdate, projectRoot, projectSlug }) {
                       const sc = pc?.status || "not_pursuing";
                       return (
                         <div key={c.code}
-                          onClick={() => setSelectedCredit(getDisplayCredit(c, pc))}
+                          {...buttonish(() => setSelectedCredit(getDisplayCredit(c, pc)))}
+                          aria-label={`${c.code} ${c.title}`}
                           style={{
                             padding: "10px 12px", borderRadius: 9, marginBottom: 4, cursor: "pointer",
                             background: selectedCredit?.code === c.code ? "rgba(124,58,237,0.12)" : "transparent",
@@ -1052,7 +1072,11 @@ function EvidencePackagePage({ project }) {
           <div style={{ marginBottom: 20 }}>
             <div style={{ fontSize: 11, color: "#7c3aed", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>Part 1 — Asset Performance</div>
             {part1.map(c => (
-              <div key={c.code} onClick={() => toggle(c.code)}
+              <div key={c.code}
+                {...buttonish(() => toggle(c.code))}
+                role="checkbox"
+                aria-checked={selected.has(c.code)}
+                aria-label={`${c.code} ${c.title}`}
                 style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderRadius: 9, marginBottom: 6, cursor: "pointer",
                   background: selected.has(c.code) ? "rgba(124,58,237,0.1)" : "rgba(255,255,255,0.03)",
                   border: `1px solid ${selected.has(c.code) ? "rgba(124,58,237,0.3)" : "rgba(0,0,0,0.07)"}` }}>
@@ -1069,7 +1093,11 @@ function EvidencePackagePage({ project }) {
           <div>
             <div style={{ fontSize: 11, color: "#2563eb", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>Part 2 — Building Management</div>
             {part2.map(c => (
-              <div key={c.code} onClick={() => toggle(c.code)}
+              <div key={c.code}
+                {...buttonish(() => toggle(c.code))}
+                role="checkbox"
+                aria-checked={selected.has(c.code)}
+                aria-label={`${c.code} ${c.title}`}
                 style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", borderRadius: 9, marginBottom: 6, cursor: "pointer",
                   background: selected.has(c.code) ? "rgba(124,58,237,0.1)" : "rgba(255,255,255,0.03)",
                   border: `1px solid ${selected.has(c.code) ? "rgba(124,58,237,0.3)" : "rgba(0,0,0,0.07)"}` }}>
@@ -1254,7 +1282,9 @@ function MeetingsPage({ project, meetings, onMeetingsChange, projectRoot, projec
             </div>
           )}
           {projectMeetings.map(m => (
-            <div key={m.id} onClick={() => selectMeeting(m)}
+            <div key={m.id}
+              {...buttonish(() => selectMeeting(m))}
+              aria-label={`Meeting: ${m.title || "Untitled"} on ${m.date}`}
               style={{
                 padding: "12px 14px", borderRadius: 10, marginBottom: 6, cursor: "pointer",
                 background: selected?.id === m.id ? "rgba(124,58,237,0.10)" : "rgba(255,255,255,0.03)",

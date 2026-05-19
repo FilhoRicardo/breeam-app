@@ -24,3 +24,10 @@ textarea { outline: none; }
 textarea:focus { border-color: rgba(124,58,237,0.5) !important; }
 
 input:focus { border-color: rgba(124,58,237,0.5) !important; }
+
+[role="button"]:focus-visible,
+[role="checkbox"]:focus-visible,
+[role="radio"]:focus-visible {
+  outline: 2px solid #7c3aed;
+  outline-offset: 2px;
+}
