@@ -184,10 +184,9 @@ const getCreditQuestionOptions = (credit) =>
 const buildUpdatedCreditSelection = (credit, nextSelectedAnswers) => {
   const options = getCreditQuestionOptions(credit);
   const selected = options.filter((opt) => nextSelectedAnswers.includes(opt.label));
-  const score = Math.min(
-    credit.available || Infinity,
-    selected.reduce((sum, opt) => sum + (opt.points || 0), 0),
-  );
+  const cap = Number.isFinite(credit.available) ? credit.available : 0;
+  const sum = selected.reduce((acc, opt) => acc + (opt.points || 0), 0);
+  const score = Math.min(cap, sum);
   const selectedAnswer = summarizeSelectedAnswers(nextSelectedAnswers);
 
   return {
