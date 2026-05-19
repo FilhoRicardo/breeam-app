@@ -279,6 +279,7 @@ const CATEGORY_COLORS = {
   Materials:     { bg: "rgba(124,58,237,0.08)",   border: "rgba(124,58,237,0.20)",  color: "#7c3aed" },
   Pollution:     { bg: "rgba(6,182,212,0.08)",    border: "rgba(6,182,212,0.20)",   color: "#0891b2" },
   Ecology:        { bg: "rgba(34,197,94,0.08)",    border: "rgba(34,197,94,0.20)",   color: "#16a34a" },
+  Waste:         { bg: "rgba(180,83,9,0.08)",     border: "rgba(180,83,9,0.20)",    color: "#b45309" },
   Management:    { bg: "rgba(100,116,139,0.08)",   border: "rgba(100,116,139,0.20)", color: "#64748b" },
 };
 
