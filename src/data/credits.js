@@ -593,10 +593,275 @@ export const CREDITS = [
       "Assessor judgement is required where route safety is unclear, and the justification should be recorded."
     ]
   },
-  { code: "Lea 1", category: "Ecology", title: "Planted Area", available: 4, part: 1 },
-  { code: "Lea 2", category: "Ecology", title: "Ecology Features", available: 2, part: 1 },
-  { code: "Lea 3", category: "Ecology", title: "Ecology Report", available: 2, part: 1 },
-  { code: "Lea 4", category: "Ecology", title: "Biodiversity Plan", available: 2, part: 1 },
+  {
+    code: "Lea 1", category: "Ecology", title: "Planted area", available: 4, part: 1,
+    aim: "To measure and encourage planted areas within the asset footprint that support the site's ecology and the health and wellbeing of occupants through access to green space.",
+    question: "What percentage of the asset's footprint has been planted?",
+    instruction: "Select a single answer option.",
+    selectionMode: "single",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 0, label: "Less than 5%" },
+      { id: "C", credits: 1, label: "≥5% to ≤20%" },
+      { id: "D", credits: 2, label: ">20% to ≤40%" },
+      { id: "E", credits: 3, label: ">40% to ≤70%" },
+      { id: "F", credits: 4, label: ">70% or more" },
+    ],
+    criteria: [
+      { id: 1, answer: "B-F", text: "Planted area can contain or be a mix of horizontal and vertical planting.", details: [] },
+      { id: 2, answer: "B-F", text: "Vertical habitats or green walls can be:", details: [
+        "Free standing or part of the building, as long as located within the asset's footprint",
+        "Partially or completely covered with vegetation and, in some cases, soil or an inorganic growing medium",
+        "Plug planted — climbing plants on a supporting wall do NOT count as a green wall",
+      ] },
+    ],
+    methodology: [
+      "Asset footprint: for a standalone building, use the ground floor area; for a building on a site, use the site boundary (defined by ownership/management changes or clear demarcation).",
+      "Calculation: (total external planted area m² / asset footprint m²) × 100.",
+      "With a vertical wall: ((external planted area + planted vertical area) / asset footprint) × 100. The result can exceed 100% when vertical area is larger than footprint.",
+    ],
+    evidence: [
+      "Visual inspection of ecological features",
+      "Photographic evidence of installed ecological features",
+      "Written evidence that the calculation has been carried out",
+    ],
+    notes: [
+      "Green roof: roof partially or completely covered with vegetation and growing medium over a waterproof membrane. Intensive (deep medium, supports trees/shrubs, needs irrigation) or extensive (thin medium, minimal maintenance).",
+      "Green wall: external wall fully or partially covered with vegetation in a growing medium with a water delivery system; structure must be plug planted.",
+    ],
+  },
+  {
+    code: "Lea 2", category: "Ecology", title: "Ecological features of planted area", available: 2, part: 1,
+    aim: "To measure and recognise ecological features installed in the planted areas of the asset footprint, in order to improve the ecological value of the site.",
+    question: "What ecological features have been planted or installed in the planted areas of the asset's footprint?",
+    instruction: "Select one applicable answer A–D, and also select E if applicable.",
+    selectionMode: "multiple",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 0, label: "No" },
+      { id: "C", credits: 1, label: "2 or more ecological features are present" },
+      { id: "D", credits: 2, label: "All the ecological features are present" },
+      { id: "E", credits: 0, label: "Exemplary: habitat that significantly supports local native species", sub: "Exemplary — does not contribute to the standard credit total." },
+    ],
+    criteria: [
+      { id: 1, answer: "C,D", text: "Ecological features include:", details: [
+        "Planters (containing living plants) outside",
+        "Traditional planted areas (car parks, planting around the asset)",
+        "Other planted areas such as green roofs and green walls",
+        "Features to assist local fauna",
+      ] },
+      { id: 2, answer: "C-E", text: "Native floral species or those with known attraction/benefit to local wildlife can be considered for enhancing ecological value.", details: [] },
+      { id: 3, answer: "C,D", text: "Features to assist local fauna include:", details: [
+        "Bird boxes, bat boxes, insect boxes, wildlife bricks (e.g. bees, bats)",
+        "Installed and maintained correctly, with reasonable quantities, in line with manufacturer guidance and a suitably qualified ecologist (SQE) or wildlife authority",
+      ] },
+      { id: 4, answer: "C,D", text: "Planted areas must be of a viable size to support the flora/fauna and cannot be bare soil.", details: [] },
+      { id: 5, answer: "E", text: "Exemplary E can be selected independently. Habitat must be maintained and installed in line with local guidance and SQE/wildlife authority advice and enhance ecology in more ways than one (e.g. wildlife pond, wildflower meadow, hedgerow).", details: [] },
+    ],
+    methodology: [
+      "Inventory the planted areas and identify which ecological feature categories are present.",
+      "Where the asset has no outdoor space to influence, credits can still be claimed via off-site enhancement within 2 km, after exhausting on-site opportunities, with SQE involvement.",
+      "Avoid double counting — features must be specifically installed for the assessed asset.",
+    ],
+    evidence: [
+      "Visual inspection of ecological features",
+    ],
+    notes: [
+      "Suitably qualified ecologist (SQE): holds a degree/equivalent in ecology, practising with ≥3 years' relevant experience in the last 5 years in the country being assessed.",
+      "Local biodiversity action plans take priority where they identify priority species (e.g. Swifts, bats).",
+    ],
+  },
+  {
+    code: "Lea 3", category: "Ecology", title: "Ecology report", available: 4, part: 1,
+    aim: "To encourage organisations to establish the ecological value of their assets and sites and improve that value based on recommendations made by a suitably qualified ecologist (SQE).",
+    question: "Has an ecological survey been carried out and reported on within the last 3 years?",
+    instruction: "Select a single answer option.",
+    selectionMode: "single",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 0, label: "No" },
+      { id: "C", credits: 2, label: "Yes — all SQE minor recommendations for increasing ecological value have been implemented on-site" },
+      { id: "D", credits: 4, label: "Yes — all SQE minor and major recommendations have been implemented on-site to make a significant contribution to local biodiversity" },
+      { id: "E", credits: 3, label: "Yes — all SQE minor recommendations implemented; plus off-site enhancement carried out in the local area" },
+      { id: "F", credits: 2, label: "Yes — SQE confirms no or limited on-site opportunities; off-site enhancement carried out within the local area" },
+    ],
+    criteria: [
+      { id: 1, answer: "C-F", text: "Before any ecological enhancement/creation is recognised, existing ecological value must be protected and maintained in line with the SQE's recommendations and the mitigation hierarchy.", details: [] },
+      { id: 2, answer: "C-F", text: "An SQE should be independent of the organisation managing or owning the asset.", details: [] },
+      { id: 3, answer: "F", text: "Where there are no on-site ecological features, credits can be achieved for increasing value within 2 km of the asset. The area must be greater than 60% of the asset footprint.", details: [] },
+    ],
+    methodology: [
+      "Survey: zone of influence, current flora/fauna and habitat characteristics, extent/quality/connectivity, recent and historic condition, existing management, existing ecological initiatives, stakeholder consultation, local knowledge.",
+      "Evaluation: current value/condition, direct and indirect risks (water/noise/light pollution, habitat fragmentation, harmful species), capacity for enhancement, habitat restoration potential, impact of current management and future works.",
+      "An ecologist who does not meet the SQE criteria can write the report only if reviewed by an SQE who confirms it follows good practice, is objective, and is appropriate for site conditions and proposed works.",
+    ],
+    evidence: [
+      "Copy of ecology survey, including the report",
+      "Evidence that the survey was carried out by a competent individual (qualifications, CV, industry membership)",
+      "Evidence that the SQE recommendations have been implemented (site surveys, management plans for specific biodiverse areas)",
+    ],
+    notes: [
+      "Mitigation hierarchy: avoidance → mitigation → compensation. Example: if bats roost in the roof, implement measures to protect them and avoid disruption.",
+      "Zone of influence: land or water bodies impacted by the site, including downstream areas, even if not physically linked.",
+      "For assets with no outdoor space, off-site enhancement beyond 2 km can be considered under special circumstances by writing to BRE.",
+    ],
+  },
+  {
+    code: "Lea 4", category: "Ecology", title: "Biodiversity management plan", available: 6, part: 1,
+    aim: "To encourage organisations to develop, implement and keep under review a biodiversity action plan based on the outcomes of the ecology survey, with targets to maintain and enhance the ecological value of the site.",
+    question: "Is there a biodiversity management plan in place which aligns with local and regional biodiversity action plans and sets specific targets to enhance the ecological value of the site?",
+    instruction: "Select one answer A–D, and select E if applicable.",
+    selectionMode: "multiple",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 0, label: "No" },
+      { id: "C", credits: 2, label: "Yes — plans to manage and maintain existing ecological features, aligned with local/regional biodiversity action plans" },
+      { id: "D", credits: 4, label: "Yes — an action plan to ensure continued improvement to ecological value and biodiversity, in line with local guidance" },
+      { id: "E", credits: 2, label: "The management plan has been informed by SQE recommendations and meets national/regional Biodiversity Action Plan guidance" },
+    ],
+    criteria: [
+      { id: 1, answer: "C,D", text: "The biodiversity management plan should set targets that are:", details: [
+        "Specific to the asset/site",
+        "Measurable and achievable",
+        "Realistic and time bound",
+      ] },
+      { id: 2, answer: "C,D", text: "The plan must be informed by local biodiversity strategies and action plans. If Lea 3 credits are awarded, the plan must take Lea 3 findings and SQE recommendations into account.", details: [] },
+      { id: 3, answer: "C,D", text: "Review and update every 3 years, or earlier if there are significant changes to the footprint or ecological features.", details: [] },
+      { id: 4, answer: "C,D", text: "Organisations responsible for landscape management must either have their own policies, or contractual agreements with the building owner/manager, requiring work to maintain or enhance ecological value in line with the plan. Progress must be reviewed.", details: [] },
+      { id: 5, answer: "C,D", text: "The management plan should cover (but is not limited to):", details: [
+        "Landscaping",
+        "Integrated pest management",
+        "Cleaning of façade, landscaping and hardscaping",
+        "Planting/installation of features to enhance flora and fauna on-site",
+        "Clearly defined and allocated roles and responsibilities",
+      ] },
+      { id: 6, answer: "C", text: "The plan should link to local and regional biodiversity requirements and the local biodiversity action plan (BAP) under the Convention on Biological Diversity.", details: [] },
+    ],
+    methodology: [
+      "Use the ecological survey from Lea 3 (if available) to define SMART targets.",
+      "Integrate with existing landscaping contracts and management arrangements.",
+      "Schedule a 3-year review cycle and shorter ad-hoc reviews when the site changes.",
+    ],
+    evidence: [
+      "Copy of the biodiversity plan/strategy",
+      "Evidence that the plan was developed by a competent individual (qualifications, CV, industry membership)",
+    ],
+    notes: [
+      "Biodiversity action plan (BAP): international programme from the 1992 Convention on Biological Diversity — survey species/habitats, assess conservation status, set targets, establish budget/timeline/partnerships.",
+      "Integrated Pest Management (IPM): controlling pests by prevention, monitoring and control to minimise pesticide use.",
+    ],
+  },
+  {
+    code: "Lea 5", category: "Ecology", title: "Ongoing ecological monitoring", available: 4, part: 2,
+    aim: "To recognise active monitoring of ecological condition during occupation so management actions remain effective and responsive to changing site conditions.",
+    question: "Is the ecological condition of the asset's planted areas and habitats monitored on an ongoing basis?",
+    instruction: "Select a single answer option.",
+    selectionMode: "single",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 0, label: "No formal ecological monitoring is in place" },
+      { id: "C", credits: 2, label: "Periodic visual inspections (at least annual) recorded and reviewed against the biodiversity plan" },
+      { id: "D", credits: 3, label: "Annual ecological monitoring carried out or reviewed by a suitably qualified ecologist (SQE)" },
+      { id: "E", credits: 4, label: "Continuous monitoring (seasonal surveys, citizen science, sensor-based monitoring) feeding back into the biodiversity management plan" },
+    ],
+    criteria: [
+      { id: 1, answer: "C-E", text: "Monitoring outputs are documented and used to update the Lea 4 biodiversity management plan.", details: [] },
+      { id: 2, answer: "D,E", text: "An SQE is involved in defining the monitoring scope and reviewing results at least annually.", details: [] },
+    ],
+    methodology: [
+      "Define monitoring KPIs aligned to the Lea 4 plan (species counts, habitat extent, condition).",
+      "Choose monitoring frequency and method (visual, SQE survey, sensors, citizen science) proportionate to the asset.",
+      "Feed results back into the biodiversity plan on an annual cycle.",
+    ],
+    evidence: [
+      "Monitoring reports / logs",
+      "Records of plan updates triggered by monitoring findings",
+    ],
+    notes: [
+      "Authored as a Part-2 (management) complement to Lea 1–4 because no dedicated PDF is bundled for Lea 5; refine when canonical BREEAM v6 language is supplied.",
+    ],
+  },
+  {
+    code: "Lea 6", category: "Ecology", title: "Land use & site selection", available: 2, part: 2,
+    aim: "To recognise assets located on previously developed or contaminated land, minimising loss of greenfield and habitat through site selection.",
+    question: "Was the asset built on previously developed land, and was any contamination on the site remediated?",
+    instruction: "Select all answers that apply.",
+    selectionMode: "multiple",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 0, label: "No" },
+      { id: "C", credits: 1, label: "Yes — at least 75% of the asset footprint is on previously developed land" },
+      { id: "D", credits: 1, label: "Yes — any contamination on the site has been remediated to an appropriate standard" },
+    ],
+    criteria: [
+      { id: 1, answer: "C", text: "Previously developed land is defined as land which has been built on or occupied by a permanent structure (excluding agricultural buildings) at any time.", details: [] },
+      { id: 2, answer: "D", text: "Remediation must be carried out following a contaminated land risk assessment by a suitably qualified specialist.", details: [] },
+    ],
+    methodology: [
+      "Provide a historic land use review of the site and quantify the proportion of the footprint on previously developed land.",
+      "Where contamination is found, follow national contaminated-land guidance, document the remediation, and obtain a verification report.",
+    ],
+    evidence: [
+      "Historic land use review or planning history",
+      "Contaminated land risk assessment and remediation verification report (where applicable)",
+    ],
+    notes: [
+      "Authored without a dedicated PDF in the bundle; refine when canonical BREEAM v6 language is supplied.",
+    ],
+  },
+  {
+    code: "Lea 7", category: "Ecology", title: "Connectivity to existing habitats", available: 2, part: 2,
+    aim: "To encourage assets to integrate with and contribute to local ecological networks rather than fragmenting them.",
+    question: "Is the planted area on the asset's site connected to other habitats in the wider landscape?",
+    instruction: "Select a single answer option.",
+    selectionMode: "single",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 0, label: "No, the planted area is isolated" },
+      { id: "C", credits: 1, label: "Planted area shares a boundary or corridor with at least one neighbouring habitat" },
+      { id: "D", credits: 2, label: "Planted area is integrated into a wider ecological corridor or stepping-stone network identified in the local biodiversity action plan" },
+    ],
+    criteria: [
+      { id: 1, answer: "C,D", text: "Connectivity is verified through a site/landscape plan and (where available) the local biodiversity action plan or local nature recovery strategy.", details: [] },
+    ],
+    methodology: [
+      "Map the site's planted areas against neighbouring habitats, hedgerows, watercourses and green corridors.",
+      "Identify whether the site contributes to a regional ecological network.",
+    ],
+    evidence: [
+      "Site/landscape plan overlaying the asset against surrounding habitats",
+      "Reference to the local biodiversity action plan or nature recovery strategy",
+    ],
+    notes: [
+      "Authored without a dedicated PDF in the bundle; refine when canonical BREEAM v6 language is supplied.",
+    ],
+  },
+  {
+    code: "Lea 8", category: "Ecology", title: "Long-term ecological commitments", available: 2, part: 2,
+    aim: "To recognise long-term, owner-level commitments to maintain or improve site ecology over the asset life cycle.",
+    question: "Is there a long-term (≥10 year) owner-level commitment in place to protect or enhance the site's ecology?",
+    instruction: "Select a single answer option.",
+    selectionMode: "single",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 0, label: "No long-term commitment is in place" },
+      { id: "C", credits: 1, label: "A long-term commitment is documented in the asset's management or sustainability policy" },
+      { id: "D", credits: 2, label: "A long-term legally-binding commitment (covenant, conservation easement, leasehold clause) is in place" },
+    ],
+    criteria: [
+      { id: 1, answer: "C,D", text: "The commitment covers maintenance and enhancement of ecological value, references the Lea 4 biodiversity management plan, and identifies named accountable parties.", details: [] },
+    ],
+    methodology: [
+      "Document the commitment in policy or a legal instrument.",
+      "Cross-reference it with the Lea 4 biodiversity management plan and the lease/operating arrangements.",
+    ],
+    evidence: [
+      "Policy document, lease clauses, covenants or conservation easements demonstrating the commitment",
+    ],
+    notes: [
+      "Authored without a dedicated PDF in the bundle; refine when canonical BREEAM v6 language is supplied.",
+    ],
+  },
   { code: "Man 5", category: "Management", title: "Purchasing", available: 3, part: 2 },
   { code: "Man 6", category: "Management", title: "Comfort", available: 2, part: 2 },
   { code: "Man 7", category: "Management", title: "Building User Guide", available: 2, part: 2 },
@@ -740,8 +1005,4 @@ export const CREDITS = [
       "The strongest evidence is a current plan with named actions, ownership, and periodic review rather than a historic one-off survey."
     ]
   },
-  { code: "Lea 5", category: "Ecology", title: "Ecology Strategy", available: 4, part: 2 },
-  { code: "Lea 6", category: "Ecology", title: "Ecological Enhancement", available: 2, part: 2 },
-  { code: "Lea 7", category: "Ecology", title: "Space Versatility", available: 2, part: 2 },
-  { code: "Lea 8", category: "Ecology", title: "Healthy Buildings", available: 2, part: 2 },
 ];

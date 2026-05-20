@@ -75,14 +75,13 @@ const CREDIT_PDF_MAP = {
   "Mat 2": "/breeam-pdfs/RESOURCES/RSC_02/RSC 02 - Manual criteria - Reuse and recycling.pdf",
   "Mat 3": "/breeam-pdfs/RESOURCES/RSC_03/RSC 03 - Manual criteria - Resource Inventory.pdf",
   "Was 1": "/breeam-pdfs/RESOURCES/RSC_04/RSC 04 - Manual criteria - Future adaptation.pdf",
-  "Pol 1": "/breeam-pdfs/POLLUTION/POL_01/POL 01 - Manual criteria - Water pollution.pdf",
-  "Pol 2": "/breeam-pdfs/POLLUTION/POL_02/POL 02 - Manual criteria - Chemical storage.pdf",
-  "Pol 3": "/breeam-pdfs/POLLUTION/POL_03/POL 03 - Manual criteria - Local air quality.pdf",
-  // Land Use & Ecology — Lea 1-4 only (Lea 5-8 omitted, see RF-22)
   "Lea 1": "/breeam-pdfs/LAND-USE-&-ECOLOGY/LUE_01/LUE 01 - Manual criteria - Planted area.pdf",
   "Lea 2": "/breeam-pdfs/LAND-USE-&-ECOLOGY/LUE_02/LUE 02 - Manual criteria - Ecology features.pdf",
   "Lea 3": "/breeam-pdfs/LAND-USE-&-ECOLOGY/LUE_03/LUE 03 - Manual criteria - Ecology report.pdf",
   "Lea 4": "/breeam-pdfs/LAND-USE-&-ECOLOGY/LUE_04/LUE 04 - Manual criteria - Biodiversity plan.pdf",
+  "Pol 1": "/breeam-pdfs/POLLUTION/POL_01/POL 01 - Manual criteria - Water pollution.pdf",
+  "Pol 2": "/breeam-pdfs/POLLUTION/POL_02/POL 02 - Manual criteria - Chemical storage.pdf",
+  "Pol 3": "/breeam-pdfs/POLLUTION/POL_03/POL 03 - Manual criteria - Local air quality.pdf",
 };
 
 // ── Storage helpers (localStorage with error handling) ──────────────────────
