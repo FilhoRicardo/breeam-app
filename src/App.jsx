@@ -71,6 +71,9 @@ const CREDIT_PDF_MAP = {
   "Man 4": "/breeam-pdfs/Uncategorized/MAN_04/MAN 04 - Manual criteria - Environment policy.pdf",
   "Man 5": "/breeam-pdfs/Uncategorized/MAN_05/MAN 05 - Manual criteria - Green lease.pdf",
   // Pollution (only credits defined in CREDITS)
+  "Mat 1": "/breeam-pdfs/RESOURCES/RSC_01/RSC 01 - Manual criteria - Condition Survey.pdf",
+  "Mat 2": "/breeam-pdfs/RESOURCES/RSC_02/RSC 02 - Manual criteria - Reuse and recycling.pdf",
+  "Mat 3": "/breeam-pdfs/RESOURCES/RSC_03/RSC 03 - Manual criteria - Resource Inventory.pdf",
   "Pol 1": "/breeam-pdfs/POLLUTION/POL_01/POL 01 - Manual criteria - Water pollution.pdf",
   "Pol 2": "/breeam-pdfs/POLLUTION/POL_02/POL 02 - Manual criteria - Chemical storage.pdf",
   "Pol 3": "/breeam-pdfs/POLLUTION/POL_03/POL 03 - Manual criteria - Local air quality.pdf",
