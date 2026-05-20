@@ -70,6 +70,8 @@ const CREDIT_PDF_MAP = {
   "Man 3": "/breeam-pdfs/Uncategorized/MAN_03/MAN 03 - Manual criteria - Maintenance policy.pdf",
   "Man 4": "/breeam-pdfs/Uncategorized/MAN_04/MAN 04 - Manual criteria - Environment policy.pdf",
   "Man 5": "/breeam-pdfs/Uncategorized/MAN_05/MAN 05 - Manual criteria - Green lease.pdf",
+  "Man 6": "/breeam-pdfs/RESOURCES/RSC_05/RSC 05 - Manual criteria - Sust procurement.pdf",
+  "Man 7": "/breeam-pdfs/RESOURCES/RSC_06/RSC 06 - Manual criteria - Optimising resource.pdf",
   // Pollution (only credits defined in CREDITS)
   "Mat 1": "/breeam-pdfs/RESOURCES/RSC_01/RSC 01 - Manual criteria - Condition Survey.pdf",
   "Mat 2": "/breeam-pdfs/RESOURCES/RSC_02/RSC 02 - Manual criteria - Reuse and recycling.pdf",
