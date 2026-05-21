@@ -1977,6 +1977,238 @@ export const CREDITS = [
     ],
   },
   {
+    code: "Wat 7", category: "Water", title: "Leak detection system", available: 4, part: 1,
+    aim: "To reduce the overall consumption of water in buildings through wastage due to water leaks.",
+    question: "Is the water supply system fitted with an automated leak detection system?",
+    instruction: "Select a single answer option.",
+    selectionMode: "single",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 0, label: "No" },
+      { id: "C", credits: 4, label: "Yes" },
+    ],
+    criteria: [
+      { id: 1, answer: "C", text: "System must automatically detect leaks throughout the supply (flow-based or sensor-based — e.g. above-normal flow at meters/sub-meters qualifies).", details: [] },
+      { id: 2, answer: "C", text: "System must identify detected leaks; activate when continuous flow above a pre-set minimum lasts a pre-set period; cover all pipework under the owner/occupier's responsibility.", details: [] },
+      { id: 3, answer: "C", text: "Not required to cut off the water supply when the alarm triggers.", details: [] },
+      { id: 4, answer: "C", text: "Where there is a utility meter at the boundary, a separate flow meter / measurement device may be needed downstream; an agreed leak-detection arrangement on the utility meter is also acceptable.", details: [] },
+      { id: 5, answer: "C", text: "Emergency systems (fire hydrants, sprinklers) must also be covered.", details: [] },
+    ],
+    methodology: [
+      "Specify a flow- or sensor-based leak detection system covering the entire supply, including emergency systems.",
+      "Tune flow/time thresholds to building usage profile to avoid nuisance alarms.",
+    ],
+    evidence: [
+      "Photographic evidence of the leak detection system",
+      "Manufacturer specifications of the leak detection system",
+    ],
+    notes: [
+      "Where the asset has no water-using equipment, assess water supply to the most-likely-used nearby facilities.",
+    ],
+  },
+  {
+    code: "Wat 8", category: "Water", title: "Leak prevention", available: 2, part: 1,
+    aim: "To minimise undetected wastage and leaks from sanitary fittings and supply pipework.",
+    question: "Are flow control devices that regulate the water supply according to demand fitted to each WC area or sanitary facility?",
+    instruction: "Select a single answer option.",
+    selectionMode: "single",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 0, label: "No" },
+      { id: "C", credits: 2, label: "Yes" },
+    ],
+    criteria: [
+      { id: 1, answer: "C", text: "Compliant flow-control devices include:", details: [
+        "Time controller (auto switch off after a fixed interval)",
+        "Programmed time controller (auto on/off at fixed times)",
+        "Volume controller (cuts off once max pre-set volume reached)",
+        "Presence detector / controller (occupancy- or motion-based)",
+        "Central control unit combining any of the above",
+      ] },
+      { id: 2, answer: "C", text: "Controls may govern combined WC areas (e.g. per-gender block within a core) — not required per individual fitting. Aim: isolate water supply when block is not in use.", details: [] },
+      { id: 3, answer: "C", text: "Programmable timed controllers linked to a shut-off device are acceptable for facilities with constant use during operating hours.", details: [] },
+    ],
+    methodology: [
+      "Fit one of the compliant flow-control device types to each WC area / sanitary facility.",
+    ],
+    evidence: [
+      "Photographic evidence of water shut-off controls",
+      "Manufacturer specifications of shut-off controls",
+      "Schematic diagram showing isolation areas",
+    ],
+    notes: [
+      "Where the asset has no water-using equipment, assess the most-likely-used nearby facilities.",
+    ],
+  },
+  {
+    code: "Wat 9", category: "Water", title: "Isolation valves", available: 4, part: 1,
+    aim: "To minimise unnecessary water consumption due to defects and reduce disruption during maintenance.",
+    question: "What percentage of water fixtures and equipment have isolation valves fitted?",
+    instruction: "Select a single answer option.",
+    selectionMode: "single",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 0, label: "0%" },
+      { id: "C", credits: 1, label: "≥ 1 to < 50%" },
+      { id: "D", credits: 2, label: "≥ 50 to < 75%" },
+      { id: "E", credits: 3, label: "≥ 75 to < 100%" },
+      { id: "F", credits: 4, label: "100%" },
+    ],
+    criteria: [
+      { id: 1, answer: "B-F", text: "Relevant fixtures include wash basins, showers, toilets, urinals, washing machines, dishwashers.", details: [] },
+      { id: 2, answer: "B-F", text: "Isolation valves fitted at an area level (e.g. shower block, toilet area) count — equipment within those areas counts toward the percentage.", details: [] },
+      { id: 3, answer: "B-F", text: "Isolation valve = any valve in the pipe that prevents flow to a specific piece of equipment or area. Must be easily accessible. Automatic or manual.", details: [] },
+    ],
+    methodology: [
+      "Inventory water-using equipment and confirm isolation valve coverage. Express as a % of fixtures (area-level valves count for all fixtures they serve).",
+    ],
+    evidence: [
+      "Photographic evidence of water isolation controls",
+    ],
+    notes: [
+      "Where the asset has no water-using equipment, assess the most-likely-used nearby facilities.",
+    ],
+  },
+  {
+    code: "Wat 10", category: "Water", title: "Reducing utility-supplied water consumption", available: 2, part: 1,
+    aim: "To minimise unnecessary water consumption by reducing the demand for utility-supplied water within the asset.",
+    question: "Does the asset harvest and reuse greywater, blackwater or rainwater?",
+    instruction: "Select a single answer option.",
+    selectionMode: "single",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 0, label: "No" },
+      { id: "C", credits: 2, label: "Yes" },
+    ],
+    criteria: [
+      { id: 1, answer: "All", text: "Filtering: where legislation prevents use of non-utility-supplied water within the asset, this issue can be filtered out.", details: [] },
+      { id: 2, answer: "C", text: "Greywater / blackwater / rainwater should produce a reasonable reduction in utility-supplied water consumption.", details: [] },
+    ],
+    methodology: [
+      "Identify alternative water sources and the demand they offset (irrigation, toilet flushing, car/clothes washing, business processes).",
+    ],
+    evidence: [
+      "Photographic evidence of non-utility supplied water source",
+      "Manufacturer information",
+      "Copy of relevant legislation (where filtering due to legal prohibition)",
+    ],
+    notes: [
+      "Blackwater: wastewater from kitchen/utility sinks, urinals, toilets.",
+      "Greywater: water discharged from sources other than kitchen and sewage.",
+    ],
+  },
+  {
+    code: "Wat 11", category: "Water", title: "Water consumption", available: 4, part: 2,
+    aim: "To ensure management are aware of annual water consumption from utility-supplied resources.",
+    question: "What is the asset's annual water consumption from utility-supplied water?",
+    instruction: "Select B and (in the BREEAM online platform) enter the annual volume in m³.",
+    selectionMode: "single",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 4, label: "Annual utility-supplied water volume entered in m³" },
+    ],
+    criteria: [
+      { id: 1, answer: "B", text: "Sum of utility-supplied water drawn into the asset over the reporting period (all uses).", details: [] },
+      { id: 2, answer: "B", text: "Reporting period start must be no more than 1 year prior to the start of the assessment (more recent is fine if the assessor can verify).", details: [] },
+    ],
+    methodology: [
+      "Collect water bills or verified meter readings for the start and end of the reporting period; compute total consumption.",
+    ],
+    evidence: [
+      "Copies of water bills or verified meter readings for the beginning and end of the reporting period",
+    ],
+    notes: [
+      "Utility-supplied water: water provided by an organisation supplying a public service under government regulation (e.g. mains water).",
+      "BREEAM Note: the canonical issue is a numeric entry feeding the online platform. This app surfaces it as a single 'data entered' answer.",
+    ],
+  },
+  {
+    code: "Wat 12", category: "Water", title: "Water recycling", available: 2, part: 2,
+    aim: "To encourage the use of alternative water supplies in order to reduce the demand for utility-supplied water.",
+    question: "What is the asset's annual water consumption from alternative supplies, as a percentage of total?",
+    instruction: "Select the band that contains the alternative-supplies percentage.",
+    selectionMode: "single",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 0, label: "Alternative supplies < 5% of total" },
+      { id: "C", credits: 1, label: "Alternative supplies ≥ 5% to < 15% of total" },
+      { id: "D", credits: 2, label: "Alternative supplies ≥ 15% of total" },
+    ],
+    criteria: [
+      { id: 1, answer: "B-D", text: "Wat 11 must be answered with the annual consumption data. Use the same reporting period and floor area as Wat 11.", details: [] },
+      { id: 2, answer: "B-D", text: "Alternative supplies include rainwater, blackwater, greywater — treated or untreated prior to reuse.", details: [] },
+      { id: 3, answer: "B-D", text: "Other water sources qualify if used to reduce demand of utility-supplied water for unregulated uses.", details: [] },
+    ],
+    methodology: [
+      "Meter or robustly estimate annual volume from alternative supplies; divide by Wat 11 total to compute %.",
+    ],
+    evidence: [
+      "Verified meter readings for the alternative supplies",
+      "Robust annual estimates if metering is unavailable",
+    ],
+    notes: [
+      "BREEAM Note: the canonical issue takes a numeric entry; this app uses 4 bands to fit its option-based UI.",
+    ],
+  },
+  {
+    code: "Wat 13", category: "Water", title: "Water consumption reporting", available: 4, part: 2,
+    aim: "To facilitate structured, systematic reporting on water consumption so building users understand it and set efficiency improvement targets.",
+    question: "How is the collected water consumption data used?",
+    instruction: "Select a single answer option.",
+    selectionMode: "single",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 0, label: "Filed away" },
+      { id: "C", credits: 2, label: "Compared against asset targets" },
+      { id: "D", credits: 3, label: "Compared against targets and reported on internally" },
+      { id: "E", credits: 4, label: "Compared against targets, reported internally, AND published in an annual public report" },
+    ],
+    criteria: [
+      { id: 1, answer: "B-E", text: "Man 4 must be answered D (environmental policy with targets) and all criteria met.", details: [] },
+      { id: 2, answer: "B-E", text: "Water consumption is monitored, targeted, and reported to the appropriate level within the occupant's organisation.", details: [] },
+      { id: 3, answer: "C-E", text: "Dedicated water management/reduction targets are endorsed at senior level, committing the organisation to reduction and to working with occupiers/suppliers to address impact.", details: [] },
+    ],
+    methodology: [
+      "Build a reporting workflow that compares meter data against targets; circulate internally; consider an annual public sustainability report.",
+    ],
+    evidence: [
+      "Records of water consumption analysis (spreadsheets, summary reports)",
+      "Copies of internal water consumption reports",
+      "Copies of public water consumption reports",
+    ],
+    notes: [],
+  },
+  {
+    code: "Wat 14", category: "Water", title: "Water strategy", available: 6, part: 2,
+    aim: "To promote reduced utility-supplied water consumption through strategies that focus on water efficiency and reduction of wastage.",
+    question: "Is there a water strategy in place?",
+    instruction: "Select a single answer A–C. If C, also tick D and/or E if applicable.",
+    selectionMode: "multiple",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 0, label: "No" },
+      { id: "C", credits: 2, label: "Yes — water strategy in place" },
+      { id: "D", credits: 2, label: "Strategy includes replacing water appliances with low-water-use equivalents during refurbishment" },
+      { id: "E", credits: 2, label: "Strategy includes a proactive maintenance policy for installed water systems" },
+    ],
+    criteria: [
+      { id: 1, answer: "D", text: "Replacement section must include a programme replacing high-water-use equipment with low-water-use equivalents, and a schedule of approved replacement appliances clearly identifiable as low-water-use.", details: [] },
+      { id: 2, answer: "D,E", text: "If all appliances are already low-water-use, a strategy must still ensure continued good practice.", details: [] },
+      { id: 3, answer: "C-E", text: "The strategy must have senior management approval.", details: [] },
+    ],
+    methodology: [
+      "Document a water strategy including a replacement programme (D) and a proactive maintenance policy (E). Senior management sign-off.",
+    ],
+    evidence: [
+      "The strategy document with relevant sections highlighted",
+      "Maintenance logs (for E)",
+      "Monitoring data evidence",
+    ],
+    notes: [
+      "Proactive maintenance = preventive (planned tests/replacements) + predictive (condition-based) maintenance.",
+    ],
+  },
+  {
     code: "Hea 5", category: "Health", title: "Minimising flicker from lighting systems", available: 4, part: 2,
     aim: "To encourage the installation of lighting systems that minimise the impact of flicker on asset users.",
     question: "Do the asset's lighting installations have features that minimise or prevent flicker?",
