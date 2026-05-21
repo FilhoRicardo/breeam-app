@@ -1839,6 +1839,521 @@ export const CREDITS = [
     ],
   },
   {
+    code: "Ene 7", category: "Energy", title: "Internal lighting", available: 4, part: 2,
+    aim: "To minimise operational energy consumption and the associated carbon emissions through efficient internal lighting and controls.",
+    question: "What is the dominant internal lighting technology and what daylight / occupancy controls are fitted?",
+    instruction: "Select all answers that apply, reflecting the dominant lamp type and controls used.",
+    selectionMode: "multiple",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 2, label: "≥ 75% of lit floor area is LED lighting" },
+      { id: "C", credits: 1, label: "LED or fluorescent fitted with constant illuminance controls" },
+      { id: "D", credits: 1, label: "Daylit space fitted with dimmable or switching photoelectric controls" },
+      { id: "E", credits: 1, label: "Occasionally-occupied space (toilets, kitchenettes, stores) fitted with presence detection (auto on/off)" },
+    ],
+    criteria: [
+      { id: 1, answer: "B-E", text: "Compliant lamp types include LED, compact fluorescent, T5/T8 fluorescent tubes with high-frequency ballasts, metal halide. Tungsten halogen, incandescent and T12 tubes are treated as inefficient.", details: [] },
+      { id: 2, answer: "C", text: "Constant illuminance control = dimming ballasts or LED drivers paired with photodetectors maintaining task lux throughout lamp life.", details: [] },
+      { id: 3, answer: "D,E", text: "Floor area for daylit space with controls (11a + 11b) must not exceed total daylit space; same rule for occasionally-occupied controls (12a + 12b).", details: [] },
+    ],
+    methodology: [
+      "Inventory lit floor area by lamp type; sum to 100%.",
+      "Identify daylit zones and presence-controlled zones; record % coverage for dimmable / switching / auto on-off / auto-off-only controls.",
+    ],
+    evidence: [
+      "Visual inspection / photographic evidence of lighting types",
+      "Building plans highlighting lighting type, daylight sensors and occupancy sensors",
+      "Evidence of how percentages were calculated",
+    ],
+    notes: [
+      "BREEAM Note: the canonical issue feeds the asset energy rating with up to 12 numeric percentages. This app surfaces the most material answers as discrete options.",
+    ],
+  },
+  {
+    code: "Ene 8", category: "Energy", title: "Ventilation", available: 3, part: 2,
+    aim: "To minimise operational energy consumption associated with mechanical ventilation by improving fan/pump efficiency and recovering heat.",
+    question: "What efficiency measures are fitted to the ventilation system?",
+    instruction: "Select all answers that apply.",
+    selectionMode: "multiple",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 1, label: "≥ 50% of fans / all pumps fitted with variable-speed drives (VSD / VFD / AFD)" },
+      { id: "C", credits: 1, label: "Specific fan power for AHUs ≤ 2 W·l⁻¹·s⁻¹ AND ductwork has been leak-tested with remedial action" },
+      { id: "D", credits: 1, label: "Ventilation system includes heat recovery (e.g. plate / rotary wheel) with measured efficiency reported" },
+    ],
+    criteria: [
+      { id: 1, answer: "B-D", text: "Air handling systems = centralised systems distributing air (typically for cooling).", details: [] },
+      { id: 2, answer: "C", text: "Ductwork leakage testing is documented and remedial actions completed.", details: [] },
+    ],
+    methodology: [
+      "Identify all fans and pumps; calculate % fitted with VSDs.",
+      "Compute specific fan power (W/l·s) for AHUs; record duct leakage test outcome.",
+      "Record heat recovery efficiency if known.",
+    ],
+    evidence: [
+      "O&M manuals / manufacturer information for the ventilation system",
+      "Service / maintenance records; photographic evidence of equipment",
+      "Duct and air-handling leakage test results",
+    ],
+    notes: [
+      "BREEAM Note: the canonical issue takes 6 numeric/yes-no inputs feeding the asset rating. This app condenses them.",
+    ],
+  },
+  {
+    code: "Ene 9", category: "Energy", title: "Hot water", available: 3, part: 2,
+    aim: "To recognise the contribution that hot water systems make to the overall energy performance of the asset.",
+    question: "How is hot water generated on-site, by what energy source, and at what efficiency?",
+    instruction: "Select all answers that apply for the main hot water system.",
+    selectionMode: "multiple",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 0, label: "No hot water generated on-site" },
+      { id: "C", credits: 1, label: "Renewable / low-carbon hot water (heat pump, CHP, solar thermal, biomass, district heat)" },
+      { id: "D", credits: 1, label: "Boiler / heat pump efficiency ≥ 90% (or COP ≥ 3)" },
+      { id: "E", credits: 1, label: "Centralised system replaced or refurbished within the last 10 years" },
+    ],
+    criteria: [
+      { id: 1, answer: "C-E", text: "Main system is identified by output capacity where multiple generators are present.", details: [] },
+      { id: 2, answer: "D", text: "Multiple generation units: average efficiency / COP weighted by capacity.", details: [] },
+    ],
+    methodology: [
+      "Inventory the hot-water generation system, fuel source, efficiency/COP, replacement year.",
+      "For district hot water, capture network sources and % distribution losses.",
+    ],
+    evidence: [
+      "Visual inspection and photographic evidence",
+      "O&M manuals / manufacturer information",
+      "Installation diagrams; service/installation/maintenance records",
+      "District-heating operator documentation (where applicable)",
+    ],
+    notes: [
+      "BREEAM Note: the canonical issue has 7+ data-entry questions feeding the asset rating. This app surfaces the most material answers as discrete options.",
+    ],
+  },
+  {
+    code: "Ene 10", category: "Energy", title: "Demand side management (DSM) capabilities for electricity", available: 4, part: 2,
+    aim: "To reduce carbon emissions associated with grid-supply electricity by enabling demand profiles to better match renewable generation availability.",
+    question: "What demand-side management capabilities does the asset have?",
+    instruction: "Select all answers that apply.",
+    selectionMode: "multiple",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 1, label: "Electric storage capacity (batteries, thermal storage)" },
+      { id: "C", credits: 1, label: "Cogeneration optimised with local renewable generation and demand profiles" },
+      { id: "D", credits: 1, label: "Smart appliances or electric DHW under DSM control" },
+      { id: "E", credits: 1, label: "Electric heating under DSM control" },
+      { id: "F", credits: 1, label: "Electric cooling under DSM control" },
+      { id: "G", credits: 1, label: "EV / other charging loads with one- or two-way grid balancing (V2G)" },
+      { id: "H", credits: 1, label: "HVAC system has run-time management" },
+    ],
+    criteria: [
+      { id: 1, answer: "B-H", text: "Filtering: where no cogeneration / no electric heating / no electric cooling / no EV charging / no HVAC, the matching credits filter out.", details: [] },
+      { id: 2, answer: "G", text: "EV charging: 1 point for one-way grid-balancing controlled charging; 2 points for two-way grid-balancing including vehicle-to-grid.", details: [] },
+    ],
+    methodology: [
+      "Audit each DSM capability against the questions; credits scale on % of available points (≥25%→1, ≥50%→2, ≥75%→3, 100%→4).",
+    ],
+    evidence: [
+      "O&M manuals / manufacturer information linked to the project",
+      "Visual inspection and verification",
+    ],
+    notes: [
+      "DSM: measures to improve demand-side consumption efficiency by responding to generation (smart appliances, EV grid balancing, local renewables, controls, storage).",
+      "Run-time management: limits hours equipment can run; uses predefined schedule incl. preconditioning.",
+    ],
+  },
+  {
+    code: "Ene 11", category: "Energy", title: "Installed controls", available: 4, part: 2,
+    aim: "To reduce operational energy consumption by installing appropriate controls.",
+    question: "What HVAC and humidity controls are installed?",
+    instruction: "Select all answers that apply.",
+    selectionMode: "multiple",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 1, label: "Internal temperature controllers in individual rooms / zones (preferably with inter-controller communication)" },
+      { id: "C", credits: 1, label: "Modulating heat / cooling generation with indoor temperature control (preferred) or outside-temperature compensation" },
+      { id: "D", credits: 1, label: "Heating / cooling interlock control (full or partial)" },
+      { id: "E", credits: 1, label: "Air-flow control at room level — demand/presence-dependent (preferred) or time-dependent" },
+      { id: "F", credits: 1, label: "Supply-air temperature control (variable set point with load compensation preferred)" },
+      { id: "G", credits: 1, label: "Air humidity control (room/exhaust/supply humidity control or supply humidity limitation)" },
+    ],
+    criteria: [
+      { id: 1, answer: "B-G", text: "Filtering: where the asset has no heating + cooling, mechanical ventilation, or humidification, the matching credits filter out.", details: [] },
+      { id: 2, answer: "D", text: "Interlock control prevents simultaneous operation of heating and cooling.", details: [] },
+    ],
+    methodology: [
+      "Audit installed control types per question; credits scale on % of available points (≥20%→1, ≥40%→2, ≥60%→3, ≥80%→4).",
+    ],
+    evidence: [
+      "Visual inspection and photographic evidence of controls",
+      "O&M manuals / manufacturer information",
+    ],
+    notes: [],
+  },
+  {
+    code: "Ene 12", category: "Energy", title: "Local energy performance asset rating", available: 3, part: 2,
+    aim: "To recognise operational energy efficiency and carbon benefits associated with benchmarking against local energy standards.",
+    question: "Has the asset been assessed against local energy performance standards, and how does it compare to the benchmark?",
+    instruction: "Select all answers that apply.",
+    selectionMode: "multiple",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 1, label: "Asset assessed against local energy performance standards for existing buildings (e.g. EPC, ENERGY STAR)" },
+      { id: "C", credits: 1, label: "Assessment verified against a recognised industry standard by an independent third party" },
+      { id: "D", credits: 1, label: "Asset's energy performance is lower (better) than the benchmark for the asset type" },
+    ],
+    criteria: [
+      { id: 1, answer: "B-D", text: "EU assessments must derive from national policy frameworks supporting the EU Energy Performance of Buildings Directive (EPBD). Non-EU assessments derive from local national policy.", details: [] },
+      { id: 2, answer: "D", text: "Benchmark must correspond to typical/average performance for the asset type; use the midpoint where given as an interval.", details: [] },
+    ],
+    methodology: [
+      "Capture which energy uses are included (heating, cooling, hot water, mechanical ventilation, lighting, transport, BMS, comms, specialist).",
+      "Capture metric (kgCO₂/m², kWh delivered/m², heating-cooling demand/m², primary energy/m², dimensionless).",
+      "Note whether based on calculated or measured energy consumption.",
+    ],
+    evidence: [
+      "Certificate or rating output document",
+      "Scheme name, version and documentation",
+    ],
+    notes: [
+      "Recognised industry standards include the EU voluntary energy performance certification schemes and IEA BEEP.",
+    ],
+  },
+  {
+    code: "Ene 13", category: "Energy", title: "Solar photovoltaic (PV) panels", available: 4, part: 1,
+    aim: "To minimise carbon emissions through on-site renewable energy generation from photovoltaics (PV).",
+    question: "What percentage of accessible roof / site area is covered by PV panels, and is there significant overshading?",
+    instruction: "Select the band that best matches PV coverage and overshading.",
+    selectionMode: "single",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 0, label: "No accessible roof / site area for PV (filtered)" },
+      { id: "C", credits: 1, label: "PV panels cover > 10% of accessible area, OR > 30% panel area has significant overshading" },
+      { id: "D", credits: 2, label: "PV panels cover > 30% of accessible area, OR > 70% panel area has significant overshading" },
+      { id: "E", credits: 3, label: "PV panels cover > 50% of accessible area" },
+      { id: "F", credits: 4, label: "PV panels cover > 70% of accessible area" },
+    ],
+    criteria: [
+      { id: 1, answer: "All", text: "Filtering: where the asset has no accessible roof or site areas, this issue can be filtered out.", details: [] },
+      { id: 2, answer: "C-F", text: "Coverage % = (roof PV area + on-site PV area) / (accessible roof + accessible site area). Accessible site area excludes car parking, landscaping, and non-building facilities. Significant overshading = ≥ 60% of sky blocked by obstacles.", details: [] },
+    ],
+    methodology: [
+      "Measure accessible roof and site areas; measure installed PV areas; compute coverage % and any overshading.",
+    ],
+    evidence: [
+      "O&M manuals / manufacturer information",
+      "Visual inspection and photographic evidence of PV panels",
+    ],
+    notes: [],
+  },
+  {
+    code: "Ene 14", category: "Energy", title: "Solar thermal panels", available: 1, part: 1,
+    aim: "To minimise carbon emissions through on-site renewable energy generation from solar thermal panels.",
+    question: "Does the asset have any on-site solar thermal panels?",
+    instruction: "Select a single answer option.",
+    selectionMode: "single",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 0, label: "No" },
+      { id: "C", credits: 1, label: "Yes" },
+    ],
+    criteria: [
+      { id: 1, answer: "All", text: "Filtering: where the asset has no accessible roof, OR has no significant hot-water usage / is on district heating, this issue can be filtered out.", details: [] },
+    ],
+    methodology: [
+      "Confirm solar thermal collectors are installed and serving hot-water generation.",
+    ],
+    evidence: [
+      "O&M manuals / manufacturer information",
+      "Photographic evidence of solar thermal panels",
+    ],
+    notes: [],
+  },
+  {
+    code: "Ene 15", category: "Energy", title: "Monitoring energy end uses", available: 4, part: 2,
+    aim: "To reduce operational energy consumption through effective management and monitoring of energy consumption for different building services and systems.",
+    question: "What percentage of end uses with significant energy consumption are sub-metered?",
+    instruction: "Select a single answer option.",
+    selectionMode: "single",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 0, label: "No end uses with significant energy consumption (filtered)" },
+      { id: "C", credits: 0, label: "< 25% of significant end uses are sub-metered" },
+      { id: "D", credits: 1, label: "≥ 25% of significant end uses are sub-metered" },
+      { id: "E", credits: 2, label: "≥ 50% of significant end uses are sub-metered" },
+      { id: "F", credits: 3, label: "≥ 75% of significant end uses are sub-metered" },
+      { id: "G", credits: 4, label: "100% of significant end uses are sub-metered" },
+    ],
+    criteria: [
+      { id: 1, answer: "B", text: "Filtering: where there are no end uses with significant energy consumption, the credits can be filtered out.", details: [] },
+      { id: 2, answer: "C-G", text: "Significant energy consumption: > 8,500 kWh/year electricity OR > 67,000 kWh/year for other energy sources.", details: [] },
+      { id: 3, answer: "C-G", text: "End uses to consider: space heating/cooling generation, hot water, mechanical ventilation, fans/pumps for heating/cooling, refrigeration, internal lighting, controls/comms, IT and plug loads, lifts/escalators, external lighting.", details: [] },
+    ],
+    methodology: [
+      "Identify present end uses; estimate annual consumption per end use; flag those above the significance threshold; confirm sub-metering coverage.",
+      "Sub-metering by subtraction is acceptable (main utility minus other sub-meters).",
+    ],
+    evidence: [
+      "Estimated energy consumption per building servicing system",
+      "Sub-meter data for the 12-month period OR line diagram of sub-meter coverage",
+    ],
+    notes: [
+      "Sub-meters: secondary to utility meters, measuring specific plant / equipment / discrete physical areas; pulsed or open-protocol outputs.",
+    ],
+  },
+  {
+    code: "Ene 16", category: "Energy", title: "Monitoring tenanted areas", available: 4, part: 2,
+    aim: "To reduce operational energy consumption through effective management and monitoring of energy consumption in separately tenanted and functional areas.",
+    question: "Is energy consumption sub-metered at tenant and functional-area level?",
+    instruction: "Select all answers that apply.",
+    selectionMode: "multiple",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 1, label: "All separately tenanted areas with significant energy consumption are sub-metered" },
+      { id: "C", credits: 1, label: "All end uses with significant energy consumption within each tenanted area are sub-metered" },
+      { id: "D", credits: 1, label: "Functional areas with significantly different energy use patterns and significant consumption are sub-metered" },
+      { id: "E", credits: 1, label: "All end uses with significant energy consumption within each functional area are sub-metered" },
+    ],
+    criteria: [
+      { id: 1, answer: "B-E", text: "Filtering: where there are no tenanted areas / no functional areas with significantly different energy patterns / consumption is not significant, the matching credits filter out.", details: [] },
+      { id: 2, answer: "B-E", text: "Significant energy consumption: > 8,500 kWh/year electricity OR > 67,000 kWh/year other fuels.", details: [] },
+      { id: 3, answer: "D,E", text: "Functional areas with significantly different patterns include commercial kitchens, sports/leisure facilities, conference suites, server rooms, cold storage.", details: [] },
+    ],
+    methodology: [
+      "Estimate per-tenant and per-functional-area energy consumption; identify those above the significance threshold; confirm sub-metering coverage and end-use breakdown per area.",
+    ],
+    evidence: [
+      "Estimated energy consumption per tenant / functional area",
+      "Sub-meter data or line diagrams indicating sub-meters and related uses",
+    ],
+    notes: [],
+  },
+  {
+    code: "Ene 17", category: "Energy", title: "External lighting", available: 4, part: 1,
+    aim: "To minimise operational energy consumption and the associated carbon emissions from external lighting.",
+    question: "What types of external lighting and car park lighting are installed, and are they fitted with automatic energy-saving controls?",
+    instruction: "If B is not selected, choose C or D AND E or F.",
+    selectionMode: "multiple",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 0, label: "All external and car park lighting is inefficient and has no automatic controls" },
+      { id: "C", credits: 1, label: "External lighting is energy efficient OR has automatic energy saving controls" },
+      { id: "D", credits: 2, label: "External lighting is energy efficient AND has automatic energy saving controls" },
+      { id: "E", credits: 1, label: "Car park lighting is energy efficient OR has automatic energy saving controls" },
+      { id: "F", credits: 2, label: "Car park lighting is energy efficient AND has automatic energy saving controls" },
+    ],
+    criteria: [
+      { id: 1, answer: "All", text: "Filtering: where external lighting or car park lighting is not necessary for safety, the matching credits can be filtered out.", details: [] },
+      { id: 2, answer: "C-F", text: "Energy efficient: average initial luminous efficacy ≥ 70 lumens/circuit W, OR all luminaires are LED / metal halide / equivalent efficacy.", details: [] },
+      { id: 3, answer: "C-F", text: "Automatic controls: time switch or daylight sensor for on/off at dusk/dawn; presence detection in areas of intermittent pedestrian traffic; curfew time switches where presence detection not fitted. Car park controls may be time switch, motion sensor or dimming.", details: [] },
+    ],
+    methodology: [
+      "List external luminaires (incl. decorative, floodlighting, dual-use security); compute weighted luminous efficacy; confirm control scheme.",
+      "Exclude temporary lighting and emergency-only lighting.",
+    ],
+    evidence: [
+      "Luminaire list and control scheme (from O&M manual or instructions for use)",
+      "Visual inspection and photographic evidence",
+    ],
+    notes: [
+      "Car park lighting must serve a car park associated with the asset (same management, used by occupants).",
+    ],
+  },
+  {
+    code: "Ene 18", category: "Energy", title: "Energy efficient transport systems", available: 2, part: 1,
+    aim: "To minimise operational energy consumption and the associated carbon emissions from energy efficient transport systems.",
+    question: "Are the lifts, escalators and moving walks installed in the building energy efficient?",
+    instruction: "Select all answers that apply.",
+    selectionMode: "multiple",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 1, label: "All lifts are energy efficient (ISO 25745-2 class C or above)" },
+      { id: "C", credits: 1, label: "All escalators and moving walks are energy efficient (ISO 25745-3 class C or above)" },
+    ],
+    criteria: [
+      { id: 1, answer: "All", text: "Filtering: where no lifts/escalators/moving walks are present, the issue can be filtered out.", details: [] },
+      { id: 2, answer: "B", text: "Lift compliance: ISO 25745-2 class C or above; measurement by an independent organisation within the last 5 years (or supplier calculation if < 5 years old).", details: [] },
+      { id: 3, answer: "C", text: "Escalator/moving walk compliance: ISO 25745-3 class C or above; plus stand-by system (auto shut-down when not used) OR slower-speed running for frequently used systems.", details: [] },
+      { id: 4, answer: "B,C", text: "Representative sample: for multiple units of the same type and year, only a representative number need be measured (must include shortest-floor-distance lift).", details: [] },
+    ],
+    methodology: [
+      "Inventory transport systems and confirm energy efficiency class per ISO 25745-2 / -3 by an independent organisation within the last 5 years.",
+    ],
+    evidence: [
+      "Building plans with lift / escalator / moving walk locations",
+      "Documentation from the manufacturer / supplier",
+      "Measured power consumption per ISO 25745-2 / -3",
+      "Visual inspection with photographic evidence",
+    ],
+    notes: [
+      "Excluded: cable installations / funiculars, military lifts, mining lifts, stage lifts, vehicle lifts, cogwheel tracks, construction-site lifts, wheelchair lifts, historic lifts (pre-1970 in original state).",
+    ],
+  },
+  {
+    code: "Ene 19", category: "Energy", title: "Energy consumption", available: 6, part: 2,
+    aim: "To minimise operational energy consumption and associated carbon emissions through effective energy management, building fabric efficiency and efficient services.",
+    question: "Annually, how much energy does the asset consume (kWh per year, metered) — what reporting period?",
+    instruction: "Select B and enter the annual consumption per fuel in the BREEAM online platform.",
+    selectionMode: "single",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 6, label: "Annual energy consumption recorded per fuel for an 11-13 month reporting period" },
+    ],
+    criteria: [
+      { id: 1, answer: "B", text: "Consumption data must relate to the GIA floor area of the assessed asset, per fuel type.", details: [] },
+      { id: 2, answer: "B", text: "Reporting period must be 11-13 months (334-397 days). The maximum gap between earliest start and latest end across fuels must be ≤ 14 months (428 days). Start date must be ≤ 1 year before the assessment.", details: [] },
+      { id: 3, answer: "B", text: "Energy sources include electricity, fuel oil/diesel/gas oil, LNG/LPG/natural gas, biofuels (biodiesel, biogas, charcoal, wood/waste wood), district heating, district cooling, and renewable heat/cooling.", details: [] },
+    ],
+    methodology: [
+      "Use sub-metering, energy bills, invoices and inventory data per Table 33 of the manual.",
+      "For wood / waste wood / coal / coke / charcoal, compute consumption from invoices × calorific content.",
+      "Where the asset doesn't have consumption data covering the assessment area only, use the BREEAM In-Use International Energy Allocation Calculator.",
+      "Non-standard energy uses (regional server rooms, trading floors, bakery ovens, sports floodlighting, furnace/forming, blast chilling) may be sub-metered and subtracted.",
+    ],
+    evidence: [
+      "Calculations based on inventory data (where applicable)",
+      "Copies of energy bills OR verified meter readings / photographic evidence of meters for start and end of the reporting period per fuel",
+    ],
+    notes: [
+      "BREEAM Note: the canonical issue contributes to 50 credits available for the operational energy rating via a numeric kWh-per-fuel entry. This app surfaces it as a single completion answer.",
+    ],
+  },
+  {
+    code: "Ene 20", category: "Energy", title: "Carbon intensity of district heating / cooling", available: 2, part: 2,
+    aim: "To minimise operational energy consumption and associated carbon emissions by reporting district heating/cooling carbon intensity.",
+    question: "What is the carbon intensity of the district heating and / or district cooling system (kgCO₂e / kWh delivered)?",
+    instruction: "Select B and enter the value(s) in the BREEAM online platform.",
+    selectionMode: "single",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 2, label: "Carbon intensity values recorded for the district heating and / or cooling supply" },
+    ],
+    criteria: [
+      { id: 1, answer: "B", text: "Carbon intensity must be sourced from the supplier of the system.", details: [] },
+      { id: 2, answer: "B", text: "Use an average annual value for the most recent year available.", details: [] },
+      { id: 3, answer: "B", text: "Minimum scope: direct (scope 1) emissions plus indirect (scope 2) emissions from any electricity used, including distribution losses.", details: [] },
+    ],
+    methodology: [
+      "Request kgCO₂e/kWh values from the district heating/cooling operator.",
+    ],
+    evidence: [
+      "Literature / records / data or other information from the district heating and/or cooling supplier stating the carbon intensity of the system",
+    ],
+    notes: [],
+  },
+  {
+    code: "Ene 21", category: "Energy", title: "Renewable electricity generated and exported", available: 2, part: 2,
+    aim: "To minimise operational energy consumption and associated carbon emissions by generating renewable electricity on-site.",
+    question: "What quantity of electricity is generated on-site (or by community renewables) and what net quantity is exported?",
+    instruction: "Select B and enter both kWh/year values in the BREEAM online platform.",
+    selectionMode: "single",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 2, label: "Annual on-site / community generation and net export recorded for the reporting period" },
+    ],
+    criteria: [
+      { id: 1, answer: "B", text: "On-site or community generation must be located on or near the asset and connected via a private wire arrangement.", details: [] },
+      { id: 2, answer: "B", text: "Metered electricity data must relate to the same start/end dates as Ene 19.", details: [] },
+    ],
+    methodology: [
+      "Reporting period 11-13 months per Ene 19.",
+    ],
+    evidence: [
+      "Photographic evidence of the generation meter",
+      "BEMS data or copies of verified meter readings for the reporting period",
+    ],
+    notes: [
+      "Private wire arrangement: electricity from local generation fed directly to the building via dedicated power supplies; surplus can be fed to grid.",
+    ],
+  },
+  {
+    code: "Ene 22", category: "Energy", title: "Energy audit", available: 4, part: 2,
+    aim: "To identify and implement cost-effective opportunities for energy savings.",
+    question: "Has an energy audit been carried out for the asset, and what payback period of measures has been implemented?",
+    instruction: "Select a single answer option.",
+    selectionMode: "single",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 0, label: "No energy audit has been carried out" },
+      { id: "C", credits: 2, label: "Yes, an energy audit has been carried out" },
+      { id: "D", credits: 3, label: "Yes, plus all measures with payback ≤ 5 years have been implemented" },
+      { id: "E", credits: 4, label: "Yes, plus all measures with payback ≤ 10 years have been implemented" },
+    ],
+    criteria: [
+      { id: 1, answer: "C-E", text: "The energy audit is not older than 4 years.", details: [] },
+      { id: 2, answer: "C-E", text: "Audit and identified measures must specifically relate to the assessed asset.", details: [] },
+      { id: 3, answer: "C-E", text: "Audit must be carried out in accordance with ISO 50002:2014 or equivalent.", details: [] },
+    ],
+    methodology: [
+      "The audit must be based on up-to-date measured operational data, comprise a detailed review of the consumption profile, use Simple Payback Periods or LCCA, and be proportionate enough to reliably identify improvement opportunities.",
+    ],
+    evidence: [
+      "Energy audit report with energy efficiency improvement recommendations",
+      "Detailed validated payback calculations",
+      "Photographic / documentation evidence that the relevant-payback measures have been implemented",
+      "Documentation showing the standards / procedures the audit complies with (ISO 50002 etc.)",
+    ],
+    notes: [
+      "Energy audit: systematic procedure for understanding the energy consumption of an asset and identifying / quantifying cost-effective energy saving opportunities.",
+    ],
+  },
+  {
+    code: "Ene 23", category: "Energy", title: "Energy consumption reporting", available: 4, part: 2,
+    aim: "To minimise operational energy consumption and associated carbon emissions by measuring against targets and raising awareness amongst building managers and users.",
+    question: "What happens to asset energy consumption data?",
+    instruction: "Select a single answer option.",
+    selectionMode: "single",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 0, label: "Asset energy consumption data is not collected" },
+      { id: "C", credits: 2, label: "Collected and compared against asset targets" },
+      { id: "D", credits: 3, label: "Collected, compared against targets and reported on internally" },
+      { id: "E", credits: 4, label: "Collected, compared against targets, reported internally AND published in an annual public report" },
+    ],
+    criteria: [
+      { id: 1, answer: "C-E", text: "Man 4 must be answered D (environmental policy with targets) and all criteria met.", details: [] },
+      { id: 2, answer: "C-E", text: "Energy consumption is monitored, targeted and reported to the appropriate organisational level. Report by meaningful segmentation (portfolio, fund, geography, asset type).", details: [] },
+    ],
+    methodology: [
+      "Compare meter data to targets; circulate internally; consider an annual public sustainability report.",
+    ],
+    evidence: [
+      "Records of energy consumption analysis (spreadsheets, summary reports)",
+      "Copies of internal reports",
+      "Copies of public annual report",
+    ],
+    notes: [],
+  },
+  {
+    code: "Ene 24", category: "Energy", title: "Reduction of carbon emissions (exemplary)", available: 3, part: 2,
+    aim: "To recognise reductions in operational energy consumption and associated carbon emissions.",
+    question: "What has been the average annual reduction in CO₂ emissions of the asset over the last 3 years?",
+    instruction: "Select a single answer option. These credits are exemplary in the BREEAM scheme.",
+    selectionMode: "single",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 1, label: "≥ 5% average annual reduction (exemplary)" },
+      { id: "C", credits: 2, label: "≥ 10% average annual reduction (exemplary)" },
+      { id: "D", credits: 3, label: "≥ 15% average annual reduction (exemplary)" },
+    ],
+    criteria: [
+      { id: 1, answer: "B-D", text: "Assets not previously certified must provide annual energy consumption data for an earlier period within 4 years of the current assessment.", details: [] },
+      { id: 2, answer: "B-D", text: "Reporting periods must each be 11-13 months, with ≤ 14 months between earliest start and latest end. The Energy Allocation method, if used, must be used for both periods.", details: [] },
+    ],
+    methodology: [
+      "Compare CO₂ emissions between two reporting periods 3 years apart, using the current BREEAM v6 emission factors so external factors (e.g. grid decarbonisation) are excluded.",
+      "Account for changes in asset-subtype mix by measuring improvement relative to the asset-subtype benchmark.",
+    ],
+    evidence: [
+      "Calculations based on inventory data",
+      "Copies of energy bills or verified meter readings for the beginning and end of each reporting period",
+      "Completed BREEAM In-Use International Energy Allocation Calculator (if applicable)",
+    ],
+    notes: [
+      "BREEAM Note: these are exemplary credits in the canonical scheme. This app surfaces them as standard credits to keep the option model consistent.",
+    ],
+  },
+  {
     code: "Wat 3", category: "Water", title: "Water efficient urinals", available: 4, part: 2,
     aim: "To reduce water consumption by encouraging the specification of water-efficient urinals.",
     question: "Does the asset contain low water use or waterless urinals?",
