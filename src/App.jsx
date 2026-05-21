@@ -84,6 +84,13 @@ const CREDIT_PDF_MAP = {
   "Pol 1": "/breeam-pdfs/POLLUTION/POL_01/POL 01 - Manual criteria - Water pollution.pdf",
   "Pol 2": "/breeam-pdfs/POLLUTION/POL_02/POL 02 - Manual criteria - Chemical storage.pdf",
   "Pol 3": "/breeam-pdfs/POLLUTION/POL_03/POL 03 - Manual criteria - Local air quality.pdf",
+  "Pol 4": "/breeam-pdfs/POLLUTION/POL_04/POL 04 - Manual criteria - GWP of refrigerants.pdf",
+  "Pol 5": "/breeam-pdfs/POLLUTION/POL_05/POL 05 - Manual criteria - Refridgerant LD.pdf",
+  "Pol 6": "/breeam-pdfs/POLLUTION/POL_06/POL 06 - Manual criteria - Nighttime light.pdf",
+  "Pol 7": "/breeam-pdfs/POLLUTION/POL_07/POL 07 - Manual criteria - Water pollution.pdf",
+  "Pol 8": "/breeam-pdfs/POLLUTION/POL_08/POL 08 - Manual criteria - Refrigerant replace.pdf",
+  "Pol 9": "/breeam-pdfs/POLLUTION/POL_09/POL 09 - Manual criteria - Land contamination.pdf",
+  "Pol 10": "/breeam-pdfs/POLLUTION/POL_10/POL 10 - Manual criteria - Incident response.pdf",
 };
 
 // ── Storage helpers (localStorage with error handling) ──────────────────────
@@ -236,6 +243,7 @@ const CATEGORY_COLORS = {
   Pollution:     { bg: "rgba(6,182,212,0.08)",    border: "rgba(6,182,212,0.20)",   color: "#0891b2" },
   Ecology:        { bg: "rgba(34,197,94,0.08)",    border: "rgba(34,197,94,0.20)",   color: "#16a34a" },
   Waste:         { bg: "rgba(180,83,9,0.08)",     border: "rgba(180,83,9,0.20)",    color: "#b45309" },
+  Resilience:    { bg: "rgba(190,18,60,0.08)",    border: "rgba(190,18,60,0.20)",   color: "#be123c" },
   Management:    { bg: "rgba(100,116,139,0.08)",   border: "rgba(100,116,139,0.20)", color: "#64748b" },
 };
 

@@ -934,6 +934,213 @@ export const CREDITS = [
     ],
   },
   {
+    code: "Pol 4", category: "Pollution", title: "Global warming potential of refrigerants", available: 4, part: 1,
+    aim: "To encourage the use of refrigerants with a low global warming potential (GWP) in refrigeration equipment.",
+    question: "What refrigerants are used in the asset refrigeration equipment?",
+    instruction: "Select a single answer option.",
+    selectionMode: "single",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 0, label: "Some refrigerants have GWP > 10 (e.g. most HFCs, HCFCs, CFCs)" },
+      { id: "C", credits: 1, label: "50% by kW cooling/heating capacity have GWP ≤ 10 (e.g. propane, butane)" },
+      { id: "D", credits: 2, label: "All refrigerants have GWP ≤ 10 (e.g. propane, butane)" },
+      { id: "E", credits: 4, label: "All refrigerants have GWP ≤ 1 (e.g. ammonia, water, carbon dioxide)" },
+    ],
+    criteria: [
+      { id: 1, answer: "All", text: "Filtering: where no refrigerants are used or only small hermetic systems (≤ 5 kg charge each) are installed, this issue can be filtered out.", details: [] },
+      { id: 2, answer: "All", text: "Applies to walk-in cold storage, commercial cold storage / display cabinets (not residential white goods), comfort cooling/heating (heat pumps), and process-based cooling (e.g. servers/IT).", details: [] },
+      { id: 3, answer: "All", text: "Applies only to on-site equipment. Low-GWP refrigerants include R-290 propane (3), R-600 butane (3), R-717 ammonia (0), R-718 water (<1), R-744 CO₂ (1), R-1234yf (<1).", details: [] },
+    ],
+    methodology: [
+      "Inventory all on-site refrigerant-bearing equipment and confirm GWP from manufacturer data.",
+      "Compute weighted percentage by kW cooling/heating capacity for option C.",
+      "Reference IPCC AR5 GWP 100-year ITH values.",
+    ],
+    evidence: [
+      "Manufacturer information confirming GWP of refrigerants used on-site",
+      "Photographic evidence of refrigerant packaging / systems",
+      "Statement from the building manager that the asset has no refrigerant systems / total charge ≤ 5 kg (if filtered)",
+    ],
+    notes: [
+      "GWP: relative global-warming potential vs 1 unit of CO₂ over a 100-year time horizon (IPCC).",
+      "Hydrocarbon and ammonia-based refrigerants have low/zero GWP and are valid HFC alternatives where H&S is addressed.",
+    ],
+  },
+  {
+    code: "Pol 5", category: "Pollution", title: "Refrigerant leak detection systems", available: 4, part: 1,
+    aim: "To reduce the level of greenhouse gas emissions related to the leakage of refrigerants.",
+    question: "Is there an automated refrigerant leak detection system in place for all equipment that uses refrigerants?",
+    instruction: "Select a single answer option.",
+    selectionMode: "single",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 0, label: "No leak detection system in place" },
+      { id: "C", credits: 3, label: "Yes — warning alarm or lighting only" },
+      { id: "D", credits: 4, label: "Yes — warning alarm/lighting, automatic shutdown and pump down of refrigerants" },
+      { id: "E", credits: 4, label: "Only environmentally benign refrigerants (GWP ≤ 1, or solid-state) are used" },
+    ],
+    criteria: [
+      { id: 1, answer: "All", text: "Filtering: where no refrigerants are used or only small hermetic systems (≤ 5 kg charge each) are installed, this issue can be filtered out.", details: [] },
+      { id: 2, answer: "All", text: "Applies to walk-in cold storage, commercial cold storage, comfort cooling/heating, and process-based cooling.", details: [] },
+      { id: 3, answer: "E", text: "Low-GWP refrigerants reference Pol 4 Table 27 (e.g. ammonia, CO₂, R-1234yf).", details: [] },
+    ],
+    methodology: [
+      "Inventory refrigerant systems and confirm leak detection coverage.",
+      "Differentiate alarm-only (C) from automatic shutdown / pump down (D).",
+    ],
+    evidence: [
+      "O&M manuals detailing leak detection system or site inspection",
+      "Manufacturer confirmation of low leak risk / minimal leak impact (for benign refrigerants)",
+      "Statement from building manager for filtering",
+    ],
+    notes: [],
+  },
+  {
+    code: "Pol 6", category: "Pollution", title: "Reduction of night-time light pollution", available: 4, part: 2,
+    aim: "To ensure external lighting is concentrated in appropriate areas with minimised upward lighting, reducing light pollution and nuisance to neighbours.",
+    question: "Has an assessment been performed that demonstrates external lighting does not result in light pollution at night?",
+    instruction: "Select a single answer option.",
+    selectionMode: "single",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 0, label: "No" },
+      { id: "C", credits: 2, label: "Yes — qualitative assessment performed" },
+      { id: "D", credits: 4, label: "Yes — quantitative assessment performed by a lighting professional" },
+      { id: "E", credits: 4, label: "Exterior lighting is not provided and is not required for safety" },
+    ],
+    criteria: [
+      { id: 1, answer: "C", text: "Qualitative assessment: all external lighting aimed downwards; aimed away from neighbours with screens/baffles; no illuminated signs; automatically switched off or dimmed during the 23:00-07:00 curfew period.", details: [] },
+      { id: 2, answer: "D", text: "Quantitative assessment per a lighting professional confirms compliance with the BREEAM obtrusive-light limits in Table 36 across the asset's environmental lighting zone (E0–E4), including pre/post-curfew limits for vertical illuminance, luminous intensity, façade and sign luminance.", details: [] },
+      { id: 3, answer: "E", text: "A lighting professional confirms external obtrusive lighting has been eliminated through design without affecting safety/security.", details: [] },
+      { id: 4, answer: "C-E", text: "Cut-off luminaires angled downwards may skip ULR / vertical-illuminance measurements. Flush stud lights on vehicle manoeuvring areas may be excluded.", details: [] },
+    ],
+    methodology: [
+      "Identify the asset's environmental lighting zone (E0 dark, E1 intrinsically dark, E2 rural, E3 suburban, E4 urban).",
+      "Use a lighting professional's measurements or photometric design data to demonstrate compliance with Table 36 limits pre- and post-curfew.",
+      "Curfew period: 23:00-07:00.",
+    ],
+    evidence: [
+      "Night-time lighting levels report or equivalent study",
+      "Photographic evidence of external luminaires showing upward-light / spill control",
+      "Confirmation that lighting is switched off or dimmed during the curfew period",
+    ],
+    notes: [
+      "Different curfew times may apply for other reasons (e.g. noise control) — coordinate accordingly.",
+      "Security lighting compliant with specific security standards may be excluded with assessor justification.",
+    ],
+  },
+  {
+    code: "Pol 7", category: "Pollution", title: "Inspection of watercourse pollution prevention features", available: 3, part: 2,
+    aim: "To maintain the effectiveness of any features installed to prevent watercourse pollution.",
+    question: "Are bunded areas, light-liquid separators and grease separators effectively maintained?",
+    instruction: "Select all answers that apply.",
+    selectionMode: "multiple",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 0, label: "No" },
+      { id: "C", credits: 1, label: "Maintenance policy covers inspection and maintenance of bunded areas" },
+      { id: "D", credits: 1, label: "Policy covers light-liquid separators with detailed inspection / maintenance" },
+      { id: "E", credits: 1, label: "Policy covers grease separators with detailed inspection / maintenance" },
+    ],
+    criteria: [
+      { id: 1, answer: "All", text: "Filtering: where no bunded areas, light-liquid separators or grease separators are required, the associated credits can be filtered out.", details: [] },
+    ],
+    methodology: [
+      "Establish a maintenance schedule for each feature with inspection log requirements.",
+    ],
+    evidence: [
+      "Maintenance policy or contract with sections relevant to bunding, light-liquid separators, grease separators",
+      "Logbook or inspection schedule",
+    ],
+    notes: [
+      "Bund: impermeable barrier structure to retain liquids.",
+      "Light-liquid separator: vessel that separates light free-floating liquids (e.g. oil) from wastewater by gravity / coalescence.",
+    ],
+  },
+  {
+    code: "Pol 8", category: "Pollution", title: "Refrigerant replacement", available: 2, part: 2,
+    aim: "To reduce the impact of refrigerants on the environment.",
+    question: "Is a strategy and timetable to replace refrigerants with low environmental impact alternatives in place?",
+    instruction: "Select a single answer option.",
+    selectionMode: "single",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 0, label: "No" },
+      { id: "C", credits: 2, label: "No — low-environmental-impact refrigerants (GWP ≤ 10) already in use" },
+      { id: "D", credits: 2, label: "Yes — all refrigerants will be replaced with low-environmental-impact alternatives (GWP ≤ 10)" },
+    ],
+    criteria: [
+      { id: 1, answer: "All", text: "Filtering: where no refrigerants are used or only small hermetic systems (≤ 5 kg charge each) are installed, this issue can be filtered out.", details: [] },
+      { id: 2, answer: "D", text: "Strategy must cover the on-site equipment to be replaced, which low-impact refrigerants will be used, and a reasonable timescale.", details: [] },
+      { id: 3, answer: "D", text: "Covers air-conditioning and refrigeration: walk-in cold storage, commercial cold storage, comfort cooling/heating, and process-based cooling.", details: [] },
+    ],
+    methodology: [
+      "Inventory equipment with high-GWP refrigerants; map replacement plan with cost/timeline; commit in writing.",
+    ],
+    evidence: [
+      "Statement from building manager if filtered (no refrigerant systems / total charge ≤ 5 kg)",
+      "Copy of the strategy / objectives relating to refrigerant replacement",
+    ],
+    notes: [
+      "Reference Pol 4 Table 27 for low-GWP refrigerants.",
+    ],
+  },
+  {
+    code: "Pol 9", category: "Pollution", title: "Land contamination mitigation", available: 4, part: 2,
+    aim: "To ensure there are no land contamination issues associated with the asset site.",
+    question: "Has the risk from potential land contamination associated with the asset site been assessed?",
+    instruction: "Select a single answer option.",
+    selectionMode: "single",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 0, label: "No" },
+      { id: "C", credits: 2, label: "Yes — issues identified that require further investigation or remediation" },
+      { id: "D", credits: 4, label: "Yes — no land contamination issues identified" },
+      { id: "E", credits: 4, label: "Yes — all land contamination issues have been remediated" },
+    ],
+    criteria: [
+      { id: 1, answer: "C-E", text: "Assessment must be performed by, or under the supervision of, a contaminated-land professional within the last 5 years.", details: [] },
+      { id: 2, answer: "C-E", text: "Assessment must include Phase I (desk study + reconnaissance), Phase II (intrusive investigation), a remediation strategy / action plan, and verification of remedial actions — as appropriate to the site's condition.", details: [] },
+    ],
+    methodology: [
+      "Reference standards: ASTM E1527-13 (Phase I), E1903-11 (Phase II), E2893-16 (Greener Cleanups); BS 10175:2011+A2:2017; ISO 18400-202/203; ISO 18504:2017.",
+      "Where existing assessments are > 5 years old, a contaminated-land professional must confirm the assessment remains valid.",
+    ],
+    evidence: [
+      "Report(s) from contaminated-land professional(s)",
+      "Written confirmation that further intrusive investigation / remedial works have been planned",
+    ],
+    notes: [
+      "Contaminated-land professional: degree in chemistry/environmental science/earth sciences/civil engineering or related, plus 3+ years' relevant site-investigation/risk-assessment experience.",
+    ],
+  },
+  {
+    code: "Pol 10", category: "Pollution", title: "Response to pollution incidents", available: 2, part: 2,
+    aim: "To reduce the impact of any pollution incidents on the surrounding environment.",
+    question: "Is a response plan in place to deal with pollution incidents in line with national standards or best-practice guidelines?",
+    instruction: "Select a single answer option.",
+    selectionMode: "single",
+    answers: [
+      { id: "A", credits: 0, label: "Question not answered" },
+      { id: "B", credits: 0, label: "No" },
+      { id: "C", credits: 2, label: "Yes" },
+    ],
+    criteria: [
+      { id: 1, answer: "All", text: "Filtering: where no sources of pollution are located on the site, this issue can be filtered out.", details: [] },
+      { id: 2, answer: "C", text: "Response plan covers emergency procedures for potential pollution sources including (but not limited to) fuel storage (diesel back-up generators) and on-site refrigerants.", details: [] },
+      { id: 3, answer: "C", text: "Plan must be reviewed at least every 5 years and after any accidents / emergencies.", details: [] },
+      { id: 4, answer: "C", text: "Where practical, response procedures must be tested periodically.", details: [] },
+    ],
+    methodology: [
+      "Draft a written emergency response plan; assign roles; schedule reviews and drills.",
+    ],
+    evidence: [
+      "Copy of the response plan",
+      "Records of any testing of emergency response procedures",
+    ],
+    notes: [],
+  },
+  {
     code: "Tra 2", category: "Transport", title: "Public Transport Access", available: 8, part: 1,
     aim: "To ensure appropriate public transport provision is available to building users, thereby helping to reduce transport-related pollution and congestion.",
     question: "Is the asset within walking distance of public transport nodes which operate a frequent service?",
